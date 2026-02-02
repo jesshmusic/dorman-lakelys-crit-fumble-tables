@@ -4,13 +4,112 @@
   "img": "icons/weapons/bows/longbow-recurve-brown.webp",
   "formula": "1d100",
   "results": [
-    { "type": 0, "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.", "weight": 25, "range": [1, 25], "img": "icons/svg/d20-highlight.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
-    { "type": 0, "text": "Triple Pierce - Your shot passes through three targets in a line, dealing full damage to each.", "weight": 17, "range": [26, 42], "img": "icons/svg/thrust.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "triple_pierce", "duration": 0 } } },
-    { "type": 0, "text": "Crippling Devastation - Your shot shatters multiple bones. Target's speed is halved and they have disadvantage on attacks until healed.", "weight": 14, "range": [43, 56], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "crippled", "duration": -1 } } },
-    { "type": 0, "text": "Mortal Wound - Your shot strikes a vital area. Target takes 3d6 damage at the start of each turn. DC 15 Medicine check or magical healing stops the bleeding.", "weight": 12, "range": [57, 68], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d6", "damageType": "piercing" } } },
-    { "type": 0, "text": "Blinding Strike - Your shot damages the target's eyes. They are blinded until healed with Regenerate or similar magic.", "weight": 10, "range": [69, 78], "img": "icons/svg/blind.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "blinded", "duration": -1 } } },
-    { "type": 0, "text": "Pinned and Helpless - Your shot pins the target completely. They are restrained until freed with an action.", "weight": 9, "range": [79, 87], "img": "icons/svg/anchor.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "restrained", "duration": -1 } } },
-    { "type": 0, "text": "Legendary Shot - Your perfectly placed shot deals an additional 4d6 piercing damage.", "weight": 12, "range": [88, 99], "img": "icons/svg/explosion.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "4d6", "damageType": "piercing" } } },
-    { "type": 0, "text": "Instant Kill Shot - If target has 50 HP or fewer, they must make DC 20 Con save or die instantly. Otherwise, they drop to 0 HP.", "weight": 1, "range": [100, 100], "img": "icons/svg/skull.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "save", "saveDC": 20, "saveAbility": "con", "failEffect": "Instant death if under 50 HP" } } }
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
+      "weight": 25,
+      "range": [1, 25],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+    },
+    {
+      "type": 0,
+      "text": "Triple Pierce - Your shot passes through three targets in a line, dealing full damage to each.",
+      "weight": 17,
+      "range": [26, 42],
+      "img": "icons/svg/thrust.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "triple_pierce",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Crippling Devastation - Your shot shatters multiple bones. Target's speed is halved and they have disadvantage on attacks until healed.",
+      "weight": 14,
+      "range": [43, 56],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "crippled",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Mortal Wound - Your shot strikes a vital area. Target takes 3d6 damage at the start of each turn. DC 15 Medicine check or magical healing stops the bleeding.",
+      "weight": 12,
+      "range": [57, 68],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3d6",
+          "damageType": "piercing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Blinding Strike - Your shot damages the target's eyes. They are blinded until healed with Regenerate or similar magic.",
+      "weight": 10,
+      "range": [69, 78],
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Pinned and Helpless - Your shot pins the target completely. They are restrained until freed with an action.",
+      "weight": 9,
+      "range": [79, 87],
+      "img": "icons/svg/anchor.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "restrained",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Legendary Shot - Your perfectly placed shot deals an additional 4d6 piercing damage.",
+      "weight": 12,
+      "range": [88, 99],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "4d6",
+          "damageType": "piercing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Instant Kill Shot - If target has 50 HP or fewer, they must make DC 20 Con save or die instantly. Otherwise, they drop to 0 HP.",
+      "weight": 1,
+      "range": [100, 100],
+      "img": "icons/svg/skull.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 20,
+          "saveAbility": "con",
+          "failEffect": "Instant death if under 50 HP"
+        }
+      }
+    }
   ]
 }

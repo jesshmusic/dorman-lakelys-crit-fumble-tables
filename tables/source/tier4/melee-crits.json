@@ -4,13 +4,116 @@
   "img": "icons/skills/melee/strike-sword-slashing-red.webp",
   "formula": "1d100",
   "results": [
-    { "type": 0, "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.", "weight": 25, "range": [1, 25], "img": "icons/svg/d20-highlight.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
-    { "type": 0, "text": "Annihilating Blow - Your strike is utterly devastating. Target is stunned for 1 round. (GM: also apply prone and 2d6 bonus damage)", "weight": 17, "range": [26, 42], "img": "icons/svg/daze.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "stunned", "duration": 1 } } },
-    { "type": 0, "text": "Mortal Wound - Your strike opens a mortal wound. Target takes 3d6 damage at the start of each turn. DC 15 Medicine check or magical healing stops the bleeding.", "weight": 15, "range": [43, 57], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d6", "damageType": "slashing" } } },
-    { "type": 0, "text": "Armor Damaged - Your attack damages their armor. -2 AC until repaired by a skilled smith.", "weight": 13, "range": [58, 70], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "penalty", "penaltyType": "ac", "penaltyValue": -2, "duration": -1 } } },
-    { "type": 0, "text": "Organ Strike - Your blade pierces vital organs. Target must make DC 18 Con save or be stunned for 1 round.", "weight": 10, "range": [71, 80], "img": "icons/svg/skull.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "save", "saveDC": 18, "saveAbility": "con", "effectCondition": "stunned", "duration": 1, "failEffect": "Stunned for 1 round" } } },
-    { "type": 0, "text": "Legendary Devastation - Your legendary strike deals an additional 4d6 damage.", "weight": 10, "range": [81, 90], "img": "icons/svg/explosion.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "4d6", "damageType": "bludgeoning" } } },
-    { "type": 0, "text": "Crippling Wound - Your devastating blow cripples a limb (DM's choice). Target has disadvantage on relevant checks until healed with Regenerate or similar magic.", "weight": 9, "range": [91, 99], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "crippled", "duration": -1 } } },
-    { "type": 0, "text": "Near-Fatal Blow - If the target has 50 HP or fewer, they must make a DC 20 Con save or drop to 0 HP.", "weight": 1, "range": [100, 100], "img": "icons/svg/skull.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "save", "saveDC": 20, "saveAbility": "con", "failEffect": "Drop to 0 HP if under 50 HP" } } }
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
+      "weight": 25,
+      "range": [1, 25],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+    },
+    {
+      "type": 0,
+      "text": "Annihilating Blow - Your strike is utterly devastating. Target is stunned for 1 round. (GM: also apply prone and 2d6 bonus damage)",
+      "weight": 17,
+      "range": [26, 42],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "stunned",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Mortal Wound - Your strike opens a mortal wound. Target takes 3d6 damage at the start of each turn. DC 15 Medicine check or magical healing stops the bleeding.",
+      "weight": 15,
+      "range": [43, 57],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3d6",
+          "damageType": "slashing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Armor Damaged - Your attack damages their armor. -2 AC until repaired by a skilled smith.",
+      "weight": 13,
+      "range": [58, 70],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Organ Strike - Your blade pierces vital organs. Target must make DC 18 Con save or be stunned for 1 round.",
+      "weight": 10,
+      "range": [71, 80],
+      "img": "icons/svg/skull.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 18,
+          "saveAbility": "con",
+          "effectCondition": "stunned",
+          "duration": 1,
+          "failEffect": "Stunned for 1 round"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Legendary Devastation - Your legendary strike deals an additional 4d6 damage.",
+      "weight": 10,
+      "range": [81, 90],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "4d6",
+          "damageType": "bludgeoning"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Crippling Wound - Your devastating blow cripples a limb (DM's choice). Target has disadvantage on relevant checks until healed with Regenerate or similar magic.",
+      "weight": 9,
+      "range": [91, 99],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "crippled",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Near-Fatal Blow - If the target has 50 HP or fewer, they must make a DC 20 Con save or drop to 0 HP.",
+      "weight": 1,
+      "range": [100, 100],
+      "img": "icons/svg/skull.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 20,
+          "saveAbility": "con",
+          "failEffect": "Drop to 0 HP if under 50 HP"
+        }
+      }
+    }
   ]
 }

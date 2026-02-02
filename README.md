@@ -11,17 +11,18 @@ When you land a critical hit or fumble an attack, this module automatically roll
 The tables scale with your character's power level:
 
 | Tier | Character Level | "Nothing Special" Chance |
-|------|-----------------|-------------------------|
-| 1 | Levels 1-4 | 60% |
-| 2 | Levels 5-8 | 45% |
-| 3 | Levels 9-12 | 35% |
-| 4 | Levels 13-20 | 25% |
+| ---- | --------------- | ------------------------ |
+| 1    | Levels 1-4      | 60%                      |
+| 2    | Levels 5-8      | 45%                      |
+| 3    | Levels 9-12     | 35%                      |
+| 4    | Levels 13-20    | 25%                      |
 
 Higher level characters face more dramatic consequences - both good and bad!
 
 ### Attack Types
 
 Different tables for different attacks:
+
 - **Melee** - Swords, axes, fists, and other close-combat weapons
 - **Ranged** - Bows, crossbows, thrown weapons
 - **Spells** - Both melee and ranged spell attacks
@@ -58,12 +59,14 @@ Find these options in **Game Settings → Module Settings**:
 ## Example Effects
 
 **Critical Hits might:**
+
 - Knock the target prone
 - Deal bonus damage
 - Stun the enemy
 - Damage their armor (-2 AC)
 
 **Fumbles might:**
+
 - Make you fall prone
 - Drop your weapon
 - Hit yourself
