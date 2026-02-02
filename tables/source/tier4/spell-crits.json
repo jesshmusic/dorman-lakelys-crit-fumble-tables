@@ -4,13 +4,111 @@
   "img": "icons/magic/fire/projectile-fireball-smoke-strong-orange.webp",
   "formula": "1d100",
   "results": [
-    { "type": 0, "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.", "weight": 25, "range": [1, 25], "img": "icons/svg/d20-highlight.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
-    { "type": 0, "text": "Arcane Annihilation - Magical fire engulfs the target eternally. They take 3d8 damage at the start of each turn until Dispel Magic (DC 17) or similar is cast.", "weight": 14, "range": [26, 39], "img": "icons/magic/fire/flame-burning-yellow-orange.webp", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d8", "damageType": "fire" } } },
-    { "type": 0, "text": "Magic Destruction - Your spell permanently disrupts the target's magic. They cannot cast spells until Remove Curse or similar is cast.", "weight": 12, "range": [40, 51], "img": "icons/svg/silenced.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "silenced", "duration": -1 } } },
-    { "type": 0, "text": "Apocalyptic Blast - The force sends the target flying 60 feet, prone, stunned for 1 round, and takes 2d6 force damage.", "weight": 11, "range": [52, 62], "img": "icons/svg/thrust.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d6", "damageType": "force" } } },
-    { "type": 0, "text": "Elemental Apocalypse - Your spell's element utterly overwhelms the target. Add 4d6 damage of the spell's type.", "weight": 10, "range": [63, 72], "img": "icons/svg/explosion.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "4d6", "damageType": "force" } } },
-    { "type": 0, "text": "Permanent Vulnerability - The target becomes permanently vulnerable to the spell's damage type until Remove Curse is cast.", "weight": 9, "range": [73, 81], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "vulnerable", "duration": -1 } } },
-    { "type": 0, "text": "Twin Spell - Your spell echoes with legendary power. Cast the same spell again immediately as a free action, at the same level.", "weight": 10, "range": [82, 91], "img": "icons/svg/upgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_echo", "duration": 0 } } },
-    { "type": 0, "text": "Arcane Mastery - Your spell is cast with legendary efficiency. Regain 1 expended spell slot up to 6th level.", "weight": 9, "range": [92, 100], "img": "icons/svg/upgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_slot_recovered", "duration": 0 } } }
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
+      "weight": 25,
+      "range": [1, 25],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Annihilation - Magical fire engulfs the target eternally. They take 3d8 damage at the start of each turn until Dispel Magic (DC 17) or similar is cast.",
+      "weight": 14,
+      "range": [26, 39],
+      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3d8",
+          "damageType": "fire"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Magic Destruction - Your spell permanently disrupts the target's magic. They cannot cast spells until Remove Curse or similar is cast.",
+      "weight": 12,
+      "range": [40, 51],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "silenced",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Apocalyptic Blast - The force sends the target flying 60 feet, prone, stunned for 1 round, and takes 2d6 force damage.",
+      "weight": 11,
+      "range": [52, 62],
+      "img": "icons/svg/thrust.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d6",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Elemental Apocalypse - Your spell's element utterly overwhelms the target. Add 4d6 damage of the spell's type.",
+      "weight": 10,
+      "range": [63, 72],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "4d6",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Permanent Vulnerability - The target becomes permanently vulnerable to the spell's damage type until Remove Curse is cast.",
+      "weight": 9,
+      "range": [73, 81],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "vulnerable",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Twin Spell - Your spell echoes with legendary power. Cast the same spell again immediately as a free action, at the same level.",
+      "weight": 10,
+      "range": [82, 91],
+      "img": "icons/svg/upgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "spell_echo",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Mastery - Your spell is cast with legendary efficiency. Regain 1 expended spell slot up to 6th level.",
+      "weight": 9,
+      "range": [92, 100],
+      "img": "icons/svg/upgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "spell_slot_recovered",
+          "duration": 0
+        }
+      }
+    }
   ]
 }

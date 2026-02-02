@@ -4,13 +4,112 @@
   "img": "icons/weapons/bows/longbow-recurve-brown.webp",
   "formula": "1d100",
   "results": [
-    { "type": 0, "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.", "weight": 35, "range": [1, 35], "img": "icons/svg/d20-grey.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
-    { "type": 0, "text": "Scatter All Ammo - You drop your entire quiver. All ammunition scatters around you.", "weight": 15, "range": [36, 50], "img": "icons/weapons/ammunition/arrow-head-war-flight.webp", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "ammo_lost", "duration": 0 } } },
-    { "type": 0, "text": "Bowstring Snapped - Your bowstring snaps. Spend an action to restring or switch weapons.", "weight": 12, "range": [51, 62], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "bowstring_snapped", "duration": -1 } } },
-    { "type": 0, "text": "Severe Strain - You badly tear a muscle. Take 2d6 damage and have disadvantage on ranged attacks for 1 minute.", "weight": 12, "range": [63, 74], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d6", "damageType": "bludgeoning" } } },
-    { "type": 0, "text": "Completely Exposed - Your fumble leaves you defenseless. You are incapacitated until the start of your next turn.", "weight": 9, "range": [75, 83], "img": "icons/svg/target.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "incapacitated", "duration": 1 } } },
-    { "type": 0, "text": "Self-Injury - You severely injure yourself. Take 2d8 damage.", "weight": 8, "range": [84, 91], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d8", "damageType": "piercing" } } },
-    { "type": 0, "text": "Fatigued - The catastrophic failure exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.", "weight": 7, "range": [92, 98], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "fatigued", "duration": 10 } } },
-    { "type": 0, "text": "Hit Ally Critically - Your shot hits an ally for critical damage. Roll attack vs ally's AC; on hit, deal double weapon damage.", "weight": 2, "range": [99, 100], "img": "icons/svg/combat.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "save", "saveDC": 0, "saveAbility": "attack_roll", "failEffect": "Critically hit ally" } } }
+    {
+      "type": 0,
+      "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.",
+      "weight": 35,
+      "range": [1, 35],
+      "img": "icons/svg/d20-grey.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+    },
+    {
+      "type": 0,
+      "text": "Scatter All Ammo - You drop your entire quiver. All ammunition scatters around you.",
+      "weight": 15,
+      "range": [36, 50],
+      "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "ammo_lost",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Bowstring Snapped - Your bowstring snaps. Spend an action to restring or switch weapons.",
+      "weight": 12,
+      "range": [51, 62],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "bowstring_snapped",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Severe Strain - You badly tear a muscle. Take 2d6 damage and have disadvantage on ranged attacks for 1 minute.",
+      "weight": 12,
+      "range": [63, 74],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d6",
+          "damageType": "bludgeoning"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Completely Exposed - Your fumble leaves you defenseless. You are incapacitated until the start of your next turn.",
+      "weight": 9,
+      "range": [75, 83],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "incapacitated",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Self-Injury - You severely injure yourself. Take 2d8 damage.",
+      "weight": 8,
+      "range": [84, 91],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d8",
+          "damageType": "piercing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Fatigued - The catastrophic failure exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.",
+      "weight": 7,
+      "range": [92, 98],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "fatigued",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Hit Ally Critically - Your shot hits an ally for critical damage. Roll attack vs ally's AC; on hit, deal double weapon damage.",
+      "weight": 2,
+      "range": [99, 100],
+      "img": "icons/svg/combat.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 0,
+          "saveAbility": "attack_roll",
+          "failEffect": "Critically hit ally"
+        }
+      }
+    }
   ]
 }

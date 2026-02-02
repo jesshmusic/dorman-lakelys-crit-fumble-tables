@@ -4,12 +4,98 @@
   "img": "icons/skills/melee/strike-sword-slashing-red.webp",
   "formula": "1d100",
   "results": [
-    { "type": 0, "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.", "weight": 45, "range": [1, 45], "img": "icons/svg/d20-highlight.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
-    { "type": 0, "text": "Staggering Blow - Your powerful strike sends the target reeling. They are knocked prone and must spend half their movement to stand.", "weight": 14, "range": [46, 59], "img": "icons/svg/falling.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "prone", "duration": 0 } } },
-    { "type": 0, "text": "Disorienting Hit - Your devastating strike leaves your target dazed. They are stunned until the end of your next turn.", "weight": 12, "range": [60, 71], "img": "icons/svg/daze.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "stunned", "duration": 1 } } },
-    { "type": 0, "text": "Deep Wound - Your strike opens a grievous wound. Target takes 1d8 damage at the start of each of their turns until healed or they use an action to stanch the bleeding.", "weight": 10, "range": [72, 81], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "1d8", "damageType": "slashing" } } },
-    { "type": 0, "text": "Armor Breach - Your attack finds a gap and damages their protection. -2 AC until the armor is repaired.", "weight": 8, "range": [82, 89], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "penalty", "penaltyType": "ac", "penaltyValue": -2, "duration": -1 } } },
-    { "type": 0, "text": "Crippling Strike - Your blow strikes a leg or arm. Target's speed is halved until they receive healing.", "weight": 5, "range": [90, 94], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "crippled", "duration": -1 } } },
-    { "type": 0, "text": "Brutal Blow - Your mighty strike deals an additional 2d6 damage from the sheer force of impact.", "weight": 6, "range": [95, 100], "img": "icons/svg/explosion.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d6", "damageType": "bludgeoning" } } }
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
+      "weight": 45,
+      "range": [1, 45],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+    },
+    {
+      "type": 0,
+      "text": "Staggering Blow - Your powerful strike sends the target reeling. They are knocked prone and must spend half their movement to stand.",
+      "weight": 14,
+      "range": [46, 59],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "prone",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Disorienting Hit - Your devastating strike leaves your target dazed. They are stunned until the end of your next turn.",
+      "weight": 12,
+      "range": [60, 71],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "stunned",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Deep Wound - Your strike opens a grievous wound. Target takes 1d8 damage at the start of each of their turns until healed or they use an action to stanch the bleeding.",
+      "weight": 10,
+      "range": [72, 81],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d8",
+          "damageType": "slashing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Armor Breach - Your attack finds a gap and damages their protection. -2 AC until the armor is repaired.",
+      "weight": 8,
+      "range": [82, 89],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Crippling Strike - Your blow strikes a leg or arm. Target's speed is halved until they receive healing.",
+      "weight": 5,
+      "range": [90, 94],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "crippled",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Brutal Blow - Your mighty strike deals an additional 2d6 damage from the sheer force of impact.",
+      "weight": 6,
+      "range": [95, 100],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d6",
+          "damageType": "bludgeoning"
+        }
+      }
+    }
   ]
 }

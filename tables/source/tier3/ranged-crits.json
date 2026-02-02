@@ -4,13 +4,112 @@
   "img": "icons/weapons/bows/longbow-recurve-brown.webp",
   "formula": "1d100",
   "results": [
-    { "type": 0, "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.", "weight": 35, "range": [1, 35], "img": "icons/svg/d20-highlight.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
-    { "type": 0, "text": "Double Pierce - Your shot passes through and hits a second target behind the first for full damage.", "weight": 15, "range": [36, 50], "img": "icons/svg/thrust.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "double_pierce", "duration": 0 } } },
-    { "type": 0, "text": "Crippling Shot - Your shot shatters bone. Target's speed is halved until magically healed.", "weight": 13, "range": [51, 63], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "crippled", "duration": -1 } } },
-    { "type": 0, "text": "Arterial Hit - Your shot strikes a major artery. Target takes 2d6 damage at the start of each turn until healed.", "weight": 12, "range": [64, 75], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d6", "damageType": "piercing" } } },
-    { "type": 0, "text": "Blinding Shot - Your shot strikes near or in the target's eyes. They are blinded for 1 minute or until healed.", "weight": 9, "range": [76, 84], "img": "icons/svg/blind.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "blinded", "duration": 10 } } },
-    { "type": 0, "text": "Pinned to Wall - Your shot pins the target to a nearby surface. They are restrained until they use an action to pull free.", "weight": 7, "range": [85, 91], "img": "icons/svg/anchor.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "restrained", "duration": -1 } } },
-    { "type": 0, "text": "Devastating Shot - Your perfectly placed shot deals an additional 3d6 piercing damage.", "weight": 8, "range": [92, 99], "img": "icons/svg/explosion.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d6", "damageType": "piercing" } } },
-    { "type": 0, "text": "Heart Shot - Your shot strikes true to a vital organ. Target must make DC 18 Con save or drop to 0 HP if under 30 HP.", "weight": 1, "range": [100, 100], "img": "icons/svg/skull.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "save", "saveDC": 18, "saveAbility": "con", "failEffect": "Drop to 0 HP if under 30 HP" } } }
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
+      "weight": 35,
+      "range": [1, 35],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+    },
+    {
+      "type": 0,
+      "text": "Double Pierce - Your shot passes through and hits a second target behind the first for full damage.",
+      "weight": 15,
+      "range": [36, 50],
+      "img": "icons/svg/thrust.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "double_pierce",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Crippling Shot - Your shot shatters bone. Target's speed is halved until magically healed.",
+      "weight": 13,
+      "range": [51, 63],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "crippled",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arterial Hit - Your shot strikes a major artery. Target takes 2d6 damage at the start of each turn until healed.",
+      "weight": 12,
+      "range": [64, 75],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d6",
+          "damageType": "piercing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Blinding Shot - Your shot strikes near or in the target's eyes. They are blinded for 1 minute or until healed.",
+      "weight": 9,
+      "range": [76, 84],
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Pinned to Wall - Your shot pins the target to a nearby surface. They are restrained until they use an action to pull free.",
+      "weight": 7,
+      "range": [85, 91],
+      "img": "icons/svg/anchor.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "restrained",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Devastating Shot - Your perfectly placed shot deals an additional 3d6 piercing damage.",
+      "weight": 8,
+      "range": [92, 99],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3d6",
+          "damageType": "piercing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Heart Shot - Your shot strikes true to a vital organ. Target must make DC 18 Con save or drop to 0 HP if under 30 HP.",
+      "weight": 1,
+      "range": [100, 100],
+      "img": "icons/svg/skull.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 18,
+          "saveAbility": "con",
+          "failEffect": "Drop to 0 HP if under 30 HP"
+        }
+      }
+    }
   ]
 }

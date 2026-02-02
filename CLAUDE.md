@@ -103,7 +103,7 @@ tests/
 ### Tier Levels
 
 | Tier | Levels | "Nothing" % | Effect Severity |
-|------|--------|-------------|-----------------|
+| ---- | ------ | ----------- | --------------- |
 | 1    | 1-4    | 60%         | Mild            |
 | 2    | 5-8    | 45%         | Moderate        |
 | 3    | 9-12   | 35%         | Powerful        |
@@ -168,13 +168,13 @@ type EffectType = 'none' | 'condition' | 'damage' | 'save';
 
 interface TableEffectConfig {
   effectType: EffectType;
-  effectCondition?: string;      // For condition type
-  damageFormula?: string;        // For damage type (e.g., "2d6")
-  damageType?: string;           // For damage type (e.g., "slashing")
-  duration?: number;             // Rounds (-1 = permanent until healed)
-  saveDC?: number;               // For save type
-  saveAbility?: string;          // For save type (str, dex, con, etc.)
-  failEffect?: string;           // Description of failed save effect
+  effectCondition?: string; // For condition type
+  damageFormula?: string; // For damage type (e.g., "2d6")
+  damageType?: string; // For damage type (e.g., "slashing")
+  duration?: number; // Rounds (-1 = permanent until healed)
+  saveDC?: number; // For save type
+  saveAbility?: string; // For save type (str, dex, con, etc.)
+  failEffect?: string; // Description of failed save effect
 }
 ```
 
@@ -191,7 +191,7 @@ interface TableEffectConfig {
 
 ```typescript
 // Listen to attack roll complete
-Hooks.on('midi-qol.AttackRollComplete', async (workflow) => {
+Hooks.on('midi-qol.AttackRollComplete', async workflow => {
   const d20Result = getD20Result(workflow);
 
   if (d20Result === 20 && areCritsEnabled()) {
@@ -239,12 +239,12 @@ function getD20Result(workflow: MidiQolWorkflow): number | null {
 
 ```typescript
 const SETTINGS = {
-  ENABLED: 'enabled',              // Master on/off
-  ENABLE_CRITS: 'enableCrits',     // Enable crit tables
+  ENABLED: 'enabled', // Master on/off
+  ENABLE_CRITS: 'enableCrits', // Enable crit tables
   ENABLE_FUMBLES: 'enableFumbles', // Enable fumble tables
-  APPLY_EFFECTS: 'applyEffects',   // Auto-apply effects
-  USE_ACTOR_LEVEL: 'useActorLevel',// Use level for tier
-  FIXED_TIER: 'fixedTier',         // Fixed tier (1-4)
+  APPLY_EFFECTS: 'applyEffects', // Auto-apply effects
+  USE_ACTOR_LEVEL: 'useActorLevel', // Use level for tier
+  FIXED_TIER: 'fixedTier', // Fixed tier (1-4)
   SHOW_CHAT_MESSAGES: 'showChatMessages' // Show chat output
 };
 ```

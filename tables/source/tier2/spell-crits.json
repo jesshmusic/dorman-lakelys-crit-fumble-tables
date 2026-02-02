@@ -18,7 +18,13 @@
       "weight": 12,
       "range": [46, 57],
       "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "1d8", "damageType": "force" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d8",
+          "damageType": "force"
+        }
+      }
     },
     {
       "type": 0,
@@ -26,7 +32,13 @@
       "weight": 10,
       "range": [58, 67],
       "img": "icons/svg/silenced.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "magic_disrupted", "duration": 10 } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "magic_disrupted",
+          "duration": 10
+        }
+      }
     },
     {
       "type": 0,
@@ -34,7 +46,13 @@
       "weight": 9,
       "range": [68, 76],
       "img": "icons/svg/thrust.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "prone", "duration": 0 } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "prone",
+          "duration": 0
+        }
+      }
     },
     {
       "type": 0,
@@ -42,7 +60,13 @@
       "weight": 8,
       "range": [77, 84],
       "img": "icons/svg/daze.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "concentration_broken", "duration": 0 } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "concentration_broken",
+          "duration": 0
+        }
+      }
     },
     {
       "type": 0,
@@ -50,7 +74,13 @@
       "weight": 6,
       "range": [85, 90],
       "img": "icons/svg/explosion.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d6", "damageType": "force" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d6",
+          "damageType": "force"
+        }
+      }
     },
     {
       "type": 0,
@@ -58,7 +88,13 @@
       "weight": 5,
       "range": [91, 95],
       "img": "icons/svg/upgrade.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_echo", "duration": 1 } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "spell_echo",
+          "duration": 1
+        }
+      }
     },
     {
       "type": 0,
@@ -66,7 +102,13 @@
       "weight": 5,
       "range": [96, 100],
       "img": "icons/svg/upgrade.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_slot_recovered", "duration": 0 } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "spell_slot_recovered",
+          "duration": 0
+        }
+      }
     }
   ]
 }
