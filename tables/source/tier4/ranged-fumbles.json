@@ -1,0 +1,17 @@
+{
+  "name": "Tier 4 Ranged Fumbles (Levels 13-20)",
+  "description": "Fumble effects for ranged attacks at Tier 4 (Levels 13-20). Even legends can fail catastrophically.",
+  "img": "icons/weapons/bows/longbow-recurve-brown.webp",
+  "formula": "1d100",
+  "results": [
+    { "type": 0, "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.", "weight": 25, "range": [1, 25], "img": "icons/svg/d20-grey.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
+    { "type": 0, "text": "Total Ammo Loss - All your ammunition scatters or is destroyed.", "weight": 15, "range": [26, 40], "img": "icons/weapons/ammunition/arrow-head-war-flight.webp", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "ammo_destroyed", "duration": 0 } } },
+    { "type": 0, "text": "Weapon Damaged - Your bow cracks or crossbow mechanism bends. -2 to attack and damage rolls until repaired.", "weight": 13, "range": [41, 53], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "penalty", "penaltyType": "attack", "penaltyValue": -2, "duration": -1 } } },
+    { "type": 0, "text": "Severe Self-Injury - You critically wound yourself. Take 3d6 damage and have disadvantage on ranged attacks for 1 minute.", "weight": 12, "range": [54, 65], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d6", "damageType": "piercing" } } },
+    { "type": 0, "text": "Completely Helpless - You fumble so badly you are incapacitated and prone until the start of your next turn.", "weight": 10, "range": [66, 75], "img": "icons/svg/daze.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "incapacitated", "duration": 1 } } },
+    { "type": 0, "text": "Devastating Self-Wound - You severely injure yourself. Take 3d8 damage.", "weight": 10, "range": [76, 85], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d8", "damageType": "piercing" } } },
+    { "type": 0, "text": "Fatigued - The catastrophic failure utterly exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.", "weight": 8, "range": [86, 93], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "fatigued", "duration": 10 } } },
+    { "type": 0, "text": "Disarmed - Your weapon flies from your hands, landing 30 feet away.", "weight": 6, "range": [94, 99], "img": "icons/weapons/bows/longbow-recurve-brown.webp", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "disarm" } } },
+    { "type": 0, "text": "Critically Hit Ally - Your shot critically strikes an ally. Roll attack vs ally's AC; on hit, deal triple weapon damage.", "weight": 1, "range": [100, 100], "img": "icons/svg/combat.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "save", "saveDC": 0, "saveAbility": "attack_roll", "failEffect": "Triple damage to ally" } } }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Tier 4 Melee Fumbles (Levels 13-20)",
+  "description": "Fumble effects for melee attacks at Tier 4 (Levels 13-20). Even legends can fail catastrophically.",
+  "img": "icons/skills/melee/strike-sword-slashing-red.webp",
+  "formula": "1d100",
+  "results": [
+    { "type": 0, "text": "Nothing Special - You stumble but recover with no additional penalty.", "weight": 25, "range": [1, 25], "img": "icons/svg/d20-grey.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
+    { "type": 0, "text": "Catastrophic Fall - You fall prone, are stunned until end of your next turn, and attacks against you have advantage.", "weight": 15, "range": [26, 40], "img": "icons/svg/falling.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "stunned", "duration": 1 } } },
+    { "type": 0, "text": "Severe Self-Injury - You critically wound yourself. Take 3d6 damage and have disadvantage on all attacks for 1 minute.", "weight": 13, "range": [41, 53], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d6", "damageType": "slashing" } } },
+    { "type": 0, "text": "Weapon Badly Damaged - Your weapon is badly damaged. -2 to attack and damage rolls until repaired by a skilled smith.", "weight": 12, "range": [54, 65], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "penalty", "penaltyType": "attack", "penaltyValue": -2, "duration": -1 } } },
+    { "type": 0, "text": "Hit Yourself Critically - Your weapon rebounds and strikes you critically. Take triple your weapon damage.", "weight": 10, "range": [66, 75], "img": "icons/svg/blood.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d8", "damageType": "slashing" } } },
+    { "type": 0, "text": "Incapacitating Failure - Your catastrophic failure stuns you. You are incapacitated for 1 round and prone.", "weight": 10, "range": [76, 85], "img": "icons/svg/daze.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "incapacitated", "duration": 1 } } },
+    { "type": 0, "text": "Fatigued - The fumble utterly exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.", "weight": 8, "range": [86, 93], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "fatigued", "duration": 10 } } },
+    { "type": 0, "text": "Disarmed - Your weapon flies from your grasp, landing 25 feet away.", "weight": 6, "range": [94, 99], "img": "icons/skills/melee/strike-sword-slashing-red.webp", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "disarm" } } },
+    { "type": 0, "text": "Devastate Allies - Your wild swing strikes all allies within 10 feet. Roll attack against each; hit deals weapon damage.", "weight": 1, "range": [100, 100], "img": "icons/svg/combat.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "save", "saveDC": 0, "saveAbility": "attack_roll", "failEffect": "Hit all nearby allies" } } }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "name": "Tier 1 Spell Critical Hits (Levels 1-4)",
+  "description": "Critical hit effects for spell attacks at Tier 1 (Levels 1-4). Effects are relatively mild for novice adventurers.",
+  "img": "icons/magic/fire/projectile-fireball-smoke-strong-orange.webp",
+  "formula": "1d100",
+  "results": [
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
+      "weight": 60,
+      "range": [1, 60],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Burn - Your spell leaves lingering magical energy. Target takes 1d4 force damage at the start of their next turn.",
+      "weight": 10,
+      "range": [61, 70],
+      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d4",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Magical Overload - The target's senses are briefly overwhelmed. They have disadvantage on their next saving throw against a spell.",
+      "weight": 8,
+      "range": [71, 78],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "magic_sensitivity",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Knockback - The force of your spell pushes the target. They must succeed on a DC 10 Strength save or be pushed 10 feet away from you.",
+      "weight": 7,
+      "range": [79, 85],
+      "img": "icons/svg/thrust.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 10,
+          "saveAbility": "str",
+          "failEffect": "Pushed 10 feet"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Spell Feedback - Your spell disrupts the target's concentration. If concentrating, they must make a concentration save with disadvantage.",
+      "weight": 5,
+      "range": [86, 90],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "concentration_threatened",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Elemental Surge - Your spell's element flares. Add 1d6 damage of the spell's damage type.",
+      "weight": 4,
+      "range": [91, 94],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d6",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Lingering Magic - Magical energy clings to the target. They glow faintly and can't benefit from invisibility until the end of their next turn.",
+      "weight": 3,
+      "range": [95, 97],
+      "img": "icons/svg/light.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "glowing",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Perfect Casting - Your spell is cast with incredible efficiency. Regain 1 expended spell slot of 1st level (if you have any expended).",
+      "weight": 3,
+      "range": [98, 100],
+      "img": "icons/svg/upgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "spell_slot_recovered",
+          "duration": 0
+        }
+      }
+    }
+  ]
+}

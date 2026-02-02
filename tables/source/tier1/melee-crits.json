@@ -1,0 +1,118 @@
+{
+  "name": "Tier 1 Melee Critical Hits (Levels 1-4)",
+  "description": "Critical hit effects for melee attacks at Tier 1 (Levels 1-4). Effects are relatively mild for novice adventurers.",
+  "img": "icons/skills/melee/strike-sword-slashing-red.webp",
+  "formula": "1d100",
+  "results": [
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
+      "weight": 60,
+      "range": [1, 60],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Knockdown - The force of your blow sends your target sprawling. They are knocked prone.",
+      "weight": 10,
+      "range": [61, 70],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "prone",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Dazed - Your devastating hit leaves your target momentarily stunned. They have disadvantage on their next attack roll.",
+      "weight": 8,
+      "range": [71, 78],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "dazed",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Bleeding Wound - Your strike opens a nasty wound that bleeds freely. Target takes 1d4 damage at the start of their next turn.",
+      "weight": 7,
+      "range": [79, 85],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d4",
+          "damageType": "slashing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Shield Bypass - Your attack finds a gap in the target's defenses. They cannot use their shield bonus to AC until the end of their next turn.",
+      "weight": 5,
+      "range": [86, 90],
+      "img": "icons/equipment/shield/buckler-wooden-round.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "shield_bypassed",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Exposed Weakness - Your keen eye spots an opening. Your next attack against this target has advantage.",
+      "weight": 4,
+      "range": [91, 94],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "exposed",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Painful Strike - The excruciating pain of your hit distracts your foe. They have disadvantage on concentration checks until the end of their next turn.",
+      "weight": 3,
+      "range": [95, 97],
+      "img": "icons/svg/lightning.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "distracted",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Devastating Blow - Your mighty strike deals an additional 1d6 damage from the sheer force of impact.",
+      "weight": 3,
+      "range": [98, 100],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d6",
+          "damageType": "bludgeoning"
+        }
+      }
+    }
+  ]
+}

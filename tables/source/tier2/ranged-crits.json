@@ -1,0 +1,72 @@
+{
+  "name": "Tier 2 Ranged Critical Hits (Levels 5-8)",
+  "description": "Critical hit effects for ranged attacks at Tier 2 (Levels 5-8). Effects are more impactful for competent adventurers.",
+  "img": "icons/weapons/bows/longbow-recurve-brown.webp",
+  "formula": "1d100",
+  "results": [
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
+      "weight": 45,
+      "range": [1, 45],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+    },
+    {
+      "type": 0,
+      "text": "Through and Through - Your projectile passes through the target and may hit another creature behind them. Roll attack against any creature in line behind the target.",
+      "weight": 12,
+      "range": [46, 57],
+      "img": "icons/svg/thrust.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "piercing_shot", "duration": 0 } }
+    },
+    {
+      "type": 0,
+      "text": "Crippling Shot - Your shot strikes a limb. Target's speed is reduced by 15 feet until healed.",
+      "weight": 10,
+      "range": [58, 67],
+      "img": "icons/svg/hazard.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "crippled", "duration": -1 } }
+    },
+    {
+      "type": 0,
+      "text": "Arterial Hit - Your shot strikes an artery. Target takes 1d8 damage at the start of each turn until healed or stanched.",
+      "weight": 9,
+      "range": [68, 76],
+      "img": "icons/svg/blood.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "1d8", "damageType": "piercing" } }
+    },
+    {
+      "type": 0,
+      "text": "Knock Down - The force of your shot knocks the target off their feet. They fall prone.",
+      "weight": 8,
+      "range": [77, 84],
+      "img": "icons/svg/falling.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "prone", "duration": 0 } }
+    },
+    {
+      "type": 0,
+      "text": "Eye Shot - Your shot threatens the target's eyes. They are blinded until the end of their next turn.",
+      "weight": 6,
+      "range": [85, 90],
+      "img": "icons/svg/blind.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "blinded", "duration": 1 } }
+    },
+    {
+      "type": 0,
+      "text": "Pinned to Ground - Your shot pins the target in place. They are restrained until they use an action to pull free.",
+      "weight": 5,
+      "range": [91, 95],
+      "img": "icons/svg/anchor.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "restrained", "duration": -1 } }
+    },
+    {
+      "type": 0,
+      "text": "Devastating Shot - Your perfectly placed shot deals an additional 2d6 piercing damage.",
+      "weight": 5,
+      "range": [96, 100],
+      "img": "icons/svg/explosion.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d6", "damageType": "piercing" } }
+    }
+  ]
+}

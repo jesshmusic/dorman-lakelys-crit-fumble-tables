@@ -1,0 +1,72 @@
+{
+  "name": "Tier 2 Spell Critical Hits (Levels 5-8)",
+  "description": "Critical hit effects for spell attacks at Tier 2 (Levels 5-8). Effects are more impactful for competent adventurers.",
+  "img": "icons/magic/fire/projectile-fireball-smoke-strong-orange.webp",
+  "formula": "1d100",
+  "results": [
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
+      "weight": 45,
+      "range": [1, 45],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Burn - Magical energy sears the target. They take 1d8 force damage at the start of each turn for 2 rounds.",
+      "weight": 12,
+      "range": [46, 57],
+      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "1d8", "damageType": "force" } }
+    },
+    {
+      "type": 0,
+      "text": "Magic Disruption - Your spell disrupts their magical abilities. Target has disadvantage on spell attacks and concentration checks for 1 minute.",
+      "weight": 10,
+      "range": [58, 67],
+      "img": "icons/svg/silenced.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "magic_disrupted", "duration": 10 } }
+    },
+    {
+      "type": 0,
+      "text": "Powerful Knockback - The force of your spell sends the target flying. They are pushed 15 feet and fall prone.",
+      "weight": 9,
+      "range": [68, 76],
+      "img": "icons/svg/thrust.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "prone", "duration": 0 } }
+    },
+    {
+      "type": 0,
+      "text": "Concentration Shatter - If the target is concentrating, their concentration automatically fails.",
+      "weight": 8,
+      "range": [77, 84],
+      "img": "icons/svg/daze.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "concentration_broken", "duration": 0 } }
+    },
+    {
+      "type": 0,
+      "text": "Elemental Surge - Your spell's element flares dramatically. Add 2d6 damage of the spell's type.",
+      "weight": 6,
+      "range": [85, 90],
+      "img": "icons/svg/explosion.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d6", "damageType": "force" } }
+    },
+    {
+      "type": 0,
+      "text": "Spell Echo - Your spell echoes with power. You may cast the same cantrip again as a bonus action.",
+      "weight": 5,
+      "range": [91, 95],
+      "img": "icons/svg/upgrade.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_echo", "duration": 1 } }
+    },
+    {
+      "type": 0,
+      "text": "Perfect Casting - Your spell is cast with incredible efficiency. Regain 1 expended spell slot up to 2nd level.",
+      "weight": 5,
+      "range": [96, 100],
+      "img": "icons/svg/upgrade.svg",
+      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_slot_recovered", "duration": 0 } }
+    }
+  ]
+}

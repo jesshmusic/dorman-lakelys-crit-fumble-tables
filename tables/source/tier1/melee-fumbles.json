@@ -1,0 +1,119 @@
+{
+  "name": "Tier 1 Melee Fumbles (Levels 1-4)",
+  "description": "Fumble effects for melee attacks at Tier 1 (Levels 1-4). Effects are relatively mild for novice adventurers.",
+  "img": "icons/skills/melee/strike-sword-slashing-red.webp",
+  "formula": "1d100",
+  "results": [
+    {
+      "type": 0,
+      "text": "Nothing Special - You stumble slightly but recover quickly with no additional penalty.",
+      "weight": 60,
+      "range": [1, 60],
+      "img": "icons/svg/d20-grey.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Off Balance - Your wild swing throws you off balance. Your next attack has disadvantage.",
+      "weight": 12,
+      "range": [61, 72],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "off_balance",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Strained Muscle - You overextend and pull a muscle. Take 1d4 damage.",
+      "weight": 8,
+      "range": [73, 80],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d4",
+          "damageType": "bludgeoning"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Slips - Your weapon slips in your grip. You must use your bonus action to readjust your hold or have disadvantage on your next attack.",
+      "weight": 7,
+      "range": [81, 87],
+      "img": "icons/skills/melee/strike-sword-slashing-red.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "weapon_slipped",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Trip Over Feet - You stumble over your own feet. You fall prone.",
+      "weight": 6,
+      "range": [88, 93],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "prone",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Opening Created - Your clumsy attack leaves you exposed. The target can make an opportunity attack against you.",
+      "weight": 4,
+      "range": [94, 97],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "exposed_to_opportunity",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Embarrassing Miss - Your pathetic swing draws mocking laughter. You have disadvantage on Intimidation checks against creatures that witnessed this until you score a critical hit.",
+      "weight": 2,
+      "range": [98, 99],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "embarrassed",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Wild Swing - Your uncontrolled swing might hit an ally within 5 feet (DM's choice). Roll attack against ally's AC; on hit, deal normal weapon damage.",
+      "weight": 1,
+      "range": [100, 100],
+      "img": "icons/svg/combat.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 0,
+          "saveAbility": "attack_roll",
+          "failEffect": "Hit nearby ally for weapon damage"
+        }
+      }
+    }
+  ]
+}

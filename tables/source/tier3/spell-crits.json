@@ -1,0 +1,16 @@
+{
+  "name": "Tier 3 Spell Critical Hits (Levels 9-12)",
+  "description": "Critical hit effects for spell attacks at Tier 3 (Levels 9-12). Effects are powerful for experienced adventurers.",
+  "img": "icons/magic/fire/projectile-fireball-smoke-strong-orange.webp",
+  "formula": "1d100",
+  "results": [
+    { "type": 0, "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.", "weight": 35, "range": [1, 35], "img": "icons/svg/d20-highlight.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
+    { "type": 0, "text": "Arcane Immolation - Magical fire engulfs the target. They take 2d8 fire damage at the start of each turn for 3 rounds.", "weight": 13, "range": [36, 48], "img": "icons/magic/fire/flame-burning-yellow-orange.webp", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d8", "damageType": "fire" } } },
+    { "type": 0, "text": "Magic Nullification - Your spell disrupts the target's magic completely. They cannot cast spells for 1 minute.", "weight": 11, "range": [49, 59], "img": "icons/svg/silenced.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "silenced", "duration": 10 } } },
+    { "type": 0, "text": "Powerful Blast - The force sends the target flying 30 feet, prone, and stunned until end of their next turn.", "weight": 10, "range": [60, 69], "img": "icons/svg/thrust.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "stunned", "duration": 1 } } },
+    { "type": 0, "text": "Elemental Devastation - Your spell's element overwhelms the target. Add 3d6 damage of the spell's type.", "weight": 9, "range": [70, 78], "img": "icons/svg/explosion.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d6", "damageType": "force" } } },
+    { "type": 0, "text": "Spell Vulnerability - The target becomes vulnerable to the spell's damage type for 1 minute.", "weight": 8, "range": [79, 86], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "vulnerable", "duration": 10 } } },
+    { "type": 0, "text": "Spell Echo - Your spell echoes with tremendous power. Cast the same spell again immediately as a free action.", "weight": 7, "range": [87, 93], "img": "icons/svg/upgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_echo", "duration": 0 } } },
+    { "type": 0, "text": "Perfect Casting - Your spell is cast with incredible efficiency. Regain 1 expended spell slot up to 4th level.", "weight": 7, "range": [94, 100], "img": "icons/svg/upgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_slot_recovered", "duration": 0 } } }
+  ]
+}

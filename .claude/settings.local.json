@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run build:tables:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\" && cat {}')",
+      "Bash(npm run lint:*)",
+      "Bash(npm run lint:fix:*)",
+      "WebFetch(domain:gitlab.com)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(cat:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(gh auth:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

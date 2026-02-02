@@ -1,0 +1,119 @@
+{
+  "name": "Tier 1 Ranged Critical Hits (Levels 1-4)",
+  "description": "Critical hit effects for ranged attacks at Tier 1 (Levels 1-4). Effects are relatively mild for novice adventurers.",
+  "img": "icons/weapons/bows/longbow-recurve-brown.webp",
+  "formula": "1d100",
+  "results": [
+    {
+      "type": 0,
+      "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
+      "weight": 60,
+      "range": [1, 60],
+      "img": "icons/svg/d20-highlight.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Pinning Shot - Your projectile pins part of the target's clothing or armor to nearby terrain. Their speed is reduced by 10 feet until they use an action to free themselves.",
+      "weight": 10,
+      "range": [61, 70],
+      "img": "icons/svg/anchor.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "pinned",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Eye Threat - Your projectile flies dangerously close to the target's eyes. They have disadvantage on their next ranged attack.",
+      "weight": 8,
+      "range": [71, 78],
+      "img": "icons/svg/eye.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "eyes_threatened",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Bleeding Wound - Your projectile leaves a deep wound. Target takes 1d4 damage at the start of their next turn.",
+      "weight": 7,
+      "range": [79, 85],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d4",
+          "damageType": "piercing"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Staggering Impact - The force of your shot staggers the target. They must succeed on a DC 10 Strength save or be pushed 5 feet.",
+      "weight": 5,
+      "range": [86, 90],
+      "img": "icons/svg/thrust.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 10,
+          "saveAbility": "str",
+          "failEffect": "Pushed 5 feet"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Perfect Aim - Your incredible accuracy impresses allies. Choose one ally who can see you; they gain advantage on their next ranged attack.",
+      "weight": 4,
+      "range": [91, 94],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "inspired_ally",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Armor Piercing - Your shot finds a weak spot in the target's armor. Your next attack against this target ignores any bonus from armor.",
+      "weight": 3,
+      "range": [95, 97],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "armor_exposed",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Penetrating Shot - Your projectile tears through, dealing an additional 1d6 piercing damage.",
+      "weight": 3,
+      "range": [98, 100],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d6",
+          "damageType": "piercing"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "name": "Tier 1 Spell Fumbles (Levels 1-4)",
+  "description": "Fumble effects for spell attacks at Tier 1 (Levels 1-4). Effects are relatively mild for novice adventurers.",
+  "img": "icons/magic/fire/projectile-fireball-smoke-strong-orange.webp",
+  "formula": "1d100",
+  "results": [
+    {
+      "type": 0,
+      "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
+      "weight": 60,
+      "range": [1, 60],
+      "img": "icons/svg/d20-grey.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Magical Feedback - The spell's energy rebounds slightly. Take 1d4 force damage.",
+      "weight": 10,
+      "range": [61, 70],
+      "img": "icons/svg/lightning.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d4",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Hiccup - Your magic stutters. Your next spell attack has disadvantage.",
+      "weight": 8,
+      "range": [71, 78],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "arcane_hiccup",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Visual Distortion - The spell creates brief visual noise. You have disadvantage on Perception checks until the end of your next turn.",
+      "weight": 7,
+      "range": [79, 85],
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "visual_distortion",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Spell Slot Strain - The failed casting strains your magical reserves. Your next spell that requires a spell slot costs an additional slot of 1st level (if you have one).",
+      "weight": 5,
+      "range": [86, 90],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "spell_strain",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Wild Magic Spark - A tiny surge of wild magic occurs. DM rolls on a minor effect table or chooses a harmless cosmetic effect (hair changes color, flowers bloom nearby, etc.).",
+      "weight": 4,
+      "range": [91, 94],
+      "img": "icons/svg/dice-target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "wild_magic_spark",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Component Mishap - A material component is accidentally destroyed or consumed. Lose one use of a material component you were using (if applicable).",
+      "weight": 3,
+      "range": [95, 97],
+      "img": "icons/commodities/gems/gem-fragments-red.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "component_lost",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Self-Target - Your spell briefly affects you instead of your target. Take the spell's effect on yourself at half damage (or the effect with a DC 10 save, if applicable).",
+      "weight": 3,
+      "range": [98, 100],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 10,
+          "saveAbility": "con",
+          "failEffect": "Take half spell damage"
+        }
+      }
+    }
+  ]
+}

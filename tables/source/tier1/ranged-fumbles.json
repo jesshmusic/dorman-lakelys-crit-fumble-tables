@@ -1,0 +1,120 @@
+{
+  "name": "Tier 1 Ranged Fumbles (Levels 1-4)",
+  "description": "Fumble effects for ranged attacks at Tier 1 (Levels 1-4). Effects are relatively mild for novice adventurers.",
+  "img": "icons/weapons/bows/longbow-recurve-brown.webp",
+  "formula": "1d100",
+  "results": [
+    {
+      "type": 0,
+      "text": "Nothing Special - Your shot goes wide but you recover your composure with no additional penalty.",
+      "weight": 60,
+      "range": [1, 60],
+      "img": "icons/svg/d20-grey.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Dropped Ammo - In your haste, you drop 1d4 pieces of ammunition.",
+      "weight": 12,
+      "range": [61, 72],
+      "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "ammo_dropped",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Bowstring Snap - Your bowstring snaps or crossbow mechanism jams. Spend an action to restring or switch weapons.",
+      "weight": 8,
+      "range": [73, 80],
+      "img": "icons/tools/fasteners/rope-coiled-tan.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "bowstring_snapped",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Pulled Muscle - You strain your arm or shoulder. Take 1d4 damage and have disadvantage on ranged attacks until the end of your next turn.",
+      "weight": 7,
+      "range": [81, 87],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d4",
+          "damageType": "bludgeoning"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Exposed Position - Your awkward positioning leaves you vulnerable. Attacks against you have advantage until the start of your next turn.",
+      "weight": 6,
+      "range": [88, 93],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "exposed",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Tangled Equipment - Your quiver strap or weapon sling gets tangled. You can't draw or stow weapons until you use a bonus action to untangle.",
+      "weight": 4,
+      "range": [94, 97],
+      "img": "icons/tools/fasteners/rope-coiled-tan.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "tangled",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Nicked - Your weapon takes a minor beating. -1 to attack rolls until you spend a short rest maintaining it.",
+      "weight": 2,
+      "range": [98, 99],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -1,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Friendly Fire Risk - Your shot veers dangerously toward an ally. If there's an ally in the path, roll your attack against their AC.",
+      "weight": 1,
+      "range": [100, 100],
+      "img": "icons/svg/combat.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 0,
+          "saveAbility": "attack_roll",
+          "failEffect": "Hit ally for weapon damage"
+        }
+      }
+    }
+  ]
+}

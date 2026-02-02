@@ -1,0 +1,16 @@
+{
+  "name": "Tier 3 Spell Fumbles (Levels 9-12)",
+  "description": "Fumble effects for spell attacks at Tier 3 (Levels 9-12). Effects are more severe for experienced adventurers.",
+  "img": "icons/magic/fire/projectile-fireball-smoke-strong-orange.webp",
+  "formula": "1d100",
+  "results": [
+    { "type": 0, "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.", "weight": 35, "range": [1, 35], "img": "icons/svg/d20-grey.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
+    { "type": 0, "text": "Severe Backlash - The spell's energy rebounds violently. Take 2d8 force damage.", "weight": 15, "range": [36, 50], "img": "icons/svg/lightning.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d8", "damageType": "force" } } },
+    { "type": 0, "text": "Magic Burnout - Your magic fails completely. You cannot cast spells for 1 minute.", "weight": 12, "range": [51, 62], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_locked", "duration": 10 } } },
+    { "type": 0, "text": "Total Sensory Overload - You are blinded, deafened, and stunned until the end of your next turn.", "weight": 11, "range": [63, 73], "img": "icons/svg/blind.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "stunned", "duration": 1 } } },
+    { "type": 0, "text": "Multiple Slot Burn - The failed casting burns out multiple spell slots. Lose 1d4 spell slots.", "weight": 9, "range": [74, 82], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_slots_lost", "duration": 0 } } },
+    { "type": 0, "text": "Spell Fully Rebounds - Your spell affects you at full power. Take the spell's full damage and effects on yourself.", "weight": 8, "range": [83, 90], "img": "icons/svg/target.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "3d6", "damageType": "force" } } },
+    { "type": 0, "text": "Fatigued - The failed spell drains you completely. You have disadvantage on attack rolls and ability checks for 1 minute.", "weight": 8, "range": [91, 98], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "fatigued", "duration": 10 } } },
+    { "type": 0, "text": "Wild Magic Explosion - A wild magic explosion occurs centered on you. All creatures within 20 feet must make DC 15 Dex save or take 3d6 force damage.", "weight": 2, "range": [99, 100], "img": "icons/svg/explosion.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "save", "saveDC": 15, "saveAbility": "dex", "failEffect": "3d6 force damage to all nearby" } } }
+  ]
+}

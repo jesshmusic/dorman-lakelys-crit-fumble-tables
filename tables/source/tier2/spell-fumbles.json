@@ -1,0 +1,16 @@
+{
+  "name": "Tier 2 Spell Fumbles (Levels 5-8)",
+  "description": "Fumble effects for spell attacks at Tier 2 (Levels 5-8). Effects are more impactful for competent adventurers.",
+  "img": "icons/magic/fire/projectile-fireball-smoke-strong-orange.webp",
+  "formula": "1d100",
+  "results": [
+    { "type": 0, "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.", "weight": 45, "range": [1, 45], "img": "icons/svg/d20-grey.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } } },
+    { "type": 0, "text": "Magical Backlash - The spell's energy rebounds painfully. Take 1d8 force damage.", "weight": 14, "range": [46, 59], "img": "icons/svg/lightning.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "1d8", "damageType": "force" } } },
+    { "type": 0, "text": "Arcane Lockout - Your magic stutters badly. You cannot cast spells until the end of your next turn.", "weight": 12, "range": [60, 71], "img": "icons/svg/hazard.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_locked", "duration": 1 } } },
+    { "type": 0, "text": "Sensory Overload - The failed spell overwhelms your senses. You are blinded and deafened until the end of your next turn.", "weight": 10, "range": [72, 81], "img": "icons/svg/blind.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "blinded", "duration": 1 } } },
+    { "type": 0, "text": "Spell Slot Burn - The failed casting burns out a spell slot. Lose an additional spell slot of 1st or 2nd level.", "weight": 8, "range": [82, 89], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "spell_slot_lost", "duration": 0 } } },
+    { "type": 0, "text": "Spell Rebounds - Your spell affects you instead. Take the spell's damage at half value.", "weight": 6, "range": [90, 95], "img": "icons/svg/target.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "damage", "damageFormula": "2d6", "damageType": "force" } } },
+    { "type": 0, "text": "Fatigued - The failed spell drains you. You have disadvantage on attack rolls and ability checks for 1 minute.", "weight": 4, "range": [96, 99], "img": "icons/svg/downgrade.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "fatigued", "duration": 10 } } },
+    { "type": 0, "text": "Wild Magic Surge - A wild magic surge occurs. DM rolls on the Wild Magic table or chooses a significant magical effect.", "weight": 1, "range": [100, 100], "img": "icons/svg/dice-target.svg", "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "condition", "effectCondition": "wild_magic_surge", "duration": 0 } } }
+  ]
+}
