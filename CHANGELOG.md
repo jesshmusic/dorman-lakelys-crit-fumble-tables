@@ -13,11 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- regenerate package-lock.json to fix CI
-
-### Other
-
-- Initial commit: Dorman Lakely's Critical Hit & Fumble Tables
+- CI workflow compatibility issues
 
 ## [1.0.0] - 2024-02-02
 
