@@ -15,7 +15,11 @@
       "Bash(npx tsc --noEmit)",
       "Bash(gh auth:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(gh repo list:*)",
+      "Bash(gh api:*)",
+      "Bash(curl:*)"
     ]
   }
 }
