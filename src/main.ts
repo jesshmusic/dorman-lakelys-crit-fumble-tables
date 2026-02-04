@@ -7,10 +7,11 @@ import { MODULE_ID, LOG_PREFIX } from './constants';
 import { registerSettings } from './settings';
 import { MidiQolHooks, TableImporter } from './services';
 import buildInfo from '../build-info.json';
+import moduleInfo from '../module.json';
 
 const buildNumber = buildInfo.buildNumber;
+const MODULE_VERSION = moduleInfo.version;
 const MODULE_TITLE = "Dorman Lakely's Crit/Fumble Tables";
-const MODULE_VERSION = '1.0.0';
 
 /**
  * Log styled module message to console
@@ -54,6 +55,7 @@ Hooks.once('ready', async function () {
   }
 
   await TableImporter.importTables();
+  await TableImporter.checkForUpdates();
   MidiQolHooks.register();
   logModuleReady();
 });
@@ -113,10 +115,12 @@ if (typeof globalThis !== 'undefined') {
     /**
      * Simulate a fumble using the ACTUAL MidiQolHooks code path
      * @param actorName - Name of actor fumbling (e.g., "Nimrod")
+     * @param targetName - Name of target token (optional, needed for "grants" effects)
      * @param attackType - Type of attack: 'melee', 'ranged', or 'spell'
      */
     async simulateFumble(
       actorName: string = 'Nimrod',
+      targetName?: string,
       attackType: 'melee' | 'ranged' | 'spell' = 'melee'
     ) {
       const { MidiQolHooks } = await import('./services/MidiQolHooks');
@@ -129,7 +133,15 @@ if (typeof globalThis !== 'undefined') {
         return null;
       }
 
-      await MidiQolHooks.testFumble(actor, attackType);
+      let targetToken: any = null;
+      if (targetName) {
+        targetToken = canvas.tokens.placeables.find((t: any) => t.name === targetName);
+        if (!targetToken) {
+          console.warn(`${LOG_PREFIX} Target "${targetName}" not found on canvas.`);
+        }
+      }
+
+      await MidiQolHooks.testFumble(actor, targetToken, attackType);
     },
 
     /**
@@ -157,12 +169,91 @@ if (typeof globalThis !== 'undefined') {
         console.log(`  - ${t.name} (${t.actor?.name || 'no actor'})`);
       });
       return tokens.map((t: any) => t.name);
+    },
+
+    /**
+     * Test a specific fumble result by name (bypasses random roll)
+     * @param fumblerName - Name of actor fumbling
+     * @param targetName - Name of target token (for "grants" effects)
+     * @param resultName - Partial name of the result to test (e.g., "Massive Opening")
+     * @param attackType - Type of attack: 'melee', 'ranged', or 'spell'
+     */
+    async testSpecificFumble(
+      fumblerName: string,
+      targetName: string,
+      resultName: string,
+      attackType: 'melee' | 'ranged' | 'spell' = 'melee'
+    ) {
+      const { EffectsManager, TableSelector } = await import('./services');
+
+      const actor = (game as any).actors?.getName(fumblerName);
+      if (!actor) {
+        console.error(`${LOG_PREFIX} Actor "${fumblerName}" not found.`);
+        return null;
+      }
+
+      const fumblerToken = canvas.tokens.placeables.find((t: any) => t.actor?.name === fumblerName);
+      if (!fumblerToken) {
+        console.error(`${LOG_PREFIX} No token found for "${fumblerName}" on canvas.`);
+        return null;
+      }
+
+      const targetToken = canvas.tokens.placeables.find((t: any) => t.name === targetName);
+      if (!targetToken) {
+        console.error(`${LOG_PREFIX} Target "${targetName}" not found on canvas.`);
+        return null;
+      }
+
+      // Get tier from actor
+      const actorLevel = actor.system?.details?.level;
+      const actorCR = actor.system?.details?.cr;
+
+      // Find the fumble table
+      const tableName = TableSelector.getTableName('fumble', attackType, actorLevel, actorCR);
+      const table = (game as any).tables?.getName(tableName);
+      if (!table) {
+        console.error(`${LOG_PREFIX} Table "${tableName}" not found.`);
+        return null;
+      }
+
+      // Find the specific result by name
+      const result = table.results.find((r: any) =>
+        r.text?.toLowerCase().includes(resultName.toLowerCase())
+      );
+      if (!result) {
+        console.error(`${LOG_PREFIX} Result containing "${resultName}" not found in table.`);
+        console.log(`${LOG_PREFIX} Available results:`);
+        table.results.forEach((r: any) => {
+          const name = r.text?.split(' - ')[0] || r.text?.substring(0, 30);
+          console.log(`  - ${name}`);
+        });
+        return null;
+      }
+
+      const rolledResult = {
+        result: result,
+        table: table
+      };
+
+      console.log(
+        `${LOG_PREFIX} [TEST] Applying fumble "${result.text?.split(' - ')[0]}" to ${fumblerName}, target: ${targetName}`
+      );
+
+      await EffectsManager.displayResult(rolledResult, fumblerName, fumblerName);
+      await EffectsManager.applyFumbleResult(
+        rolledResult,
+        fumblerToken,
+        [targetToken],
+        actor,
+        null
+      );
     }
   };
 
   console.log(`${LOG_PREFIX} Debug functions available:`);
-  console.log(`  DormanLakely.simulateCrit('Daevon', 'Nimrod', 'melee')`);
-  console.log(`  DormanLakely.simulateFumble('Nimrod', 'melee')`);
+  console.log(`  DormanLakely.simulateCrit('Attacker', 'Target', 'melee')`);
+  console.log(`  DormanLakely.simulateFumble('Fumbler', 'Target', 'melee')`);
+  console.log(`  DormanLakely.testSpecificFumble('Fumbler', 'Target', 'Massive Opening', 'melee')`);
   console.log(`  DormanLakely.listActors()`);
   console.log(`  DormanLakely.listTokens()`);
 }

@@ -42,7 +42,9 @@ export const EFFECT_TYPES = {
   DAMAGE: 'damage',
   SAVE: 'save',
   DISARM: 'disarm',
-  PENALTY: 'penalty'
+  PENALTY: 'penalty',
+  ADVANTAGE: 'advantage',
+  DISADVANTAGE: 'disadvantage'
 } as const;
 
 /**
@@ -94,7 +96,8 @@ export const SETTINGS = {
   USE_ACTOR_LEVEL: 'useActorLevel',
   FIXED_TIER: 'fixedTier',
   SHOW_CHAT_MESSAGES: 'showChatMessages',
-  TABLES_IMPORTED: 'tablesImported'
+  TABLES_IMPORTED: 'tablesImported',
+  TABLES_VERSION: 'tablesVersion'
 } as const;
 
 /**

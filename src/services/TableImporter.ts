@@ -1,9 +1,18 @@
 /**
  * TableImporter Service
  * Automatically imports roll tables to the world on first module load
+ * Handles version-based table updates when module is upgraded
  */
 
 import { MODULE_ID, LOG_PREFIX, SETTINGS } from '../constants';
+
+/**
+ * Get the current module version from module.json
+ */
+function getModuleVersion(): string {
+  const moduleData = game.modules.get(MODULE_ID);
+  return (moduleData as any)?.version ?? '0.0.0';
+}
 
 interface TableResultData {
   type: number;
@@ -33,6 +42,92 @@ export class TableImporter {
    */
   static hasImported(): boolean {
     return game.settings.get(MODULE_ID, SETTINGS.TABLES_IMPORTED) as boolean;
+  }
+
+  /**
+   * Get the version of tables currently imported
+   */
+  static getImportedVersion(): string {
+    return (game.settings.get(MODULE_ID, SETTINGS.TABLES_VERSION) as string) || '';
+  }
+
+  /**
+   * Check if tables need to be updated (module version is newer than imported version)
+   */
+  static needsUpdate(): boolean {
+    if (!this.hasImported()) {
+      return false; // No tables imported yet, will be handled by importTables
+    }
+
+    const importedVersion = this.getImportedVersion();
+    const currentVersion = getModuleVersion();
+
+    // If no version stored (legacy), assume update needed
+    if (!importedVersion) {
+      return true;
+    }
+
+    return this.isNewerVersion(currentVersion, importedVersion);
+  }
+
+  /**
+   * Compare semantic versions - returns true if v1 > v2
+   */
+  private static isNewerVersion(v1: string, v2: string): boolean {
+    const parts1 = v1.split('.').map(n => parseInt(n, 10) || 0);
+    const parts2 = v2.split('.').map(n => parseInt(n, 10) || 0);
+
+    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+      const p1 = parts1[i] || 0;
+      const p2 = parts2[i] || 0;
+      if (p1 > p2) return true;
+      if (p1 < p2) return false;
+    }
+    return false;
+  }
+
+  /**
+   * Prompt the GM to update tables when a new version is detected
+   */
+  static async promptForUpdate(): Promise<void> {
+    if (!game.user?.isGM) {
+      return;
+    }
+
+    const importedVersion = this.getImportedVersion() || 'unknown';
+    const currentVersion = getModuleVersion();
+
+    const confirmed = await Dialog.confirm({
+      title: game.i18n.localize('DLCRITFUMBLE.Dialogs.UpdateTables.Title'),
+      content: `<p>${game.i18n.format('DLCRITFUMBLE.Dialogs.UpdateTables.Content', {
+        oldVersion: importedVersion,
+        newVersion: currentVersion
+      })}</p>
+      <p style="color: #ff9800;"><strong>${game.i18n.localize('DLCRITFUMBLE.Dialogs.UpdateTables.Warning')}</strong></p>`,
+      defaultYes: true
+    });
+
+    if (confirmed) {
+      await this.reimportTables();
+    } else {
+      // User declined - store current version to prevent repeated prompts
+      await game.settings.set(MODULE_ID, SETTINGS.TABLES_VERSION, currentVersion);
+      ui.notifications.info(game.i18n.localize('DLCRITFUMBLE.Notifications.UpdateSkipped'));
+    }
+  }
+
+  /**
+   * Check for updates and prompt if needed (called on module ready)
+   */
+  static async checkForUpdates(): Promise<void> {
+    if (!game.user?.isGM) {
+      return;
+    }
+
+    if (this.needsUpdate()) {
+      console.log(`${LOG_PREFIX} Table update available`);
+      await this.promptForUpdate();
+    }
   }
 
   /**
@@ -69,12 +164,15 @@ export class TableImporter {
     }
 
     await game.settings.set(MODULE_ID, SETTINGS.TABLES_IMPORTED, true);
+    await game.settings.set(MODULE_ID, SETTINGS.TABLES_VERSION, getModuleVersion());
 
     const message = game.i18n.format('DLCRITFUMBLE.Notifications.TablesImported', {
       count: imported.toString()
     });
     ui.notifications.info(message);
-    console.log(`${LOG_PREFIX} Imported ${imported} tables, skipped ${skipped}`);
+    console.log(
+      `${LOG_PREFIX} Imported ${imported} tables (v${getModuleVersion()}), skipped ${skipped}`
+    );
   }
 
   /**

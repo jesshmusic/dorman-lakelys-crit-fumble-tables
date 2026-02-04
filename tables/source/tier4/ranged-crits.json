@@ -10,55 +10,91 @@
       "weight": 25,
       "range": [1, 25],
       "img": "icons/svg/d20-highlight.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
-    },
-    {
-      "type": 0,
-      "text": "Triple Pierce - Your shot passes through three targets in a line, dealing full damage to each.",
-      "weight": 17,
-      "range": [26, 42],
-      "img": "icons/svg/thrust.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "triple_pierce",
-          "duration": 0
+          "effectType": "none"
         }
       }
     },
     {
       "type": 0,
-      "text": "Crippling Devastation - Your shot shatters multiple bones. Target's speed is halved and they have disadvantage on attacks until healed.",
-      "weight": 14,
-      "range": [43, 56],
+      "text": "Devastating Impact - Your shot strikes with tremendous force. Deal an additional 3d6 piercing damage.",
+      "weight": 9,
+      "range": [26, 34],
+      "img": "icons/svg/thrust.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3W",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Staggering Shot - Your devastating shot staggers the target completely. They have disadvantage on all attacks and saves until end of their next turn.",
+      "weight": 8,
+      "range": [35, 42],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.all", "save.all"],
+          "effectName": "Staggered",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Mortal Wound - Your shot strikes a vital area. Target takes 3d6 damage at the start of each turn. DC 17 Medicine or magical healing stops bleeding.",
+      "weight": 7,
+      "range": [43, 49],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3W",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Completely Exposed - Your shot exposes critical weaknesses. Attacks against the target have advantage for 1 minute.",
+      "weight": 7,
+      "range": [50, 56],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Completely Exposed",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Crippling Devastation - Your shot shatters multiple bones. Target's speed is 0 and they have disadvantage on attacks until magically healed.",
+      "weight": 6,
+      "range": [57, 62],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "crippled",
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "effectName": "Crippled",
           "duration": -1
         }
       }
     },
     {
       "type": 0,
-      "text": "Mortal Wound - Your shot strikes a vital area. Target takes 3d6 damage at the start of each turn. DC 15 Medicine check or magical healing stops the bleeding.",
-      "weight": 12,
-      "range": [57, 68],
-      "img": "icons/svg/blood.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "3d6",
-          "damageType": "piercing"
-        }
-      }
-    },
-    {
-      "type": 0,
-      "text": "Blinding Strike - Your shot damages the target's eyes. They are blinded until healed with Regenerate or similar magic.",
-      "weight": 10,
-      "range": [69, 78],
+      "text": "Blinding Strike - Your shot damages the target's eyes permanently. They are blinded until healed with Regenerate or similar magic.",
+      "weight": 6,
+      "range": [63, 68],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -70,9 +106,24 @@
     },
     {
       "type": 0,
-      "text": "Pinned and Helpless - Your shot pins the target completely. They are restrained until freed with an action.",
-      "weight": 9,
-      "range": [79, 87],
+      "text": "Legendary Marksman - Your perfect shot inspires legendary confidence. You have advantage on all ranged attacks for 1 minute.",
+      "weight": 5,
+      "range": [69, 73],
+      "img": "icons/svg/upgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.rwak",
+          "effectName": "Legendary Marksman",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Pinned and Helpless - Your shot pins the target completely. They are restrained until they use an action to pull free (DC 18 Str check).",
+      "weight": 5,
+      "range": [74, 78],
       "img": "icons/svg/anchor.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -84,15 +135,58 @@
     },
     {
       "type": 0,
-      "text": "Legendary Shot - Your perfectly placed shot deals an additional 4d6 piercing damage.",
-      "weight": 12,
-      "range": [88, 99],
+      "text": "Terror Shot - Your brutal accuracy terrifies the target to their core. They are frightened of you for 1 minute (DC 18 Wis save ends).",
+      "weight": 5,
+      "range": [79, 83],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "frightened",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Armor Destroyed - Your shot finds the critical weak spot. Target takes -4 to AC until armor is replaced or magically repaired.",
+      "weight": 5,
+      "range": [84, 88],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -4,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Devastating Shot - Your perfectly placed shot deals an additional 4d6 piercing damage.",
+      "weight": 4,
+      "range": [89, 92],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "4d6",
-          "damageType": "piercing"
+          "damageFormula": "3W",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Overwhelming Shot - Your legendary shot deals an additional 5d6 piercing damage and knocks the target prone.",
+      "weight": 7,
+      "range": [93, 99],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "4W",
+          "damageType": "weapon"
         }
       }
     },

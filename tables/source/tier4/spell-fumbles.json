@@ -10,13 +10,17 @@
       "weight": 25,
       "range": [1, 25],
       "img": "icons/svg/d20-grey.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
     },
     {
       "type": 0,
       "text": "Catastrophic Backlash - The spell's energy rebounds devastatingly. Take 3d8 force damage.",
-      "weight": 16,
-      "range": [26, 41],
+      "weight": 9,
+      "range": [26, 34],
       "img": "icons/svg/lightning.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -28,9 +32,25 @@
     },
     {
       "type": 0,
+      "text": "Arcane Vulnerability - Your failed spell leaves you utterly exposed. Attacks against you have advantage for 1 minute.",
+      "weight": 8,
+      "range": [35, 42],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Arcane Vulnerability",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Magic Burnout - Your magic fails completely. You cannot cast spells until you complete a short rest.",
-      "weight": 13,
-      "range": [42, 54],
+      "weight": 7,
+      "range": [43, 49],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -42,9 +62,24 @@
     },
     {
       "type": 0,
+      "text": "Shattered Focus - Your failure destroys your concentration completely. You have disadvantage on spell attacks and concentration for 1 minute.",
+      "weight": 7,
+      "range": [50, 56],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.msak", "attack.rsak", "concentration"],
+          "effectName": "Shattered Focus",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Complete Sensory Overload - You are blinded, deafened, stunned, and prone until the end of your next turn.",
-      "weight": 12,
-      "range": [55, 66],
+      "weight": 6,
+      "range": [57, 62],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -56,23 +91,9 @@
     },
     {
       "type": 0,
-      "text": "Massive Slot Burn - The failed casting burns out many spell slots. Lose 2d4 spell slots.",
-      "weight": 10,
-      "range": [67, 76],
-      "img": "icons/svg/downgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "spell_slots_lost",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": 0,
-      "text": "Spell Devastates You - Your spell affects you at critical power. Take the spell's full critical damage and effects on yourself.",
-      "weight": 10,
-      "range": [77, 86],
+      "text": "Spell Fully Rebounds - Your spell affects you at critical power. Take 4d6 force damage.",
+      "weight": 6,
+      "range": [63, 68],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -84,30 +105,102 @@
     },
     {
       "type": 0,
-      "text": "Fatigued - The failed spell utterly drains you. You have disadvantage on attack rolls and ability checks for 1 minute.",
-      "weight": 12,
-      "range": [87, 98],
+      "text": "Massive Slot Burn - The failed casting burns out many spell slots. Lose 2d4 spell slots.",
+      "weight": 5,
+      "range": [69, 73],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "fatigued",
+          "effectCondition": "spell_slots_lost",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Fatigued - The failed spell utterly drains you. You have disadvantage on attack rolls and ability checks for 1 minute.",
+      "weight": 5,
+      "range": [74, 78],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.all", "ability.all"],
+          "effectName": "Fatigued",
           "duration": 10
         }
       }
     },
     {
       "type": 0,
-      "text": "Catastrophic Wild Magic - A devastating wild magic explosion occurs. All creatures within 30 feet must make DC 17 Dex save or take 4d6 force damage.",
+      "text": "Arcane Shock - Devastating magical energy jolts through you. You can't take reactions and have disadvantage on Dex saves for 1 minute.",
+      "weight": 5,
+      "range": [79, 83],
+      "img": "icons/svg/lightning.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "save.dex",
+          "effectName": "Arcane Shock",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Precious Component Destroyed - A very valuable material component is destroyed. Lose 500gp worth of components.",
+      "weight": 5,
+      "range": [84, 88],
+      "img": "icons/commodities/gems/gem-fragments-red.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "component_lost",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Devastating Magical Rebound - Your spell affects you with devastating force. Take 5d8 force damage.",
+      "weight": 4,
+      "range": [89, 92],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "5d8",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Catastrophic Failure - Your spell fails with catastrophic force. Take 6d6 force damage and you are stunned for 1 round.",
+      "weight": 6,
+      "range": [93, 98],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "6d6",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Catastrophic Wild Magic - A devastating wild magic explosion occurs. All creatures within 30 feet must make DC 18 Dex save or take 5d6 force damage.",
       "weight": 2,
       "range": [99, 100],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 17,
+          "saveDC": 18,
           "saveAbility": "dex",
-          "failEffect": "4d6 force damage to all nearby"
+          "failEffect": "5d6 force damage to all nearby"
         }
       }
     }

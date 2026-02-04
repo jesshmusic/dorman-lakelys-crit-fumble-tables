@@ -7,8 +7,8 @@
     {
       "type": 0,
       "text": "Nothing Special - You stumble slightly but recover quickly with no additional penalty.",
-      "weight": 60,
-      "range": [1, 60],
+      "weight": 40,
+      "range": [1, 40],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -19,22 +19,39 @@
     {
       "type": 0,
       "text": "Off Balance - Your wild swing throws you off balance. Your next attack has disadvantage.",
-      "weight": 12,
-      "range": [61, 72],
+      "weight": 8,
+      "range": [41, 48],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "off_balance",
-          "duration": 1
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "effectName": "Off Balance",
+          "duration": 0
         }
       }
     },
     {
       "type": 0,
-      "text": "Strained Muscle - You overextend and pull a muscle. Take 1d4 damage.",
-      "weight": 8,
-      "range": [73, 80],
+      "text": "Overextended - You reach too far and leave yourself open. The target gains advantage on their next attack against you.",
+      "weight": 7,
+      "range": [49, 55],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Overextended",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Strained Muscle - You overextend and pull a muscle. Take 1d4 bludgeoning damage.",
+      "weight": 7,
+      "range": [56, 62],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -46,23 +63,24 @@
     },
     {
       "type": 0,
-      "text": "Weapon Slips - Your weapon slips in your grip. You must use your bonus action to readjust your hold or have disadvantage on your next attack.",
-      "weight": 7,
-      "range": [81, 87],
+      "text": "Weapon Slips - Your weapon slips in your grip. You have disadvantage on attack rolls until the end of your next turn.",
+      "weight": 6,
+      "range": [63, 68],
       "img": "icons/skills/melee/strike-sword-slashing-red.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "weapon_slipped",
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "effectName": "Weapon Slipped",
           "duration": 1
         }
       }
     },
     {
       "type": 0,
-      "text": "Trip Over Feet - You stumble over your own feet. You fall prone.",
+      "text": "Trip Over Feet - You stumble over your own feet and fall prone.",
       "weight": 6,
-      "range": [88, 93],
+      "range": [69, 74],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -74,10 +92,55 @@
     },
     {
       "type": 0,
-      "text": "Opening Created - Your clumsy attack leaves you exposed. The target can make an opportunity attack against you.",
+      "text": "Telegraphed Attack - Your attack was obvious. The target has advantage on their next saving throw against you.",
+      "weight": 5,
+      "range": [75, 79],
+      "img": "icons/svg/eye.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "grants",
+          "effectName": "Telegraphed",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Lost Momentum - Your swing goes wide and you lose your rhythm. You cannot take reactions until the start of your next turn.",
+      "weight": 5,
+      "range": [80, 84],
+      "img": "icons/svg/clockwork.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "no_reactions",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Winded - The exertion leaves you gasping. You have disadvantage on Constitution checks until the end of your next turn.",
       "weight": 4,
-      "range": [94, 97],
-      "img": "icons/svg/target.svg",
+      "range": [85, 88],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "ability.con",
+          "effectName": "Winded",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Opening Created - Your clumsy attack leaves you exposed. The target may make an opportunity attack against you.",
+      "weight": 4,
+      "range": [89, 92],
+      "img": "icons/svg/combat.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
@@ -88,21 +151,49 @@
     },
     {
       "type": 0,
-      "text": "Embarrassing Miss - Your pathetic swing draws mocking laughter. You have disadvantage on Intimidation checks against creatures that witnessed this until you score a critical hit.",
-      "weight": 2,
-      "range": [98, 99],
-      "img": "icons/svg/silenced.svg",
+      "text": "Weapon Notched - Your weapon hits something hard and is damaged. -1 to attack rolls until repaired.",
+      "weight": 3,
+      "range": [93, 95],
+      "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "embarrassed",
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -1,
           "duration": -1
         }
       }
     },
     {
       "type": 0,
-      "text": "Wild Swing - Your uncontrolled swing might hit an ally within 5 feet (DM's choice). Roll attack against ally's AC; on hit, deal normal weapon damage.",
+      "text": "Embarrassing Miss - Your pathetic swing draws mocking laughter. You have disadvantage on Intimidation checks for 1 minute.",
+      "weight": 2,
+      "range": [96, 97],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "ability.cha",
+          "effectName": "Embarrassed",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Dropped - Your weapon flies from your grasp, landing 10 feet away in a random direction.",
+      "weight": 2,
+      "range": [98, 99],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disarm"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Wild Swing - Your uncontrolled swing hits an ally within 5 feet (DM's choice). Roll attack against ally's AC; on hit, deal normal weapon damage.",
       "weight": 1,
       "range": [100, 100],
       "img": "icons/svg/combat.svg",

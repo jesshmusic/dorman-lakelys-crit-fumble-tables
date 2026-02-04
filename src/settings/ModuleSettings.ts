@@ -122,6 +122,15 @@ export function registerSettings(): void {
     default: false
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.TABLES_VERSION, {
+    name: 'Tables Version',
+    hint: 'Internal tracking of which module version the tables were imported from',
+    scope: 'world',
+    config: false,
+    type: String,
+    default: ''
+  });
+
   game.settings.registerMenu(MODULE_ID, 'reimportTables', {
     name: game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.Name'),
     label: game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.Label'),

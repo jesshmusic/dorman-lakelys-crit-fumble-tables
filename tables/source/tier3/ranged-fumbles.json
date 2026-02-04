@@ -7,16 +7,20 @@
     {
       "type": 0,
       "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.",
-      "weight": 35,
-      "range": [1, 35],
+      "weight": 30,
+      "range": [1, 30],
       "img": "icons/svg/d20-grey.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
     },
     {
       "type": 0,
       "text": "Scatter All Ammo - You drop your entire quiver. All ammunition scatters around you.",
-      "weight": 15,
-      "range": [36, 50],
+      "weight": 9,
+      "range": [31, 39],
       "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -28,23 +32,25 @@
     },
     {
       "type": 0,
-      "text": "Bowstring Snapped - Your bowstring snaps. Spend an action to restring or switch weapons.",
-      "weight": 12,
-      "range": [51, 62],
-      "img": "icons/svg/hazard.svg",
+      "text": "Completely Exposed - Your fumble leaves you exposed. Attacks against you have advantage for 1 minute.",
+      "weight": 8,
+      "range": [40, 47],
+      "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "bowstring_snapped",
-          "duration": -1
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Completely Exposed",
+          "duration": 10
         }
       }
     },
     {
       "type": 0,
-      "text": "Severe Strain - You badly tear a muscle. Take 2d6 damage and have disadvantage on ranged attacks for 1 minute.",
-      "weight": 12,
-      "range": [63, 74],
+      "text": "Severe Strain - You badly tear a muscle. Take 2d6 bludgeoning damage.",
+      "weight": 8,
+      "range": [48, 55],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -56,10 +62,53 @@
     },
     {
       "type": 0,
-      "text": "Completely Exposed - Your fumble leaves you defenseless. You are incapacitated until the start of your next turn.",
-      "weight": 9,
-      "range": [75, 83],
-      "img": "icons/svg/target.svg",
+      "text": "Shattered Confidence - Your failure rattles you deeply. You have disadvantage on all ranged attacks and saving throws for 1 minute.",
+      "weight": 7,
+      "range": [56, 62],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.rwak", "save.all"],
+          "effectName": "Shattered Confidence",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Bowstring Snapped - Your bowstring snaps or weapon mechanism jams. Spend an action to fix or switch weapons.",
+      "weight": 6,
+      "range": [63, 68],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "weapon_jammed",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Self-Injury - You severely injure yourself. Take 2d8 damage.",
+      "weight": 5,
+      "range": [69, 73],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d8",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Incapacitated - Your fumble leaves you defenseless. You are incapacitated until the start of your next turn.",
+      "weight": 5,
+      "range": [74, 78],
+      "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
@@ -70,29 +119,71 @@
     },
     {
       "type": 0,
-      "text": "Self-Injury - You severely injure yourself. Take 2d8 damage.",
-      "weight": 8,
-      "range": [84, 91],
-      "img": "icons/svg/blood.svg",
+      "text": "Disarmed - Your weapon flies from your hands, landing 25 feet away.",
+      "weight": 5,
+      "range": [79, 83],
+      "img": "icons/weapons/bows/longbow-recurve-brown.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "2d8",
-          "damageType": "piercing"
+          "effectType": "disarm"
         }
       }
     },
     {
       "type": 0,
       "text": "Fatigued - The catastrophic failure exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.",
-      "weight": 7,
-      "range": [92, 98],
+      "weight": 4,
+      "range": [84, 87],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "fatigued",
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.all", "ability.all"],
+          "effectName": "Fatigued",
           "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Badly Damaged - Your weapon is badly damaged. -3 to attack rolls until repaired.",
+      "weight": 4,
+      "range": [88, 91],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -3,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Breaks - Your weapon breaks from the strain. It is destroyed and cannot be used.",
+      "weight": 4,
+      "range": [92, 95],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "weapon_destroyed",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Severe Self-Injury - Your weapon rebounds critically. Take 3d8 damage.",
+      "weight": 3,
+      "range": [96, 98],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3d8",
+          "damageType": "weapon"
         }
       }
     },

@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-02-04
+
+### Added
+
+- Add GitHub workflows and release infrastructure
+
+### Fixed
+
+- update all workflows to use npm install and Node 22
+- address PR review feedback
+- remove package-lock.json to regenerate in CI
+- upgrade Node to v22 for lockfile compatibility
+- use npm install instead of npm ci for cross-platform compatibility
+- regenerate package-lock.json completely
+- sync package-lock.json version with package.json
+- regenerate package-lock.json to fix CI
+
+### Changed
+
+- more tracked files
+- bump version to 1.0.1
+
+### Other
+
+- Initial commit: Dorman Lakely's Critical Hit & Fumble Tables
+
 ## [1.0.1] - 2026-02-02
 
 ### Added

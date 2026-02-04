@@ -104,6 +104,13 @@ export class TableSelector {
 
       const d100Roll = Math.floor(Math.random() * 100) + 1;
 
+      // Parse name and description from result.text (format: "Name - Description")
+      const resultText = result.text || '';
+      const dashIndex = resultText.indexOf(' - ');
+      const name =
+        dashIndex > 0 ? resultText.substring(0, dashIndex) : resultText || 'Unknown Result';
+      const description = dashIndex > 0 ? resultText.substring(dashIndex + 3) : '';
+
       return {
         table: {
           name: table.name,
@@ -115,8 +122,8 @@ export class TableSelector {
           formula: '1d100'
         },
         result: {
-          name: result.name || 'Unknown Result',
-          description: result.description || '',
+          name,
+          description,
           weight: 1,
           range: [d100Roll, d100Roll],
           img: result.img,
@@ -155,5 +162,19 @@ export class TableSelector {
   ): Promise<RolledResult | null> {
     const tier = this.getTier(actorLevel, actorCR);
     return this.rollOnTable(tier, attackType, RESULT_TYPES.FUMBLE);
+  }
+
+  /**
+   * Get the table name for a given result type, attack type, and actor level/CR
+   * Used for testing specific results
+   */
+  static getTableName(
+    resultType: 'crit' | 'fumble',
+    attackType: AttackType,
+    actorLevel?: number,
+    actorCR?: number
+  ): string {
+    const tier = this.getTier(actorLevel, actorCR);
+    return getTableName(tier, attackType, resultType as ResultType);
   }
 }

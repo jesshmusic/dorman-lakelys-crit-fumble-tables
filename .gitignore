@@ -29,5 +29,8 @@ Thumbs.db
 # Compiled tables
 /tables/compiled
 
-# Lock files (optional - some prefer to commit these)
-# package-lock.json
+# Lock files (regenerated in CI)
+package-lock.json
+
+# Local npm cache
+.npm_cache/

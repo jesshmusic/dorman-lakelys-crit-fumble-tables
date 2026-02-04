@@ -177,6 +177,219 @@ describe('TableImporter', () => {
     });
   });
 
+  describe('version tracking', () => {
+    it('should return empty string when no version is stored', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesVersion') return '';
+        if (key === 'tablesImported') return true;
+        return true;
+      });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      expect(TableImporter.getImportedVersion()).toBe('');
+    });
+
+    it('should return stored version', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesVersion') return '1.0.0';
+        if (key === 'tablesImported') return true;
+        return true;
+      });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      expect(TableImporter.getImportedVersion()).toBe('1.0.0');
+    });
+
+    it('should store version when importing tables', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return false;
+        return true;
+      });
+      (game.tables as any).clear();
+
+      // Mock module version
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      await TableImporter.importTables();
+
+      expect(game.settings.set).toHaveBeenCalledWith(
+        'dorman-lakelys-crit-fumble-tables',
+        'tablesVersion',
+        '1.0.1'
+      );
+    });
+  });
+
+  describe('needsUpdate', () => {
+    it('should return false when tables have not been imported', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return false;
+        return true;
+      });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      expect(TableImporter.needsUpdate()).toBe(false);
+    });
+
+    it('should return true when no version stored (legacy)', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '';
+        return true;
+      });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      expect(TableImporter.needsUpdate()).toBe(true);
+    });
+
+    it('should return true when module version is newer', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '1.0.0';
+        return true;
+      });
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      expect(TableImporter.needsUpdate()).toBe(true);
+    });
+
+    it('should return false when versions match', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '1.0.1';
+        return true;
+      });
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      expect(TableImporter.needsUpdate()).toBe(false);
+    });
+
+    it('should return false when stored version is newer', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '2.0.0';
+        return true;
+      });
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      expect(TableImporter.needsUpdate()).toBe(false);
+    });
+
+    it('should handle major version comparisons', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '1.9.9';
+        return true;
+      });
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '2.0.0' });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      expect(TableImporter.needsUpdate()).toBe(true);
+    });
+  });
+
+  describe('checkForUpdates', () => {
+    it('should not prompt non-GM users', async () => {
+      (game as any).user = { id: 'player-id', isGM: false };
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '1.0.0';
+        return true;
+      });
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      await TableImporter.checkForUpdates();
+
+      expect(Dialog.confirm).not.toHaveBeenCalled();
+    });
+
+    it('should prompt GM when update available', async () => {
+      (game as any).user = { id: 'gm-id', isGM: true };
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '1.0.0';
+        return true;
+      });
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      await TableImporter.checkForUpdates();
+
+      expect(Dialog.confirm).toHaveBeenCalled();
+    });
+
+    it('should not prompt when no update available', async () => {
+      (game as any).user = { id: 'gm-id', isGM: true };
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '1.0.1';
+        return true;
+      });
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      await TableImporter.checkForUpdates();
+
+      expect(Dialog.confirm).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('promptForUpdate', () => {
+    it('should store current version when user declines update', async () => {
+      (game as any).user = { id: 'gm-id', isGM: true };
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return true;
+        if (key === 'tablesVersion') return '1.0.0';
+        return true;
+      });
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+      (Dialog.confirm as jest.Mock<() => Promise<boolean>>).mockResolvedValue(false);
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      await TableImporter.promptForUpdate();
+
+      // Should store current version to prevent repeated prompts
+      expect(game.settings.set).toHaveBeenCalledWith(
+        'dorman-lakelys-crit-fumble-tables',
+        'tablesVersion',
+        '1.0.1'
+      );
+      expect(ui.notifications.info).toHaveBeenCalled();
+    });
+
+    it('should reimport tables when user accepts update', async () => {
+      (game as any).user = { id: 'gm-id', isGM: true };
+      let tablesImported = true;
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'tablesImported') return tablesImported;
+        if (key === 'tablesVersion') return '1.0.0';
+        return true;
+      });
+      (game.settings.set as jest.Mock).mockImplementation(
+        (_module: string, key: string, value: any) => {
+          if (key === 'tablesImported') tablesImported = value;
+          return Promise.resolve(value);
+        }
+      );
+      (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
+      (Dialog.confirm as jest.Mock<() => Promise<boolean>>).mockResolvedValue(true);
+
+      // Clear tables and add folder for reimport
+      (game.tables as any).clear();
+
+      const { TableImporter } = await import('../../src/services/TableImporter');
+      await TableImporter.promptForUpdate();
+
+      // Should call reimportTables (which shows info notification)
+      expect(ui.notifications.info).toHaveBeenCalled();
+    });
+  });
+
   describe('reimportTables', () => {
     it('should delete existing tables and re-import', async () => {
       // Set up as GM
