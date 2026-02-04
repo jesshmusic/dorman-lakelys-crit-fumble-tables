@@ -50,6 +50,22 @@
         "ConfirmMessage": "This will delete ALL existing crit/fumble tables and re-import fresh copies from the module.",
         "Warning": "Warning: Any custom table modifications will be lost!",
         "Success": "Tables re-imported successfully!"
+      },
+      "ResetSettings": {
+        "Name": "Reset to Defaults",
+        "Label": "Reset Settings",
+        "Hint": "Reset all module settings to their default values.",
+        "ConfirmTitle": "Reset Settings",
+        "ConfirmMessage": "Are you sure you want to reset all settings to their default values?",
+        "Success": "Settings reset to defaults!"
+      },
+      "Patreon": {
+        "Name": "Support on Patreon",
+        "Label": "Visit Patreon",
+        "Hint": "Support the development of this module on Patreon! Your contributions help fund new features and updates."
+      },
+      "PreviewSound": {
+        "Tooltip": "Preview sound"
       }
     },
 

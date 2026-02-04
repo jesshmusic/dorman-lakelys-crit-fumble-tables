@@ -4,7 +4,7 @@
  */
 
 import { MODULE_ID, LOG_PREFIX } from './constants';
-import { registerSettings } from './settings';
+import { registerSettings, injectSoundPreviewButtons, getFumbleSound } from './settings';
 import { MidiQolHooks, TableImporter } from './services';
 import buildInfo from '../build-info.json';
 
@@ -73,6 +73,14 @@ Hooks.on('updateSetting', (setting: { key: string }) => {
   if (setting.key.startsWith(MODULE_ID)) {
     console.log(`${LOG_PREFIX} Setting changed: ${setting.key}`);
   }
+});
+
+/**
+ * Inject sound preview buttons when settings panel renders
+ * Note: Foundry v13 ApplicationV2 passes HTMLElement, legacy passes jQuery
+ */
+Hooks.on('renderSettingsConfig', (_app: Application, html: unknown) => {
+  injectSoundPreviewButtons(html);
 });
 
 export { TableSelector, EffectsManager, MidiQolHooks, TableImporter } from './services';
@@ -244,6 +252,11 @@ if (typeof globalThis !== 'undefined') {
       console.log(
         `${LOG_PREFIX} [TEST] Applying fumble "${result.text?.split(' - ')[0]}" to ${fumblerName}, target: ${targetName}`
       );
+
+      const fumbleSound = getFumbleSound();
+      if (fumbleSound) {
+        foundry.audio.AudioHelper.play({ src: fumbleSound, volume: 0.8 }, true);
+      }
 
       await EffectsManager.displayResult(rolledResult, fumblerName, fumblerName);
       await EffectsManager.applyFumbleResult(

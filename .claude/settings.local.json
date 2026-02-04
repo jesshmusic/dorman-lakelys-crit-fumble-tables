@@ -31,7 +31,9 @@
       "Bash(gh run watch:*)",
       "Bash(gh release view:*)",
       "Bash(gh pr view:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git reset:*)",
+      "Bash(npm run release:minor:*)"
     ]
   }
 }

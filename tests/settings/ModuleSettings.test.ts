@@ -75,6 +75,34 @@ describe('ModuleSettings', () => {
         expect.any(Object)
       );
     });
+
+    it('should register reset settings menu', async () => {
+      const { registerSettings } = await import('../../src/settings/ModuleSettings');
+
+      registerSettings();
+
+      expect(game.settings.registerMenu).toHaveBeenCalledWith(
+        'dorman-lakelys-crit-fumble-tables',
+        'resetSettings',
+        expect.objectContaining({
+          icon: 'fas fa-undo'
+        })
+      );
+    });
+
+    it('should register Patreon link menu', async () => {
+      const { registerSettings } = await import('../../src/settings/ModuleSettings');
+
+      registerSettings();
+
+      expect(game.settings.registerMenu).toHaveBeenCalledWith(
+        'dorman-lakelys-crit-fumble-tables',
+        'patreonLink',
+        expect.objectContaining({
+          icon: 'fab fa-patreon'
+        })
+      );
+    });
   });
 
   describe('getSetting', () => {
@@ -308,7 +336,9 @@ describe('ModuleSettings', () => {
       const { getCritSound } = await import('../../src/settings/ModuleSettings');
 
       // Should return default sound path
-      expect(getCritSound()).toBe('sounds/combat/epic-start-3hit.ogg');
+      expect(getCritSound()).toBe(
+        'modules/dorman-lakelys-crit-fumble-tables/sounds/Stabs-Success.mp3'
+      );
     });
   });
 
@@ -333,7 +363,56 @@ describe('ModuleSettings', () => {
       const { getFumbleSound } = await import('../../src/settings/ModuleSettings');
 
       // Should return default sound path
-      expect(getFumbleSound()).toBe('sounds/combat/epic-turn-2hit.ogg');
+      expect(getFumbleSound()).toBe(
+        'modules/dorman-lakelys-crit-fumble-tables/sounds/Stabs-Fail.mp3'
+      );
+    });
+  });
+
+  describe('injectSoundPreviewButtons', () => {
+    it('should inject preview buttons for sound settings', async () => {
+      const { injectSoundPreviewButtons } = await import('../../src/settings/ModuleSettings');
+
+      // Create mock HTML structure
+      const mockFormFields = {
+        find: jest.fn().mockReturnValue({ length: 0 }),
+        append: jest.fn().mockReturnThis()
+      };
+      const mockSettingRow = {
+        find: jest.fn().mockReturnValue(mockFormFields)
+      };
+      const mockInput = {
+        closest: jest.fn().mockReturnValue(mockSettingRow),
+        length: 1
+      };
+      const mockHtml = {
+        find: jest.fn().mockReturnValue(mockInput)
+      } as any;
+
+      injectSoundPreviewButtons(mockHtml);
+
+      // Should look for both sound settings
+      expect(mockHtml.find).toHaveBeenCalledWith(
+        '[name="dorman-lakelys-crit-fumble-tables.critSound"]'
+      );
+      expect(mockHtml.find).toHaveBeenCalledWith(
+        '[name="dorman-lakelys-crit-fumble-tables.fumbleSound"]'
+      );
+    });
+
+    it('should not inject buttons if setting row not found', async () => {
+      const { injectSoundPreviewButtons } = await import('../../src/settings/ModuleSettings');
+
+      const mockInput = {
+        closest: jest.fn().mockReturnValue({ length: 0 }),
+        length: 0
+      };
+      const mockHtml = {
+        find: jest.fn().mockReturnValue(mockInput)
+      } as any;
+
+      // Should not throw
+      expect(() => injectSoundPreviewButtons(mockHtml)).not.toThrow();
     });
   });
 });
