@@ -177,7 +177,7 @@
     },
     {
       "type": 0,
-      "text": "Catastrophic Failure - Your spell fails with catastrophic force. Take 6d6 force damage and you are stunned for 1 round.",
+      "text": "Catastrophic Failure - Your spell fails with catastrophic force. Take 6d6 force damage as the magical backlash overwhelms you.",
       "weight": 6,
       "range": [93, 98],
       "img": "icons/svg/explosion.svg",

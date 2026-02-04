@@ -25,8 +25,8 @@
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "1W",
-          "damageType": "weapon"
+          "damageFormula": "1d8",
+          "damageType": "force"
         }
       }
     },
