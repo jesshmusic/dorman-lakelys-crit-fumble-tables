@@ -32,6 +32,14 @@
         "Name": "Show Chat Messages",
         "Hint": "Display crit/fumble results in chat"
       },
+      "CritSound": {
+        "Name": "Critical Hit Sound",
+        "Hint": "Sound effect to play when a critical hit occurs. Leave empty for no sound."
+      },
+      "FumbleSound": {
+        "Name": "Fumble Sound",
+        "Hint": "Sound effect to play when a fumble occurs. Leave empty for no sound."
+      },
       "ReimportTables": {
         "Name": "Re-import Tables",
         "Label": "Re-import Tables",

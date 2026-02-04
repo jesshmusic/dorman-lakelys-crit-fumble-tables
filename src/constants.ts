@@ -96,8 +96,18 @@ export const SETTINGS = {
   USE_ACTOR_LEVEL: 'useActorLevel',
   FIXED_TIER: 'fixedTier',
   SHOW_CHAT_MESSAGES: 'showChatMessages',
+  CRIT_SOUND: 'critSound',
+  FUMBLE_SOUND: 'fumbleSound',
   TABLES_IMPORTED: 'tablesImported',
   TABLES_VERSION: 'tablesVersion'
+} as const;
+
+/**
+ * Default sound paths
+ */
+export const DEFAULT_SOUNDS = {
+  CRIT: 'sounds/combat/epic-start-3hit.ogg',
+  FUMBLE: 'sounds/combat/epic-turn-2hit.ogg'
 } as const;
 
 /**

@@ -2,7 +2,7 @@
  * Module Settings Registration
  */
 
-import { MODULE_ID, LOG_PREFIX, SETTINGS } from '../constants';
+import { MODULE_ID, LOG_PREFIX, SETTINGS, DEFAULT_SOUNDS } from '../constants';
 import { TableImporter } from '../services/TableImporter';
 
 /**
@@ -113,6 +113,26 @@ export function registerSettings(): void {
     default: true
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.CRIT_SOUND, {
+    name: game.i18n.localize('DLCRITFUMBLE.Settings.CritSound.Name'),
+    hint: game.i18n.localize('DLCRITFUMBLE.Settings.CritSound.Hint'),
+    scope: 'world',
+    config: true,
+    type: String,
+    default: DEFAULT_SOUNDS.CRIT,
+    filePicker: 'audio'
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.FUMBLE_SOUND, {
+    name: game.i18n.localize('DLCRITFUMBLE.Settings.FumbleSound.Name'),
+    hint: game.i18n.localize('DLCRITFUMBLE.Settings.FumbleSound.Hint'),
+    scope: 'world',
+    config: true,
+    type: String,
+    default: DEFAULT_SOUNDS.FUMBLE,
+    filePicker: 'audio'
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.TABLES_IMPORTED, {
     name: 'Tables Imported',
     hint: 'Internal flag tracking if tables have been imported to this world',
@@ -202,4 +222,18 @@ export function getConfiguredTier(): number {
  */
 export function useActorLevel(): boolean {
   return getSetting<boolean>(SETTINGS.USE_ACTOR_LEVEL);
+}
+
+/**
+ * Get the configured critical hit sound path
+ */
+export function getCritSound(): string {
+  return getSetting<string>(SETTINGS.CRIT_SOUND) || DEFAULT_SOUNDS.CRIT;
+}
+
+/**
+ * Get the configured fumble sound path
+ */
+export function getFumbleSound(): string {
+  return getSetting<string>(SETTINGS.FUMBLE_SOUND) || DEFAULT_SOUNDS.FUMBLE;
 }
