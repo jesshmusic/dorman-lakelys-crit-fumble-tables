@@ -14,5 +14,6 @@ export {
   getConfiguredTier,
   useActorLevel,
   getCritSound,
-  getFumbleSound
+  getFumbleSound,
+  injectSoundPreviewButtons
 } from './ModuleSettings';

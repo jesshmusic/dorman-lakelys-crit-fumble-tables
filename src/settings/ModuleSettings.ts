@@ -2,8 +2,23 @@
  * Module Settings Registration
  */
 
-import { MODULE_ID, LOG_PREFIX, SETTINGS, DEFAULT_SOUNDS } from '../constants';
+import { MODULE_ID, LOG_PREFIX, SETTINGS, DEFAULT_SOUNDS, URLS } from '../constants';
 import { TableImporter } from '../services/TableImporter';
+
+/**
+ * Default values for all configurable settings
+ */
+const SETTING_DEFAULTS: Record<string, boolean | string> = {
+  [SETTINGS.ENABLED]: true,
+  [SETTINGS.ENABLE_CRITS]: true,
+  [SETTINGS.ENABLE_FUMBLES]: true,
+  [SETTINGS.APPLY_EFFECTS]: true,
+  [SETTINGS.USE_ACTOR_LEVEL]: true,
+  [SETTINGS.FIXED_TIER]: '1',
+  [SETTINGS.SHOW_CHAT_MESSAGES]: true,
+  [SETTINGS.CRIT_SOUND]: DEFAULT_SOUNDS.CRIT,
+  [SETTINGS.FUMBLE_SOUND]: DEFAULT_SOUNDS.FUMBLE
+};
 
 /**
  * Dialog for re-importing tables with confirmation
@@ -37,6 +52,75 @@ class ReimportTablesDialog extends FormApplication {
       await TableImporter.reimportTables();
       ui.notifications.info(game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.Success'));
     }
+  }
+}
+
+/**
+ * Dialog for resetting settings to defaults
+ */
+class ResetSettingsDialog extends FormApplication {
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: 'dlcritfumble-reset-settings',
+      title: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmTitle'),
+      template: `modules/${MODULE_ID}/templates/reset-settings-dialog.html`,
+      width: 400
+    });
+  }
+
+  getData() {
+    return {
+      message: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmMessage')
+    };
+  }
+
+  async _updateObject(_event: Event, _formData: object): Promise<void> {
+    const confirmed = await Dialog.confirm({
+      title: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmTitle'),
+      content: `<p>${game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmMessage')}</p>`,
+      defaultYes: false
+    });
+
+    if (confirmed) {
+      console.log(`${LOG_PREFIX} Resetting settings to defaults...`);
+      for (const [key, defaultValue] of Object.entries(SETTING_DEFAULTS)) {
+        await game.settings.set(MODULE_ID, key, defaultValue);
+      }
+      ui.notifications.info(game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.Success'));
+    }
+  }
+}
+
+/**
+ * Form application that opens Patreon link
+ */
+class PatreonLink extends FormApplication {
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: 'dlcritfumble-patreon',
+      title: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Name'),
+      template: `modules/${MODULE_ID}/templates/patreon-link.html`,
+      width: 400
+    });
+  }
+
+  getData() {
+    return {
+      patreonUrl: URLS.PATREON
+    };
+  }
+
+  async _updateObject(_event: Event, _formData: object): Promise<void> {
+    // Navigation handled by click listener to avoid duplicate window opens
+  }
+
+  activateListeners(html: JQuery) {
+    super.activateListeners(html);
+    html.find('.patreon-button').on('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      window.open(URLS.PATREON, '_blank');
+    });
   }
 }
 
@@ -159,6 +243,24 @@ export function registerSettings(): void {
     type: ReimportTablesDialog,
     restricted: true
   });
+
+  game.settings.registerMenu(MODULE_ID, 'resetSettings', {
+    name: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.Name'),
+    label: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.Label'),
+    hint: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.Hint'),
+    icon: 'fas fa-undo',
+    type: ResetSettingsDialog,
+    restricted: true
+  });
+
+  game.settings.registerMenu(MODULE_ID, 'patreonLink', {
+    name: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Name'),
+    label: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Label'),
+    hint: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Hint'),
+    icon: 'fab fa-patreon',
+    type: PatreonLink,
+    restricted: false
+  });
 }
 
 /**
@@ -236,4 +338,97 @@ export function getCritSound(): string {
  */
 export function getFumbleSound(): string {
   return getSetting<string>(SETTINGS.FUMBLE_SOUND) || DEFAULT_SOUNDS.FUMBLE;
+}
+
+/**
+ * Inject sound preview buttons next to the sound file picker settings
+ * Supports both jQuery (legacy) and HTMLElement (Foundry v13 ApplicationV2)
+ */
+export function injectSoundPreviewButtons(html: JQuery | HTMLElement | unknown): void {
+  // Safety check - bail out early if html is null/undefined
+  if (!html) {
+    return;
+  }
+
+  // Try to convert to jQuery
+  let $html: JQuery;
+  try {
+    // Check if it's already jQuery-like (has find method)
+    if (typeof (html as JQuery).find === 'function') {
+      $html = html as JQuery;
+    }
+    // Check if it's an HTMLElement and $ is available
+    else if (typeof $ === 'function' && html instanceof HTMLElement) {
+      $html = $(html);
+    }
+    // Check if it's an array-like with an element (some Foundry versions pass [element])
+    else if (typeof $ === 'function' && Array.isArray(html) && html[0] instanceof HTMLElement) {
+      $html = $(html[0]);
+    }
+    // Can't handle this type
+    else {
+      return;
+    }
+  } catch {
+    // If anything goes wrong, silently bail out
+    return;
+  }
+
+  // Final safety check
+  if (!$html || typeof $html.find !== 'function') {
+    return;
+  }
+
+  const soundSettings = [
+    { key: SETTINGS.CRIT_SOUND, name: 'critSound' },
+    { key: SETTINGS.FUMBLE_SOUND, name: 'fumbleSound' }
+  ];
+
+  for (const { key, name } of soundSettings) {
+    const settingRow = $html.find(`[name="${MODULE_ID}.${key}"]`).closest('.form-group');
+    if (!settingRow.length) continue;
+
+    const inputWrapper = settingRow.find('.form-fields');
+    if (!inputWrapper.length) continue;
+
+    // Check if button already exists
+    if (inputWrapper.find('.sound-preview-btn').length) continue;
+
+    const previewBtn = $(`
+      <button type="button" class="sound-preview-btn"
+              data-setting="${name}"
+              title="${game.i18n.localize('DLCRITFUMBLE.Settings.PreviewSound.Tooltip')}"
+              style="flex: 0 0 auto; margin-left: 4px; padding: 0 8px;">
+        <i class="fas fa-play"></i>
+      </button>
+    `);
+
+    previewBtn.on('click', async event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const input = settingRow.find(`[name="${MODULE_ID}.${key}"]`);
+      const soundPath = (input.val() as string) || '';
+
+      if (!soundPath) {
+        ui.notifications.warn(
+          game.i18n.localize('DLCRITFUMBLE.Settings.PreviewSound.NoFileSelected')
+        );
+        return;
+      }
+
+      try {
+        // Use Foundry's AudioHelper to play the sound
+        await (foundry.audio?.AudioHelper ?? AudioHelper).play(
+          { src: soundPath, volume: 0.8, autoplay: true, loop: false },
+          false
+        );
+      } catch (error) {
+        console.error(`${LOG_PREFIX} Error playing sound:`, error);
+        ui.notifications.error(game.i18n.localize('DLCRITFUMBLE.Settings.PreviewSound.PlayError'));
+      }
+    });
+
+    inputWrapper.append(previewBtn);
+  }
 }

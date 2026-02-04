@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-02-04
+
+### Added
+
+- Bundle custom crit/fumble sound effects with the module (Stabs-Success.mp3, Stabs-Fail.mp3)
+- Sound playback for `testSpecificFumble` debug function
+- Patreon link and reset settings dialog templates
+
+### Fixed
+
+- Fix `toggleStatusEffect` to use Foundry v13 Actor API (`token.actor.toggleStatusEffect`) instead of Token
+- Fix sound not playing during `testSpecificFumble` test function
+
+### Changed
+
+- Default crit/fumble sounds now use bundled module sounds instead of Foundry built-in sounds
+- Settings QoL improvements
+
 ## [1.0.3] - 2026-02-04
 
 ### Added

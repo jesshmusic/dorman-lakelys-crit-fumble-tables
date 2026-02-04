@@ -31,10 +31,7 @@ describe('MidiQolHooks', () => {
 
       MidiQolHooks.register();
 
-      expect(Hooks.on).toHaveBeenCalledWith(
-        'midi-qol.AttackRollComplete',
-        expect.any(Function)
-      );
+      expect(Hooks.on).toHaveBeenCalledWith('midi-qol.AttackRollComplete', expect.any(Function));
     });
 
     it('should show error when midi-qol is not active', async () => {
@@ -101,7 +98,15 @@ describe('MidiQolHooks', () => {
         attackRoll: {
           total: 10,
           formula: '2d6',
-          terms: [{ faces: 6, results: [{ result: 3, active: true }, { result: 4, active: true }] }]
+          terms: [
+            {
+              faces: 6,
+              results: [
+                { result: 3, active: true },
+                { result: 4, active: true }
+              ]
+            }
+          ]
         }
       };
 

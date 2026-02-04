@@ -298,6 +298,7 @@ export function createMockActor(overrides?: Partial<Actor>): Actor {
     getActiveTokens: jest.fn<() => any[]>().mockReturnValue([]),
     applyDamage: jest.fn<() => Promise<any>>().mockResolvedValue({}),
     createEmbeddedDocuments: jest.fn<() => Promise<any[]>>().mockResolvedValue([]),
+    toggleStatusEffect: jest.fn<() => Promise<boolean>>().mockResolvedValue(true),
     ...overrides
   } as any;
 }
@@ -312,7 +313,6 @@ export function createMockToken(overrides?: Partial<Token>): Token {
     name: 'Test Token',
     actor,
     document: {},
-    toggleStatusEffect: jest.fn<() => Promise<boolean>>().mockResolvedValue(true),
     ...overrides
   } as any;
 }
@@ -422,6 +422,7 @@ export function createMockFormApplication(): typeof FormApplication {
       return this;
     }
     async close(_options?: object) {}
+    activateListeners(_html: any) {}
     async _updateObject(_event: Event, _formData: object) {}
   } as any;
 }
@@ -434,6 +435,32 @@ export function createMockDialog(): any {
     confirm: jest.fn<() => Promise<boolean>>().mockResolvedValue(true),
     prompt: jest.fn<() => Promise<string>>().mockResolvedValue(''),
     wait: jest.fn<() => Promise<any>>().mockResolvedValue(null)
+  };
+}
+
+/**
+ * Mock jQuery function
+ */
+export function createMockJQuery(): any {
+  const mockElement = {
+    find: jest.fn().mockReturnThis(),
+    closest: jest.fn().mockReturnThis(),
+    on: jest.fn().mockReturnThis(),
+    append: jest.fn().mockReturnThis(),
+    val: jest.fn().mockReturnValue(''),
+    length: 1
+  };
+
+  const $ = jest.fn().mockReturnValue(mockElement);
+  return $;
+}
+
+/**
+ * Mock AudioHelper class
+ */
+export function createMockAudioHelper(): any {
+  return {
+    play: jest.fn<() => Promise<any>>().mockResolvedValue({})
   };
 }
 
@@ -453,6 +480,9 @@ export function setupMocks(): void {
   (global as any).FormApplication = createMockFormApplication();
   (global as any).Dialog = createMockDialog();
   (global as any).MidiQOL = createMockMidiQOL();
+  (global as any).$ = createMockJQuery();
+  (global as any).AudioHelper = createMockAudioHelper();
+  (global as any).HTMLElement = class MockHTMLElement {};
   (global as any).canvas = {
     scene: { id: 'test-scene', name: 'Test Scene' },
     tokens: { placeables: [] }

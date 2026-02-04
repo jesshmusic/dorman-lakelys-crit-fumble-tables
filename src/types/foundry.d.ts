@@ -4,6 +4,33 @@
  */
 
 declare global {
+  // Basic jQuery type declaration for Foundry's bundled jQuery
+  interface JQuery<TElement = HTMLElement> {
+    find(selector: string): JQuery<TElement>;
+    closest(selector: string): JQuery<TElement>;
+    on(event: string, handler: (event: Event, ...args: any[]) => void): JQuery<TElement>;
+    on(
+      event: string,
+      selector: string,
+      handler: (event: Event, ...args: any[]) => void
+    ): JQuery<TElement>;
+    append(content: JQuery | string): JQuery<TElement>;
+    val(): string | number | string[] | undefined;
+    val(value: string | number | string[]): JQuery<TElement>;
+    length: number;
+  }
+
+  // jQuery global function
+  function $(selector: string | HTMLElement): JQuery;
+  function $(html: string): JQuery;
+
+  // Legacy AudioHelper class (fallback for older Foundry versions)
+  const AudioHelper: {
+    play(
+      options: { src: string; volume?: number; autoplay?: boolean; loop?: boolean },
+      push?: boolean
+    ): Promise<any>;
+  };
   const game: {
     modules: Map<string, { active: boolean }>;
     settings: {
@@ -71,7 +98,7 @@ declare global {
     audio: {
       AudioHelper: {
         play(
-          options: { src: string; volume?: number; loop?: boolean },
+          options: { src: string; volume?: number; autoplay?: boolean; loop?: boolean },
           push?: boolean
         ): Promise<any>;
       };
@@ -162,6 +189,7 @@ declare global {
     getData(): object;
     render(force?: boolean): this;
     close(options?: object): Promise<void>;
+    activateListeners(html: JQuery): void;
     _updateObject(event: Event, formData: object): Promise<void>;
   }
 
@@ -267,6 +295,10 @@ declare global {
     getActiveTokens(): Token[];
     applyDamage(amount: number, options?: any): Promise<Actor>;
     createEmbeddedDocuments(type: string, data: any[]): Promise<any[]>;
+    toggleStatusEffect(
+      statusId: string,
+      options?: { active?: boolean; overlay?: boolean }
+    ): Promise<boolean>;
   }
 
   interface Token {
@@ -274,10 +306,6 @@ declare global {
     name: string;
     actor: Actor | null;
     document: any;
-    toggleStatusEffect(
-      statusId: string,
-      options?: { active?: boolean; overlay?: boolean }
-    ): Promise<boolean>;
   }
 
   interface Item {

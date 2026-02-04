@@ -106,8 +106,15 @@ export const SETTINGS = {
  * Default sound paths
  */
 export const DEFAULT_SOUNDS = {
-  CRIT: 'sounds/combat/epic-start-3hit.ogg',
-  FUMBLE: 'sounds/combat/epic-turn-2hit.ogg'
+  CRIT: `modules/${MODULE_ID}/sounds/Stabs-Success.mp3`,
+  FUMBLE: `modules/${MODULE_ID}/sounds/Stabs-Fail.mp3`
+} as const;
+
+/**
+ * External URLs
+ */
+export const URLS = {
+  PATREON: 'https://www.patreon.com/DormanLakely'
 } as const;
 
 /**

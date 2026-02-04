@@ -216,7 +216,7 @@ export class EffectsManager {
 
       if (!hasCondition) {
         // Toggle the status effect on (this uses Foundry's built-in system)
-        await token.toggleStatusEffect(statusId, { active: true });
+        await token.actor.toggleStatusEffect(statusId, { active: true });
       }
 
       const durationText =
