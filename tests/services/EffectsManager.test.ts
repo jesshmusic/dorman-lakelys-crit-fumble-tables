@@ -3,7 +3,7 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { resetMocks, createMockToken, createMockItem } from '../mocks/foundry';
+import { resetMocks, createMockToken, createMockItem, createMockActor } from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
 describe('EffectsManager', () => {
@@ -797,6 +797,818 @@ describe('EffectsManager', () => {
         const callArgs = (MidiQOL.applyTokenDamage as jest.Mock).mock.calls[0];
         expect(callArgs[0][0].type).toBe('bludgeoning');
       });
+    });
+
+    describe('spell dice formula support', () => {
+      it('should convert 1S to spell die', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = createMockItem({
+          name: 'Fire Bolt',
+          type: 'spell',
+          system: { actionType: 'rsak', damage: { parts: [['1d10', 'fire']] } }
+        });
+
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('1S', item);
+        expect(result).toBe('1d10');
+      });
+
+      it('should convert 3S to 3 spell dice', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = createMockItem({
+          name: 'Eldritch Blast',
+          type: 'spell',
+          system: { actionType: 'rsak', damage: { parts: [['1d10', 'force']] } }
+        });
+
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('3S', item);
+        expect(result).toBe('3d10');
+      });
+
+      it('should handle lowercase s', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = createMockItem({
+          name: 'Fire Bolt',
+          type: 'spell',
+          system: { damage: { parts: [['1d10', 'fire']] } }
+        });
+
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('2s', item);
+        expect(result).toBe('2d10');
+      });
+
+      it('should default to d8 when no spell item provided', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('2S', undefined);
+        expect(result).toBe('2d8');
+      });
+
+      it('should default to d8 when spell has no damage parts', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = createMockItem({
+          name: 'Utility Spell',
+          type: 'spell',
+          system: { damage: { parts: [] } }
+        });
+
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('2S', item);
+        expect(result).toBe('2d8');
+      });
+    });
+
+    describe('getSpellDamageDie', () => {
+      it('should extract d10 from fire bolt', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = createMockItem({
+          name: 'Fire Bolt',
+          type: 'spell',
+          system: { damage: { parts: [['1d10', 'fire']] } }
+        });
+
+        const result = (EffectsManager as any).getSpellDamageDie(item);
+        expect(result).toBe('d10');
+      });
+
+      it('should return d8 when no item', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).getSpellDamageDie(undefined);
+        expect(result).toBe('d8');
+      });
+
+      it('should return d8 when no damage parts', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = createMockItem({
+          system: { damage: { parts: [] } }
+        });
+
+        const result = (EffectsManager as any).getSpellDamageDie(item);
+        expect(result).toBe('d8');
+      });
+    });
+
+    describe('applyDamage with spell dice', () => {
+      it('should resolve spell dice and use spell damage type', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const token = createMockToken();
+        const item = createMockItem({
+          name: 'Fire Bolt',
+          type: 'spell',
+          system: { actionType: 'rsak', damage: { parts: [['1d10', 'fire']] } }
+        });
+
+        await (EffectsManager as any).applyDamage(
+          token,
+          { damageFormula: '2S', damageType: 'spell' },
+          item
+        );
+
+        expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
+        const callArgs = (MidiQOL.applyTokenDamage as jest.Mock).mock.calls[0];
+        expect(callArgs[0][0].type).toBe('fire');
+      });
+
+      it('should use force as default when damageType is spell and no item', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const token = createMockToken();
+
+        await (EffectsManager as any).applyDamage(
+          token,
+          { damageFormula: '2d8', damageType: 'spell' },
+          undefined
+        );
+
+        expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
+        const callArgs = (MidiQOL.applyTokenDamage as jest.Mock).mock.calls[0];
+        expect(callArgs[0][0].type).toBe('force');
+      });
+    });
+  });
+
+  describe('applyFumbleResult', () => {
+    it('should not apply effects when applyEffects setting is false', async () => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        if (key === 'applyEffects') return false;
+        return true;
+      });
+
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumblerToken = createMockToken();
+      const targetTokens = [createMockToken()];
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: 'attack.all',
+        advantageTarget: 'grants',
+        duration: 1
+      });
+
+      await EffectsManager.applyFumbleResult(result, fumblerToken, targetTokens);
+
+      expect(fumblerToken.actor?.createEmbeddedDocuments).not.toHaveBeenCalled();
+    });
+
+    it('should not apply effects when effectType is none', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumblerToken = createMockToken();
+      const targetTokens = [createMockToken()];
+      const result = createMockRolledResult({ effectType: 'none' });
+
+      await EffectsManager.applyFumbleResult(result, fumblerToken, targetTokens);
+
+      expect(fumblerToken.actor?.createEmbeddedDocuments).not.toHaveBeenCalled();
+    });
+
+    it('should apply grants advantage to targets instead of fumbler', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumblerToken = createMockToken({ name: 'Fumbler' });
+      const targetToken = createMockToken({ name: 'Target' });
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: 'attack.all',
+        advantageTarget: 'grants',
+        duration: 1
+      });
+
+      await EffectsManager.applyFumbleResult(result, fumblerToken, [targetToken]);
+
+      // Effect should be applied to target, not fumbler
+      expect(targetToken.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+    });
+
+    it('should apply grants disadvantage to targets', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumblerToken = createMockToken({ name: 'Fumbler' });
+      const targetToken = createMockToken({ name: 'Target' });
+      const result = createMockRolledResult({
+        effectType: 'disadvantage',
+        advantageScope: 'attack.all',
+        advantageTarget: 'grants',
+        duration: 1
+      });
+
+      await EffectsManager.applyFumbleResult(result, fumblerToken, [targetToken]);
+
+      expect(targetToken.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+    });
+
+    it('should apply non-grants effects to fumbler', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumblerToken = createMockToken({ name: 'Fumbler' });
+      const result = createMockRolledResult({
+        effectType: 'condition',
+        effectCondition: 'prone',
+        duration: 1
+      });
+
+      await EffectsManager.applyFumbleResult(result, fumblerToken, []);
+
+      expect(fumblerToken.toggleStatusEffect).toHaveBeenCalledWith('prone', { active: true });
+    });
+
+    it('should handle grants effect with no targets', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumblerToken = createMockToken({ name: 'Fumbler' });
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: 'attack.all',
+        advantageTarget: 'grants',
+        duration: 1
+      });
+
+      // With no targets, should fall through to apply to fumbler
+      await EffectsManager.applyFumbleResult(result, fumblerToken, []);
+
+      // Effect applied to fumbler since no targets
+      expect(fumblerToken.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleSaveEffect', () => {
+    it('should log save effect and apply condition', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      await EffectsManager.handleSaveEffect(token, {
+        effectType: 'save',
+        saveDC: 15,
+        saveAbility: 'dex',
+        effectCondition: 'prone',
+        duration: 1
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('DC 15 dex'));
+      expect(token.toggleStatusEffect).toHaveBeenCalledWith('prone', { active: true });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should apply damage from save effect', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+
+      await EffectsManager.handleSaveEffect(token, {
+        effectType: 'save',
+        saveDC: 15,
+        saveAbility: 'dex',
+        damageFormula: '3d6',
+        damageType: 'fire'
+      });
+
+      expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
+    });
+
+    it('should not apply when missing required config', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+
+      // Missing saveDC
+      await EffectsManager.handleSaveEffect(token, {
+        effectType: 'save',
+        saveAbility: 'dex'
+      });
+
+      expect(token.toggleStatusEffect).not.toHaveBeenCalled();
+
+      // Missing saveAbility
+      await EffectsManager.handleSaveEffect(token, {
+        effectType: 'save',
+        saveDC: 15
+      });
+
+      expect(token.toggleStatusEffect).not.toHaveBeenCalled();
+    });
+
+    it('should not apply when token has no actor', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken({ actor: null });
+
+      await EffectsManager.handleSaveEffect(token, {
+        effectType: 'save',
+        saveDC: 15,
+        saveAbility: 'dex',
+        effectCondition: 'prone'
+      });
+
+      expect(token.toggleStatusEffect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('applyDisarm', () => {
+    it('should unequip weapon on disarm', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const mockUpdate = jest.fn<any>().mockResolvedValue({});
+      const weapon = {
+        id: 'weapon-id',
+        type: 'weapon',
+        name: 'Longsword',
+        update: mockUpdate
+      };
+      const actor = createMockActor();
+      (actor.items as any) = {
+        get: jest.fn().mockReturnValue(weapon)
+      };
+
+      await EffectsManager.applyDisarm(actor, weapon as any);
+
+      expect(mockUpdate).toHaveBeenCalledWith({ 'system.equipped': false });
+    });
+
+    it('should warn when missing actor', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await EffectsManager.applyDisarm(undefined, { id: 'item-id' } as any);
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('missing actor or item'));
+      consoleSpy.mockRestore();
+    });
+
+    it('should warn when missing item', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const actor = createMockActor();
+
+      await EffectsManager.applyDisarm(actor, undefined);
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('missing actor or item'));
+      consoleSpy.mockRestore();
+    });
+
+    it('should warn when item not found on actor', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const actor = createMockActor();
+      (actor.items as any) = {
+        get: jest.fn().mockReturnValue(undefined)
+      };
+
+      await EffectsManager.applyDisarm(actor, { id: 'missing-id' } as any);
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cannot find item'));
+      consoleSpy.mockRestore();
+    });
+
+    it('should log when item is not a weapon', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const notWeapon = {
+        id: 'item-id',
+        type: 'equipment',
+        name: 'Shield'
+      };
+      const actor = createMockActor();
+      (actor.items as any) = {
+        get: jest.fn().mockReturnValue(notWeapon)
+      };
+
+      await EffectsManager.applyDisarm(actor, notWeapon as any);
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cannot disarm non-weapon'));
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('applyPenalty', () => {
+    it('should apply AC penalty', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+
+      await EffectsManager.applyPenalty(token, {
+        effectType: 'penalty',
+        penaltyType: 'ac',
+        penaltyValue: -2,
+        duration: -1
+      });
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
+        'ActiveEffect',
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'Armor Damaged',
+            changes: expect.arrayContaining([
+              expect.objectContaining({
+                key: 'system.attributes.ac.bonus',
+                value: '-2'
+              })
+            ])
+          })
+        ])
+      );
+    });
+
+    it('should apply attack penalty', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+
+      await EffectsManager.applyPenalty(token, {
+        effectType: 'penalty',
+        penaltyType: 'attack',
+        penaltyValue: -1,
+        duration: 5
+      });
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
+        'ActiveEffect',
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'Weapon Damaged',
+            changes: expect.arrayContaining([
+              expect.objectContaining({
+                key: 'system.bonuses.All.attack',
+                value: '-1'
+              })
+            ]),
+            duration: expect.objectContaining({
+              rounds: 5
+            })
+          })
+        ])
+      );
+    });
+
+    it('should warn when missing required config', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const token = createMockToken();
+
+      // Missing penaltyType
+      await EffectsManager.applyPenalty(token, {
+        effectType: 'penalty',
+        penaltyValue: -2
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('missing required config'));
+
+      // Missing penaltyValue
+      await EffectsManager.applyPenalty(token, {
+        effectType: 'penalty',
+        penaltyType: 'ac'
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should warn when token has no actor', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const token = createMockToken({ actor: null });
+
+      await EffectsManager.applyPenalty(token, {
+        effectType: 'penalty',
+        penaltyType: 'ac',
+        penaltyValue: -2
+      });
+
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('applyResult edge cases', () => {
+    it('should handle result without flags', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult();
+      result.result.flags = undefined;
+
+      // Should not throw
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).not.toHaveBeenCalled();
+    });
+
+    it('should handle save effect type', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'save',
+        saveDC: 15,
+        saveAbility: 'dex',
+        effectCondition: 'prone',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.toggleStatusEffect).toHaveBeenCalledWith('prone', { active: true });
+    });
+
+    it('should handle disarm effect type', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const mockUpdate = jest.fn<any>().mockResolvedValue({});
+      const weapon = {
+        id: 'weapon-id',
+        type: 'weapon',
+        name: 'Longsword',
+        update: mockUpdate
+      };
+      const actor = createMockActor();
+      (actor.items as any) = {
+        get: jest.fn().mockReturnValue(weapon)
+      };
+
+      const result = createMockRolledResult({
+        effectType: 'disarm'
+      });
+
+      await EffectsManager.applyResult(result, token, actor, weapon as any);
+
+      expect(mockUpdate).toHaveBeenCalledWith({ 'system.equipped': false });
+    });
+
+    it('should handle penalty effect type', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'penalty',
+        penaltyType: 'ac',
+        penaltyValue: -2,
+        duration: -1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+    });
+  });
+
+  describe('isStandardCondition', () => {
+    it('should recognize standard D&D 5e conditions', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const standardConditions = [
+        'blinded', 'charmed', 'deafened', 'frightened', 'grappled',
+        'incapacitated', 'invisible', 'paralyzed', 'petrified', 'poisoned',
+        'prone', 'restrained', 'stunned', 'unconscious', 'exhaustion'
+      ];
+
+      for (const condition of standardConditions) {
+        expect((EffectsManager as any).isStandardCondition(condition)).toBe(true);
+      }
+    });
+
+    it('should not recognize custom conditions', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const customConditions = ['spell_locked', 'dazed', 'off_balance', 'disoriented'];
+
+      for (const condition of customConditions) {
+        expect((EffectsManager as any).isStandardCondition(condition)).toBe(false);
+      }
+    });
+
+    it('should be case insensitive', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      expect((EffectsManager as any).isStandardCondition('PRONE')).toBe(true);
+      expect((EffectsManager as any).isStandardCondition('Stunned')).toBe(true);
+      expect((EffectsManager as any).isStandardCondition('BlInDeD')).toBe(true);
+    });
+  });
+
+  describe('additional scope coverage', () => {
+    it('should handle all ability scopes', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const scopes = ['ability.con', 'ability.int', 'ability.wis', 'ability.cha'];
+
+      for (const scope of scopes) {
+        jest.clearAllMocks();
+        const result = createMockRolledResult({
+          effectType: 'disadvantage',
+          advantageScope: scope,
+          duration: 1
+        });
+
+        await EffectsManager.applyResult(result, token);
+
+        expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+      }
+    });
+
+    it('should handle all save scopes', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const scopes = ['save.str', 'save.con', 'save.int', 'save.wis', 'save.cha'];
+
+      for (const scope of scopes) {
+        jest.clearAllMocks();
+        const result = createMockRolledResult({
+          effectType: 'advantage',
+          advantageScope: scope,
+          duration: 1
+        });
+
+        await EffectsManager.applyResult(result, token);
+
+        expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+      }
+    });
+
+    it('should handle attack.mwak scope', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'disadvantage',
+        advantageScope: 'attack.mwak',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
+        'ActiveEffect',
+        expect.arrayContaining([
+          expect.objectContaining({
+            changes: expect.arrayContaining([
+              expect.objectContaining({
+                key: 'flags.midi-qol.disadvantage.attack.mwak'
+              })
+            ])
+          })
+        ])
+      );
+    });
+
+    it('should handle attack.rsak scope', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: 'attack.rsak',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
+        'ActiveEffect',
+        expect.arrayContaining([
+          expect.objectContaining({
+            changes: expect.arrayContaining([
+              expect.objectContaining({
+                key: 'flags.midi-qol.advantage.attack.rsak'
+              })
+            ])
+          })
+        ])
+      );
+    });
+
+    it('should handle attack.msak scope', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'disadvantage',
+        advantageScope: 'attack.msak',
+        duration: 2
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
+        'ActiveEffect',
+        expect.arrayContaining([
+          expect.objectContaining({
+            changes: expect.arrayContaining([
+              expect.objectContaining({
+                key: 'flags.midi-qol.disadvantage.attack.msak'
+              })
+            ])
+          })
+        ])
+      );
+    });
+
+    it('should handle ability.all scope', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: 'ability.all',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
+        'ActiveEffect',
+        expect.arrayContaining([
+          expect.objectContaining({
+            changes: expect.arrayContaining([
+              expect.objectContaining({
+                key: 'flags.midi-qol.advantage.ability.check.all'
+              })
+            ])
+          })
+        ])
+      );
+    });
+
+    it('should handle ability.dex scope', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'disadvantage',
+        advantageScope: 'ability.dex',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+    });
+
+    it('should handle save.all scope', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: 'save.all',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
+        'ActiveEffect',
+        expect.arrayContaining([
+          expect.objectContaining({
+            changes: expect.arrayContaining([
+              expect.objectContaining({
+                key: 'flags.midi-qol.advantage.ability.save.all'
+              })
+            ])
+          })
+        ])
+      );
+    });
+
+    it('should handle "all" scope for global advantage', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: 'all',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
+        'ActiveEffect',
+        expect.arrayContaining([
+          expect.objectContaining({
+            changes: expect.arrayContaining([
+              expect.objectContaining({
+                key: 'flags.midi-qol.advantage.all'
+              })
+            ])
+          })
+        ])
+      );
     });
   });
 });
