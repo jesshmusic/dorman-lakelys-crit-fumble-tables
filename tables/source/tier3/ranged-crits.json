@@ -7,58 +7,108 @@
     {
       "type": 0,
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
-      "weight": 35,
-      "range": [1, 35],
+      "weight": 30,
+      "range": [1, 30],
       "img": "icons/svg/d20-highlight.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
     },
     {
       "type": 0,
-      "text": "Double Pierce - Your shot passes through and hits a second target behind the first for full damage.",
-      "weight": 15,
-      "range": [36, 50],
+      "text": "Penetrating Shot - Your projectile strikes with devastating force. Deal an additional 2d6 piercing damage.",
+      "weight": 9,
+      "range": [31, 39],
       "img": "icons/svg/thrust.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "double_pierce",
-          "duration": 0
+          "effectType": "damage",
+          "damageFormula": "2W",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Staggering Shot - Your shot staggers the target badly. They have disadvantage on all attacks and saving throws until the end of their next turn.",
+      "weight": 8,
+      "range": [40, 47],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.all", "save.all"],
+          "effectName": "Staggered",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arterial Hit - Your shot strikes a major artery. Target takes 2d6 piercing damage at the start of their next turn.",
+      "weight": 8,
+      "range": [48, 55],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2W",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Exposed Target - Your shot exposes critical weaknesses. Attacks against the target have advantage for 1 minute.",
+      "weight": 7,
+      "range": [56, 62],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Exposed Target",
+          "duration": 10
         }
       }
     },
     {
       "type": 0,
       "text": "Crippling Shot - Your shot shatters bone. Target's speed is halved until magically healed.",
-      "weight": 13,
-      "range": [51, 63],
+      "weight": 6,
+      "range": [63, 68],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "crippled",
+          "effectCondition": "slowed",
           "duration": -1
         }
       }
     },
     {
       "type": 0,
-      "text": "Arterial Hit - Your shot strikes a major artery. Target takes 2d6 damage at the start of each turn until healed.",
-      "weight": 12,
-      "range": [64, 75],
-      "img": "icons/svg/blood.svg",
+      "text": "Marksman's Focus - Your perfect shot inspires you. You have advantage on all ranged attacks for 1 minute.",
+      "weight": 5,
+      "range": [69, 73],
+      "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "2d6",
-          "damageType": "piercing"
+          "effectType": "advantage",
+          "advantageScope": "attack.rwak",
+          "effectName": "Marksman's Focus",
+          "duration": 10
         }
       }
     },
     {
       "type": 0,
-      "text": "Blinding Shot - Your shot strikes near or in the target's eyes. They are blinded for 1 minute or until healed.",
-      "weight": 9,
-      "range": [76, 84],
+      "text": "Blinding Shot - Your shot strikes near the target's eyes. They are blinded for 1 minute or until healed.",
+      "weight": 5,
+      "range": [74, 78],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -71,8 +121,8 @@
     {
       "type": 0,
       "text": "Pinned to Wall - Your shot pins the target to a nearby surface. They are restrained until they use an action to pull free.",
-      "weight": 7,
-      "range": [85, 91],
+      "weight": 5,
+      "range": [79, 83],
       "img": "icons/svg/anchor.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -84,23 +134,66 @@
     },
     {
       "type": 0,
+      "text": "Terrifying Shot - Your brutal accuracy terrifies the target. They are frightened of you for 1 minute.",
+      "weight": 4,
+      "range": [84, 87],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "frightened",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Armor Piercing - Your shot finds a critical weak spot. Target takes -3 to AC until repaired.",
+      "weight": 4,
+      "range": [88, 91],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -3,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Devastating Shot - Your perfectly placed shot deals an additional 3d6 piercing damage.",
-      "weight": 8,
-      "range": [92, 99],
+      "weight": 4,
+      "range": [92, 95],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "3d6",
-          "damageType": "piercing"
+          "damageFormula": "3W",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Overwhelming Shot - Your devastating shot deals an additional 4d6 piercing damage and knocks the target prone.",
+      "weight": 3,
+      "range": [96, 98],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3W",
+          "damageType": "weapon"
         }
       }
     },
     {
       "type": 0,
       "text": "Heart Shot - Your shot strikes true to a vital organ. Target must make DC 18 Con save or drop to 0 HP if under 30 HP.",
-      "weight": 1,
-      "range": [100, 100],
+      "weight": 2,
+      "range": [99, 100],
       "img": "icons/svg/skull.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

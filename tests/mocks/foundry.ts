@@ -9,12 +9,20 @@ import { jest } from '@jest/globals';
  * Mock game object
  */
 export function createMockGame(overrides?: Partial<typeof game>): typeof game {
+  // Create a mock modules Map with a mocked get function
+  const modulesMap = new Map([['midi-qol', { active: true, version: '1.0.0' }]]);
+  (modulesMap as any).get = jest.fn((id: string) => {
+    if (id === 'midi-qol') return { active: true, version: '1.0.0' };
+    if (id === 'dorman-lakelys-crit-fumble-tables') return { active: true, version: '1.0.1' };
+    return undefined;
+  });
+
   return {
-    modules: new Map([['midi-qol', { active: true }]]),
+    modules: modulesMap,
     settings: {
       register: jest.fn(),
       registerMenu: jest.fn(),
-      get: jest.fn((module: string, key: string) => {
+      get: jest.fn((_module: string, key: string) => {
         // Default settings values for tests
         const defaults: Record<string, any> = {
           enabled: true,
@@ -24,7 +32,8 @@ export function createMockGame(overrides?: Partial<typeof game>): typeof game {
           useActorLevel: true,
           fixedTier: '1',
           showChatMessages: true,
-          tablesImported: false
+          tablesImported: false,
+          tablesVersion: ''
         };
         return defaults[key];
       }),
@@ -117,8 +126,7 @@ export function createMockTable(name: string): any {
   const mockDraw = jest.fn<() => Promise<any>>().mockResolvedValue({
     results: [
       {
-        name: 'Test Result',
-        description: 'A test result description',
+        text: 'Test Result - A test result description',
         img: 'icons/svg/dice-target.svg',
         flags: {
           'dorman-lakelys-crit-fumble-tables': {
@@ -286,6 +294,7 @@ export function createMockActor(overrides?: Partial<Actor>): Actor {
       }
     },
     items: new Map() as any,
+    statuses: new Set<string>(),
     getActiveTokens: jest.fn<() => any[]>().mockReturnValue([]),
     applyDamage: jest.fn<() => Promise<any>>().mockResolvedValue({}),
     createEmbeddedDocuments: jest.fn<() => Promise<any[]>>().mockResolvedValue([]),
@@ -303,8 +312,27 @@ export function createMockToken(overrides?: Partial<Token>): Token {
     name: 'Test Token',
     actor,
     document: {},
+    toggleStatusEffect: jest.fn<() => Promise<boolean>>().mockResolvedValue(true),
     ...overrides
   } as any;
+}
+
+/**
+ * Mock Item (weapon or spell)
+ */
+export function createMockItem(overrides?: any): any {
+  return {
+    id: 'test-item-id',
+    name: 'Test Weapon',
+    type: 'weapon',
+    system: {
+      actionType: 'mwak',
+      damage: {
+        parts: [['1d8', 'slashing']]
+      }
+    },
+    ...overrides
+  };
 }
 
 /**

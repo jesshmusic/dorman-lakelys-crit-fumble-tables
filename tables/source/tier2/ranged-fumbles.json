@@ -7,16 +7,20 @@
     {
       "type": 0,
       "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.",
-      "weight": 45,
-      "range": [1, 45],
+      "weight": 35,
+      "range": [1, 35],
       "img": "icons/svg/d20-grey.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
     },
     {
       "type": 0,
       "text": "Scatter Ammo - In your fumble, you drop 2d4 pieces of ammunition that scatter around you.",
-      "weight": 14,
-      "range": [46, 59],
+      "weight": 8,
+      "range": [36, 43],
       "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -28,23 +32,24 @@
     },
     {
       "type": 0,
-      "text": "Bowstring Snapped - Your bowstring snaps or crossbow mechanism jams. Spend an action to restring or switch weapons.",
-      "weight": 12,
-      "range": [60, 71],
-      "img": "icons/tools/fasteners/rope-coiled-tan.webp",
+      "text": "Off Target - Your aim was completely off. You have disadvantage on your next ranged attack.",
+      "weight": 7,
+      "range": [44, 50],
+      "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "bowstring_snapped",
-          "duration": -1
+          "effectType": "disadvantage",
+          "advantageScope": "attack.rwak",
+          "effectName": "Off Target",
+          "duration": 0
         }
       }
     },
     {
       "type": 0,
-      "text": "Torn Muscle - You badly strain your arm. Take 1d6 damage and have disadvantage on ranged attacks for 1 minute.",
-      "weight": 9,
-      "range": [72, 80],
+      "text": "Torn Muscle - You badly strain your arm. Take 1d6 bludgeoning damage.",
+      "weight": 7,
+      "range": [51, 57],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -56,31 +61,111 @@
     },
     {
       "type": 0,
-      "text": "Completely Exposed - Your awkward position leaves you defenseless. Attacks against you have advantage and you can't take reactions until the start of your next turn.",
-      "weight": 7,
-      "range": [81, 87],
+      "text": "Completely Exposed - Your awkward position leaves you defenseless. Attacks against you have advantage until the start of your next turn.",
+      "weight": 6,
+      "range": [58, 63],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "exposed",
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Completely Exposed",
           "duration": 1
         }
       }
     },
     {
       "type": 0,
-      "text": "Disarmed - Your weapon flies from your hands, landing 20 feet away.",
+      "text": "Bowstring Snapped - Your bowstring snaps or crossbow mechanism jams. Spend an action to fix or switch weapons.",
       "weight": 6,
-      "range": [88, 93],
-      "img": "icons/weapons/bows/longbow-recurve-brown.webp",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "disarm" } }
+      "range": [64, 69],
+      "img": "icons/tools/fasteners/rope-coiled-tan.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "weapon_jammed",
+          "duration": -1
+        }
+      }
     },
     {
       "type": 0,
-      "text": "Self-Injury - The weapon rebounds and injures you. Take 1d8 damage.",
-      "weight": 6,
-      "range": [94, 99],
+      "text": "Shaken Aim - Your failure rattles you. You have disadvantage on ranged attacks until the end of your next turn.",
+      "weight": 5,
+      "range": [70, 74],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.rwak",
+          "effectName": "Shaken Aim",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Telegraphed Shot - Your target saw you coming. They have advantage on their next saving throw against you.",
+      "weight": 5,
+      "range": [75, 79],
+      "img": "icons/svg/eye.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "grants",
+          "effectName": "Telegraphed",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Disarmed - Your weapon flies from your hands, landing 20 feet away.",
+      "weight": 5,
+      "range": [80, 84],
+      "img": "icons/weapons/bows/longbow-recurve-brown.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disarm"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Damaged - Your weapon is damaged. -2 to attack rolls until repaired.",
+      "weight": 4,
+      "range": [85, 88],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -2,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Lost Focus - Your concentration breaks. You can't take reactions until the start of your next turn.",
+      "weight": 4,
+      "range": [89, 92],
+      "img": "icons/svg/clockwork.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "no_reactions",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Self-Injury - The weapon rebounds and injures you. Take 1d8 bludgeoning damage.",
+      "weight": 3,
+      "range": [93, 95],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -92,9 +177,23 @@
     },
     {
       "type": 0,
+      "text": "Weapon Breaks - Your weapon breaks from the strain. It is destroyed and cannot be used.",
+      "weight": 3,
+      "range": [96, 98],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "weapon_destroyed",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Hit Ally - Your shot hits a nearby ally. Roll attack against ally's AC; on hit, deal weapon damage.",
-      "weight": 1,
-      "range": [100, 100],
+      "weight": 2,
+      "range": [99, 100],
       "img": "icons/svg/combat.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

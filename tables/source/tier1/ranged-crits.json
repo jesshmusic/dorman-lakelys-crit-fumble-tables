@@ -7,8 +7,8 @@
     {
       "type": 0,
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
-      "weight": 60,
-      "range": [1, 60],
+      "weight": 40,
+      "range": [1, 40],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -19,13 +19,13 @@
     {
       "type": 0,
       "text": "Pinning Shot - Your projectile pins part of the target's clothing or armor to nearby terrain. Their speed is reduced by 10 feet until they use an action to free themselves.",
-      "weight": 10,
-      "range": [61, 70],
+      "weight": 8,
+      "range": [41, 48],
       "img": "icons/svg/anchor.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "pinned",
+          "effectCondition": "slowed",
           "duration": -1
         }
       }
@@ -33,36 +33,37 @@
     {
       "type": 0,
       "text": "Eye Threat - Your projectile flies dangerously close to the target's eyes. They have disadvantage on their next ranged attack.",
-      "weight": 8,
-      "range": [71, 78],
+      "weight": 7,
+      "range": [49, 55],
       "img": "icons/svg/eye.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "eyes_threatened",
-          "duration": 1
+          "effectType": "disadvantage",
+          "advantageScope": "attack.rwak",
+          "effectName": "Eye Threat",
+          "duration": 0
         }
       }
     },
     {
       "type": 0,
-      "text": "Bleeding Wound - Your projectile leaves a deep wound. Target takes 1d4 damage at the start of their next turn.",
+      "text": "Bleeding Wound - Your projectile leaves a deep wound. Target takes 1d4 extra damage.",
       "weight": 7,
-      "range": [79, 85],
+      "range": [56, 62],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "1d4",
-          "damageType": "piercing"
+          "damageFormula": "1W",
+          "damageType": "weapon"
         }
       }
     },
     {
       "type": 0,
       "text": "Staggering Impact - The force of your shot staggers the target. They must succeed on a DC 10 Strength save or be pushed 5 feet.",
-      "weight": 5,
-      "range": [86, 90],
+      "weight": 6,
+      "range": [63, 68],
       "img": "icons/svg/thrust.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -75,43 +76,134 @@
     },
     {
       "type": 0,
-      "text": "Perfect Aim - Your incredible accuracy impresses allies. Choose one ally who can see you; they gain advantage on their next ranged attack.",
-      "weight": 4,
-      "range": [91, 94],
+      "text": "Rattled Target - Your shot startles the target. They have disadvantage on their next ability check.",
+      "weight": 6,
+      "range": [69, 74],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "ability.all",
+          "effectName": "Rattled",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Exposed Target - Your shot forces the target to flinch and expose themselves. Attacks against them have advantage until the end of your next turn.",
+      "weight": 5,
+      "range": [75, 79],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "inspired_ally",
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Exposed Target",
           "duration": 1
         }
       }
     },
     {
       "type": 0,
-      "text": "Armor Piercing - Your shot finds a weak spot in the target's armor. Your next attack against this target ignores any bonus from armor.",
+      "text": "Disarming Shot - Your projectile strikes the target's weapon hand. They have disadvantage on attack rolls until the end of their next turn.",
+      "weight": 5,
+      "range": [80, 84],
+      "img": "icons/svg/sword.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "effectName": "Hand Struck",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Perfect Aim - Your incredible accuracy impresses allies. You have advantage on your next ranged attack.",
+      "weight": 4,
+      "range": [85, 88],
+      "img": "icons/svg/upgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.rwak",
+          "effectName": "Perfect Aim",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Distracting Shot - Your shot forces the target to focus on dodging. They have disadvantage on their next saving throw.",
+      "weight": 4,
+      "range": [89, 92],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "save.all",
+          "effectName": "Distracted",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Armor Piercing - Your shot finds a weak spot in the target's armor. They take -1 to AC until they spend an action to adjust it.",
       "weight": 3,
-      "range": [95, 97],
+      "range": [93, 95],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -1,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Hamstring Shot - Your projectile strikes the target's leg. Their speed is reduced by half until the end of their next turn.",
+      "weight": 2,
+      "range": [96, 97],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "armor_exposed",
+          "effectCondition": "slowed",
           "duration": 1
         }
       }
     },
     {
       "type": 0,
-      "text": "Penetrating Shot - Your projectile tears through, dealing an additional 1d6 piercing damage.",
-      "weight": 3,
-      "range": [98, 100],
+      "text": "Penetrating Shot - Your projectile tears through, dealing an additional 1d6 damage.",
+      "weight": 2,
+      "range": [98, 99],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "1d6",
-          "damageType": "piercing"
+          "damageFormula": "1W",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Deadly Precision - A masterful shot! Deal maximum weapon damage instead of rolling, and the target is frightened of you until the end of their next turn.",
+      "weight": 1,
+      "range": [100, 100],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "frightened",
+          "duration": 1
         }
       }
     }

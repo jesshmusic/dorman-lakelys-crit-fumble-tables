@@ -7,16 +7,20 @@
     {
       "type": 0,
       "text": "Nothing Special - You stumble but recover with no additional penalty.",
-      "weight": 45,
-      "range": [1, 45],
+      "weight": 35,
+      "range": [1, 35],
       "img": "icons/svg/d20-grey.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
     },
     {
       "type": 0,
-      "text": "Severely Off Balance - Your wild swing throws you completely off balance. You are prone and your next attack has disadvantage.",
-      "weight": 14,
-      "range": [46, 59],
+      "text": "Off Balance - Your wild swing throws you off balance. You fall prone.",
+      "weight": 8,
+      "range": [36, 43],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -28,9 +32,25 @@
     },
     {
       "type": 0,
-      "text": "Muscle Tear - You badly strain a muscle. Take 1d6 damage and have disadvantage on Strength-based attacks and checks for 1 minute.",
-      "weight": 12,
-      "range": [60, 71],
+      "text": "Telegraphed Attack - Your target reads your movements. They have advantage on their next attack against you.",
+      "weight": 7,
+      "range": [44, 50],
+      "img": "icons/svg/eye.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Telegraphed",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Muscle Tear - You badly strain a muscle. Take 1d6 bludgeoning damage.",
+      "weight": 7,
+      "range": [51, 57],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -42,9 +62,40 @@
     },
     {
       "type": 0,
-      "text": "Weapon Damaged - Your weapon strikes something hard. -2 to attack and damage rolls until repaired.",
-      "weight": 10,
-      "range": [72, 81],
+      "text": "Massive Opening - Your clumsy attack leaves you exposed. Attacks against you have advantage until the start of your next turn.",
+      "weight": 6,
+      "range": [58, 63],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Massive Opening",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Shaken Confidence - Your failure rattles you. You have disadvantage on attack rolls until the end of your next turn.",
+      "weight": 6,
+      "range": [64, 69],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "effectName": "Shaken Confidence",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Damaged - Your weapon strikes something hard. -2 to attack rolls until repaired.",
+      "weight": 5,
+      "range": [70, 74],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -57,45 +108,92 @@
     },
     {
       "type": 0,
-      "text": "Disarmed - Your weapon flies from your grasp, landing 15 feet away in a random direction.",
-      "weight": 8,
-      "range": [82, 89],
-      "img": "icons/skills/melee/strike-sword-slashing-red.webp",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "disarm" } }
+      "text": "Lost Grip - Your weapon slips in your grip. You have disadvantage on your next attack with this weapon.",
+      "weight": 5,
+      "range": [75, 79],
+      "img": "icons/svg/sword.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.mwak",
+          "effectName": "Lost Grip",
+          "duration": 0
+        }
+      }
     },
     {
       "type": 0,
-      "text": "Massive Opening - Your clumsy attack leaves you completely exposed. All attacks against you have advantage until the start of your next turn.",
-      "weight": 6,
-      "range": [90, 95],
-      "img": "icons/svg/target.svg",
+      "text": "Disarmed - Your weapon flies from your grasp, landing 15 feet away in a random direction.",
+      "weight": 5,
+      "range": [80, 84],
+      "img": "icons/skills/melee/strike-sword-slashing-red.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disarm"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Vulnerable Position - Your stumble leaves you defenseless. You can't take reactions until the start of your next turn.",
+      "weight": 4,
+      "range": [85, 88],
+      "img": "icons/svg/clockwork.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "exposed",
+          "effectCondition": "no_reactions",
           "duration": 1
         }
       }
     },
     {
       "type": 0,
-      "text": "Hit Yourself - Your weapon rebounds and strikes you. Take your weapon's damage.",
+      "text": "Opportunity Created - Your clumsy attack allows a free strike. The target may make an opportunity attack against you.",
       "weight": 4,
-      "range": [96, 99],
+      "range": [89, 92],
+      "img": "icons/svg/combat.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "exposed_to_opportunity",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Hit Yourself - Your weapon rebounds and strikes you. Take 1d8 damage.",
+      "weight": 3,
+      "range": [93, 95],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
           "damageFormula": "1d8",
-          "damageType": "slashing"
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Breaks - Your weapon shatters on impact. It is destroyed and cannot be used.",
+      "weight": 3,
+      "range": [96, 98],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "weapon_destroyed",
+          "duration": 0
         }
       }
     },
     {
       "type": 0,
       "text": "Strike Ally - Your uncontrolled swing hits a nearby ally. Roll attack against ally's AC; on hit, deal weapon damage.",
-      "weight": 1,
-      "range": [100, 100],
+      "weight": 2,
+      "range": [99, 100],
       "img": "icons/svg/combat.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

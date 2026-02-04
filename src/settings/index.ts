@@ -12,5 +12,7 @@ export {
   shouldApplyEffects,
   shouldShowChatMessages,
   getConfiguredTier,
-  useActorLevel
+  useActorLevel,
+  getCritSound,
+  getFumbleSound
 } from './ModuleSettings';

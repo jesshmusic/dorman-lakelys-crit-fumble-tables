@@ -30,6 +30,40 @@ export type TierNumber = 1 | 2 | 3 | 4;
 export type PenaltyType = 'ac' | 'attack';
 
 /**
+ * Scope for advantage/disadvantage effects
+ * Determines what types of rolls are affected
+ */
+export type AdvantageScope =
+  | 'all'
+  | 'attack.all'
+  | 'attack.mwak'
+  | 'attack.rwak'
+  | 'attack.msak'
+  | 'attack.rsak'
+  | 'ability.all'
+  | 'ability.str'
+  | 'ability.dex'
+  | 'ability.con'
+  | 'ability.int'
+  | 'ability.wis'
+  | 'ability.cha'
+  | 'save.all'
+  | 'save.str'
+  | 'save.dex'
+  | 'save.con'
+  | 'save.int'
+  | 'save.wis'
+  | 'save.cha'
+  | 'concentration';
+
+/**
+ * Target for advantage/disadvantage effects
+ * 'self' - affects the actor's own rolls
+ * 'grants' - affects rolls made against the actor (attackers get adv/dis)
+ */
+export type AdvantageTarget = 'self' | 'grants';
+
+/**
  * Configuration for a table effect
  */
 export interface TableEffectConfig {
@@ -53,6 +87,12 @@ export interface TableEffectConfig {
   penaltyType?: PenaltyType;
   /** Penalty value (e.g., -2) if effectType is 'penalty' */
   penaltyValue?: number;
+  /** Scope for advantage/disadvantage effects (can be single or multiple) */
+  advantageScope?: AdvantageScope | AdvantageScope[];
+  /** Target for advantage/disadvantage - 'self' affects actor, 'grants' affects attackers */
+  advantageTarget?: AdvantageTarget;
+  /** Custom effect name for advantage/disadvantage effects */
+  effectName?: string;
 }
 
 /**

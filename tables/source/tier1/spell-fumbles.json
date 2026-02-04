@@ -7,8 +7,8 @@
     {
       "type": 0,
       "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
-      "weight": 60,
-      "range": [1, 60],
+      "weight": 40,
+      "range": [1, 40],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -19,8 +19,8 @@
     {
       "type": 0,
       "text": "Magical Feedback - The spell's energy rebounds slightly. Take 1d4 force damage.",
-      "weight": 10,
-      "range": [61, 70],
+      "weight": 8,
+      "range": [41, 48],
       "img": "icons/svg/lightning.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -33,14 +33,15 @@
     {
       "type": 0,
       "text": "Arcane Hiccup - Your magic stutters. Your next spell attack has disadvantage.",
-      "weight": 8,
-      "range": [71, 78],
+      "weight": 7,
+      "range": [49, 55],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "arcane_hiccup",
-          "duration": 1
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.msak", "attack.rsak"],
+          "effectName": "Arcane Hiccup",
+          "duration": 0
         }
       }
     },
@@ -48,12 +49,29 @@
       "type": 0,
       "text": "Visual Distortion - The spell creates brief visual noise. You have disadvantage on Perception checks until the end of your next turn.",
       "weight": 7,
-      "range": [79, 85],
+      "range": [56, 62],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "visual_distortion",
+          "effectType": "disadvantage",
+          "advantageScope": "ability.wis",
+          "effectName": "Visual Distortion",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Exposed Caster - Your failed casting leaves you open. Attacks against you have advantage until the start of your next turn.",
+      "weight": 6,
+      "range": [63, 68],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Exposed Caster",
           "duration": 1
         }
       }
@@ -61,8 +79,8 @@
     {
       "type": 0,
       "text": "Spell Slot Strain - The failed casting strains your magical reserves. Your next spell that requires a spell slot costs an additional slot of 1st level (if you have one).",
-      "weight": 5,
-      "range": [86, 90],
+      "weight": 6,
+      "range": [69, 74],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -74,9 +92,24 @@
     },
     {
       "type": 0,
-      "text": "Wild Magic Spark - A tiny surge of wild magic occurs. DM rolls on a minor effect table or chooses a harmless cosmetic effect (hair changes color, flowers bloom nearby, etc.).",
-      "weight": 4,
-      "range": [91, 94],
+      "text": "Magical Fatigue - The failed spell drains you. You have disadvantage on Constitution checks until the end of your next turn.",
+      "weight": 5,
+      "range": [75, 79],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "ability.con",
+          "effectName": "Magical Fatigue",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Wild Magic Spark - A tiny surge of wild magic occurs. DM rolls on a minor effect table or chooses a harmless cosmetic effect.",
+      "weight": 5,
+      "range": [80, 84],
       "img": "icons/svg/dice-target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -88,9 +121,40 @@
     },
     {
       "type": 0,
+      "text": "Concentration Shaken - The failure shakes your confidence. You have disadvantage on concentration checks until the end of your next turn.",
+      "weight": 4,
+      "range": [85, 88],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "concentration",
+          "effectName": "Concentration Shaken",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Telegraphed Magic - Your target sensed your failed spell. They have advantage on their next saving throw against your spells.",
+      "weight": 4,
+      "range": [89, 92],
+      "img": "icons/svg/eye.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "grants",
+          "effectName": "Telegraphed",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Component Mishap - A material component is accidentally destroyed or consumed. Lose one use of a material component you were using (if applicable).",
       "weight": 3,
-      "range": [95, 97],
+      "range": [93, 95],
       "img": "icons/commodities/gems/gem-fragments-red.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -102,9 +166,37 @@
     },
     {
       "type": 0,
+      "text": "Arcane Shock - Magical energy jolts through you. You cannot take reactions until the start of your next turn.",
+      "weight": 2,
+      "range": [96, 97],
+      "img": "icons/svg/lightning.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "no_reactions",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Magical Surge - Uncontrolled energy damages you. Take 1d6 force damage.",
+      "weight": 2,
+      "range": [98, 99],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d6",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Self-Target - Your spell briefly affects you instead of your target. Take the spell's effect on yourself at half damage (or the effect with a DC 10 save, if applicable).",
-      "weight": 3,
-      "range": [98, 100],
+      "weight": 1,
+      "range": [100, 100],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

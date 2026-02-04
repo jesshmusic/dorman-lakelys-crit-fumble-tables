@@ -10,27 +10,76 @@
       "weight": 25,
       "range": [1, 25],
       "img": "icons/svg/d20-highlight.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
     },
     {
       "type": 0,
-      "text": "Arcane Annihilation - Magical fire engulfs the target eternally. They take 3d8 damage at the start of each turn until Dispel Magic (DC 17) or similar is cast.",
-      "weight": 14,
-      "range": [26, 39],
+      "text": "Arcane Annihilation - Magical fire engulfs the target. They take 3d8 fire damage at the start of each turn until Dispel Magic (DC 17) or similar.",
+      "weight": 9,
+      "range": [26, 34],
       "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "3d8",
-          "damageType": "fire"
+          "damageFormula": "3S",
+          "damageType": "spell"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Magic Disruption - Your spell permanently disrupts the target's magic. They have disadvantage on spell attacks and saves for 1 minute.",
+      "weight": 8,
+      "range": [35, 42],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.msak", "attack.rsak", "save.all"],
+          "effectName": "Magic Disruption",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Apocalyptic Blast - The force sends the target flying 60 feet, prone, stunned for 1 round, and takes 3d6 force damage.",
+      "weight": 7,
+      "range": [43, 49],
+      "img": "icons/svg/thrust.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3S",
+          "damageType": "spell"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Vulnerability - Your magic leaves the target utterly exposed. Attacks against them have advantage for 1 minute.",
+      "weight": 7,
+      "range": [50, 56],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Arcane Vulnerability",
+          "duration": 10
         }
       }
     },
     {
       "type": 0,
       "text": "Magic Destruction - Your spell permanently disrupts the target's magic. They cannot cast spells until Remove Curse or similar is cast.",
-      "weight": 12,
-      "range": [40, 51],
+      "weight": 6,
+      "range": [57, 62],
       "img": "icons/svg/silenced.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -42,37 +91,38 @@
     },
     {
       "type": 0,
-      "text": "Apocalyptic Blast - The force sends the target flying 60 feet, prone, stunned for 1 round, and takes 2d6 force damage.",
-      "weight": 11,
-      "range": [52, 62],
-      "img": "icons/svg/thrust.svg",
+      "text": "Legendary Arcane Mastery - Your perfect casting inspires legendary power. You have advantage on all spell attacks for 1 minute.",
+      "weight": 6,
+      "range": [63, 68],
+      "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "2d6",
-          "damageType": "force"
+          "effectType": "advantage",
+          "advantageScope": ["attack.msak", "attack.rsak"],
+          "effectName": "Legendary Arcane Mastery",
+          "duration": 10
         }
       }
     },
     {
       "type": 0,
       "text": "Elemental Apocalypse - Your spell's element utterly overwhelms the target. Add 4d6 damage of the spell's type.",
-      "weight": 10,
-      "range": [63, 72],
+      "weight": 5,
+      "range": [69, 73],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "4d6",
-          "damageType": "force"
+          "damageFormula": "3S",
+          "damageType": "spell"
         }
       }
     },
     {
       "type": 0,
       "text": "Permanent Vulnerability - The target becomes permanently vulnerable to the spell's damage type until Remove Curse is cast.",
-      "weight": 9,
-      "range": [73, 81],
+      "weight": 5,
+      "range": [74, 78],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -84,9 +134,23 @@
     },
     {
       "type": 0,
+      "text": "Terrifying Magic - Your devastating spell terrifies the target to their core. They are frightened of you for 1 minute (DC 18 Wis save ends).",
+      "weight": 5,
+      "range": [79, 83],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "frightened",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Twin Spell - Your spell echoes with legendary power. Cast the same spell again immediately as a free action, at the same level.",
-      "weight": 10,
-      "range": [82, 91],
+      "weight": 5,
+      "range": [84, 88],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -98,15 +162,44 @@
     },
     {
       "type": 0,
-      "text": "Arcane Mastery - Your spell is cast with legendary efficiency. Regain 1 expended spell slot up to 6th level.",
-      "weight": 9,
-      "range": [92, 100],
+      "text": "Overwhelming Arcane Power - Your devastating spell deals an additional 5d6 force damage.",
+      "weight": 4,
+      "range": [89, 92],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "4S",
+          "damageType": "spell"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Perfection - Your spell is cast with legendary efficiency. Regain 1 expended spell slot up to 7th level.",
+      "weight": 7,
+      "range": [93, 99],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "spell_slot_recovered",
           "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Soul Searing - If target has 50 HP or fewer, they must make DC 20 Wis save or die instantly as their soul is burned away.",
+      "weight": 1,
+      "range": [100, 100],
+      "img": "icons/svg/skull.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 20,
+          "saveAbility": "wis",
+          "failEffect": "Instant death if under 50 HP"
         }
       }
     }

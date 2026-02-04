@@ -7,35 +7,40 @@
     {
       "type": 0,
       "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
-      "weight": 45,
-      "range": [1, 45],
+      "weight": 35,
+      "range": [1, 35],
       "img": "icons/svg/d20-highlight.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
-    },
-    {
-      "type": 0,
-      "text": "Arcane Burn - Magical energy sears the target. They take 1d8 force damage at the start of each turn for 2 rounds.",
-      "weight": 12,
-      "range": [46, 57],
-      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1d8",
-          "damageType": "force"
+          "effectType": "none"
         }
       }
     },
     {
       "type": 0,
-      "text": "Magic Disruption - Your spell disrupts their magical abilities. Target has disadvantage on spell attacks and concentration checks for 1 minute.",
-      "weight": 10,
-      "range": [58, 67],
+      "text": "Arcane Burn - Magical energy sears the target. They take 1d8 force damage at the start of their next turn.",
+      "weight": 8,
+      "range": [36, 43],
+      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1S",
+          "damageType": "spell"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Magic Disruption - Your spell disrupts their magical abilities. Target has disadvantage on spell attacks for 1 minute.",
+      "weight": 7,
+      "range": [44, 50],
       "img": "icons/svg/silenced.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "magic_disrupted",
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.msak", "attack.rsak"],
+          "effectName": "Magic Disruption",
           "duration": 10
         }
       }
@@ -43,8 +48,8 @@
     {
       "type": 0,
       "text": "Powerful Knockback - The force of your spell sends the target flying. They are pushed 15 feet and fall prone.",
-      "weight": 9,
-      "range": [68, 76],
+      "weight": 7,
+      "range": [51, 57],
       "img": "icons/svg/thrust.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -56,14 +61,46 @@
     },
     {
       "type": 0,
-      "text": "Concentration Shatter - If the target is concentrating, their concentration automatically fails.",
-      "weight": 8,
-      "range": [77, 84],
+      "text": "Arcane Vulnerability - Your magic leaves the target exposed. Attacks against them have advantage until the end of your next turn.",
+      "weight": 6,
+      "range": [58, 63],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Arcane Vulnerability",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Concentration Shatter - Your spell disrupts focus. If concentrating, they have disadvantage on the save with a -5 penalty.",
+      "weight": 6,
+      "range": [64, 69],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "concentration_broken",
+          "effectType": "disadvantage",
+          "advantageScope": "concentration",
+          "effectName": "Concentration Shatter",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Insight - Your magical senses sharpen. You have advantage on your next spell attack.",
+      "weight": 5,
+      "range": [70, 74],
+      "img": "icons/svg/upgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": ["attack.msak", "attack.rsak"],
+          "effectName": "Arcane Insight",
           "duration": 0
         }
       }
@@ -71,22 +108,51 @@
     {
       "type": 0,
       "text": "Elemental Surge - Your spell's element flares dramatically. Add 2d6 damage of the spell's type.",
-      "weight": 6,
-      "range": [85, 90],
+      "weight": 5,
+      "range": [75, 79],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "2d6",
-          "damageType": "force"
+          "damageFormula": "2S",
+          "damageType": "spell"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Mind Fog - Your spell clouds the target's mind. They have disadvantage on their next saving throw.",
+      "weight": 5,
+      "range": [80, 84],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "save.all",
+          "effectName": "Mind Fog",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Dazzling Display - Your spell creates a blinding flash. The target is blinded until the end of their next turn.",
+      "weight": 4,
+      "range": [85, 88],
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": 1
         }
       }
     },
     {
       "type": 0,
       "text": "Spell Echo - Your spell echoes with power. You may cast the same cantrip again as a bonus action.",
-      "weight": 5,
-      "range": [91, 95],
+      "weight": 4,
+      "range": [89, 92],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -98,9 +164,37 @@
     },
     {
       "type": 0,
-      "text": "Perfect Casting - Your spell is cast with incredible efficiency. Regain 1 expended spell slot up to 2nd level.",
-      "weight": 5,
-      "range": [96, 100],
+      "text": "Stunning Spell - The magical energy overwhelms the target. They are stunned until the end of your next turn.",
+      "weight": 3,
+      "range": [93, 95],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "stunned",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Arcane Amplification - Your magical power surges! Deal an additional 2d8 force damage.",
+      "weight": 3,
+      "range": [96, 98],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2S",
+          "damageType": "spell"
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Perfect Casting - A masterful spell! Deal maximum damage and regain 1 expended spell slot up to 2nd level.",
+      "weight": 2,
+      "range": [99, 100],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

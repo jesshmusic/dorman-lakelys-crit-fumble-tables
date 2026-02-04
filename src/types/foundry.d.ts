@@ -263,6 +263,7 @@ declare global {
       };
     };
     items: Collection<Item>;
+    statuses: Set<string>;
     getActiveTokens(): Token[];
     applyDamage(amount: number, options?: any): Promise<Actor>;
     createEmbeddedDocuments(type: string, data: any[]): Promise<any[]>;
@@ -273,6 +274,10 @@ declare global {
     name: string;
     actor: Actor | null;
     document: any;
+    toggleStatusEffect(
+      statusId: string,
+      options?: { active?: boolean; overlay?: boolean }
+    ): Promise<boolean>;
   }
 
   interface Item {

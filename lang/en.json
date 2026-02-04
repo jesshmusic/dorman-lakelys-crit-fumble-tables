@@ -32,6 +32,14 @@
         "Name": "Show Chat Messages",
         "Hint": "Display crit/fumble results in chat"
       },
+      "CritSound": {
+        "Name": "Critical Hit Sound",
+        "Hint": "Sound effect to play when a critical hit occurs. Leave empty for no sound."
+      },
+      "FumbleSound": {
+        "Name": "Fumble Sound",
+        "Hint": "Sound effect to play when a fumble occurs. Leave empty for no sound."
+      },
       "ReimportTables": {
         "Name": "Re-import Tables",
         "Label": "Re-import Tables",
@@ -78,6 +86,14 @@
       "SaveFailure": "Save failed - effect applied!"
     },
 
+    "Dialogs": {
+      "UpdateTables": {
+        "Title": "Update Crit/Fumble Tables",
+        "Content": "A new version of the crit/fumble tables is available! Your tables were imported from version {oldVersion}, and version {newVersion} is now available with new effects and improvements.",
+        "Warning": "Note: Updating will replace your current tables. Any custom modifications will be lost."
+      }
+    },
+
     "Errors": {
       "MidiQolRequired": "Dorman Lakely's Critical Hit & Fumble Tables requires Midi-QOL to be enabled.",
       "TableNotFound": "Table '{tableName}' not found. Please import the compendium tables.",
@@ -91,7 +107,8 @@
       "HooksRegistered": "Midi-QOL hooks registered successfully.",
       "ImportingTables": "Importing crit/fumble tables...",
       "TablesImported": "Imported {count} crit/fumble tables!",
-      "ReimportingTables": "Re-importing crit/fumble tables..."
+      "ReimportingTables": "Re-importing crit/fumble tables...",
+      "UpdateSkipped": "Table update skipped. You can update later via Module Settings > Re-import Tables."
     }
   }
 }

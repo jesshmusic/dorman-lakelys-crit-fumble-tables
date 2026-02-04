@@ -7,8 +7,8 @@
     {
       "type": 0,
       "text": "Nothing Special - Your shot goes wide but you recover your composure with no additional penalty.",
-      "weight": 60,
-      "range": [1, 60],
+      "weight": 40,
+      "range": [1, 40],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -19,8 +19,8 @@
     {
       "type": 0,
       "text": "Dropped Ammo - In your haste, you drop 1d4 pieces of ammunition.",
-      "weight": 12,
-      "range": [61, 72],
+      "weight": 8,
+      "range": [41, 48],
       "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -32,23 +32,24 @@
     },
     {
       "type": 0,
-      "text": "Bowstring Snap - Your bowstring snaps or crossbow mechanism jams. Spend an action to restring or switch weapons.",
-      "weight": 8,
-      "range": [73, 80],
-      "img": "icons/tools/fasteners/rope-coiled-tan.webp",
+      "text": "Off Target - Your aim was completely off. Your next ranged attack has disadvantage.",
+      "weight": 7,
+      "range": [49, 55],
+      "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "bowstring_snapped",
-          "duration": -1
+          "effectType": "disadvantage",
+          "advantageScope": "attack.rwak",
+          "effectName": "Off Target",
+          "duration": 0
         }
       }
     },
     {
       "type": 0,
-      "text": "Pulled Muscle - You strain your arm or shoulder. Take 1d4 damage and have disadvantage on ranged attacks until the end of your next turn.",
+      "text": "Strained Arm - You overextend and strain your arm. Take 1d4 bludgeoning damage.",
       "weight": 7,
-      "range": [81, 87],
+      "range": [56, 62],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -62,12 +63,43 @@
       "type": 0,
       "text": "Exposed Position - Your awkward positioning leaves you vulnerable. Attacks against you have advantage until the start of your next turn.",
       "weight": 6,
-      "range": [88, 93],
+      "range": [63, 68],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Exposed Position",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Bowstring Snap - Your bowstring snaps or crossbow mechanism jams. Spend an action to restring or switch weapons.",
+      "weight": 6,
+      "range": [69, 74],
+      "img": "icons/tools/fasteners/rope-coiled-tan.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "exposed",
+          "effectCondition": "weapon_jammed",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Lost Focus - Your concentration breaks. You have disadvantage on Perception checks until the end of your next turn.",
+      "weight": 5,
+      "range": [75, 79],
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "ability.wis",
+          "effectName": "Lost Focus",
           "duration": 1
         }
       }
@@ -75,8 +107,8 @@
     {
       "type": 0,
       "text": "Tangled Equipment - Your quiver strap or weapon sling gets tangled. You can't draw or stow weapons until you use a bonus action to untangle.",
-      "weight": 4,
-      "range": [94, 97],
+      "weight": 5,
+      "range": [80, 84],
       "img": "icons/tools/fasteners/rope-coiled-tan.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -88,9 +120,40 @@
     },
     {
       "type": 0,
+      "text": "Hesitation - Your missed shot makes you hesitant. You have disadvantage on your next attack roll.",
+      "weight": 4,
+      "range": [85, 88],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "effectName": "Hesitation",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Telegraphed Shot - Your target sees your aim and prepares. They have advantage on their next saving throw against you.",
+      "weight": 4,
+      "range": [89, 92],
+      "img": "icons/svg/eye.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "grants",
+          "effectName": "Telegraphed",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Weapon Nicked - Your weapon takes a minor beating. -1 to attack rolls until you spend a short rest maintaining it.",
-      "weight": 2,
-      "range": [98, 99],
+      "weight": 3,
+      "range": [93, 95],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -98,6 +161,32 @@
           "penaltyType": "attack",
           "penaltyValue": -1,
           "duration": -1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Ammunition Lost - Your projectile ricochets and is lost. Lose 1 piece of ammunition.",
+      "weight": 2,
+      "range": [96, 97],
+      "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "ammo_lost",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Weapon Dropped - Your ranged weapon slips from your grasp, landing at your feet.",
+      "weight": 2,
+      "range": [98, 99],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disarm"
         }
       }
     },

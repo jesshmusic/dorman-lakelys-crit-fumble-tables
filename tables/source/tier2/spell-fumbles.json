@@ -7,16 +7,20 @@
     {
       "type": 0,
       "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
-      "weight": 45,
-      "range": [1, 45],
+      "weight": 35,
+      "range": [1, 35],
       "img": "icons/svg/d20-grey.svg",
-      "flags": { "dorman-lakelys-crit-fumble-tables": { "effectType": "none" } }
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none"
+        }
+      }
     },
     {
       "type": 0,
       "text": "Magical Backlash - The spell's energy rebounds painfully. Take 1d8 force damage.",
-      "weight": 14,
-      "range": [46, 59],
+      "weight": 8,
+      "range": [36, 43],
       "img": "icons/svg/lightning.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -28,9 +32,24 @@
     },
     {
       "type": 0,
+      "text": "Arcane Hiccup - Your magic stutters. You have disadvantage on spell attacks until the end of your next turn.",
+      "weight": 7,
+      "range": [44, 50],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.msak", "attack.rsak"],
+          "effectName": "Arcane Hiccup",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Arcane Lockout - Your magic stutters badly. You cannot cast spells until the end of your next turn.",
-      "weight": 12,
-      "range": [60, 71],
+      "weight": 7,
+      "range": [51, 57],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -42,9 +61,25 @@
     },
     {
       "type": 0,
-      "text": "Sensory Overload - The failed spell overwhelms your senses. You are blinded and deafened until the end of your next turn.",
-      "weight": 10,
-      "range": [72, 81],
+      "text": "Exposed Caster - Your failed casting leaves you vulnerable. Attacks against you have advantage until the start of your next turn.",
+      "weight": 6,
+      "range": [58, 63],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Exposed Caster",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Sensory Overload - The failed spell overwhelms your senses. You are blinded until the end of your next turn.",
+      "weight": 6,
+      "range": [64, 69],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -56,9 +91,40 @@
     },
     {
       "type": 0,
+      "text": "Concentration Shaken - The failure shakes your focus. You have disadvantage on concentration checks for 1 minute.",
+      "weight": 5,
+      "range": [70, 74],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "concentration",
+          "effectName": "Concentration Shaken",
+          "duration": 10
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Telegraphed Magic - Your target sensed your failure. They have advantage on their next saving throw against your spells.",
+      "weight": 5,
+      "range": [75, 79],
+      "img": "icons/svg/eye.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "grants",
+          "effectName": "Telegraphed",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Spell Slot Burn - The failed casting burns out a spell slot. Lose an additional spell slot of 1st or 2nd level.",
-      "weight": 8,
-      "range": [82, 89],
+      "weight": 5,
+      "range": [80, 84],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -70,9 +136,23 @@
     },
     {
       "type": 0,
-      "text": "Spell Rebounds - Your spell affects you instead. Take the spell's damage at half value.",
-      "weight": 6,
-      "range": [90, 95],
+      "text": "Magical Fatigue - The failed spell exhausts you. You can't take reactions until the start of your next turn.",
+      "weight": 4,
+      "range": [85, 88],
+      "img": "icons/svg/clockwork.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "no_reactions",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": 0,
+      "text": "Spell Rebounds - Your spell affects you instead. Take 2d6 force damage.",
+      "weight": 4,
+      "range": [89, 92],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -85,22 +165,37 @@
     {
       "type": 0,
       "text": "Fatigued - The failed spell drains you. You have disadvantage on attack rolls and ability checks for 1 minute.",
-      "weight": 4,
-      "range": [96, 99],
+      "weight": 3,
+      "range": [93, 95],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "fatigued",
+          "effectType": "disadvantage",
+          "advantageScope": ["attack.all", "ability.all"],
+          "effectName": "Fatigued",
           "duration": 10
         }
       }
     },
     {
       "type": 0,
+      "text": "Component Destroyed - A valuable material component is destroyed. Lose 25gp worth of components.",
+      "weight": 3,
+      "range": [96, 98],
+      "img": "icons/commodities/gems/gem-fragments-red.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "component_lost",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": 0,
       "text": "Wild Magic Surge - A wild magic surge occurs. DM rolls on the Wild Magic table or chooses a significant magical effect.",
-      "weight": 1,
-      "range": [100, 100],
+      "weight": 2,
+      "range": [99, 100],
       "img": "icons/svg/dice-target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

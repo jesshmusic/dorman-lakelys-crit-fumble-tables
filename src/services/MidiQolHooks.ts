@@ -5,15 +5,9 @@
 
 import { LOG_PREFIX } from '../constants';
 import { MidiQolWorkflow, MIDI_QOL_HOOKS, getActionType } from '../types';
-import { areCritsEnabled, areFumblesEnabled } from '../settings';
+import { areCritsEnabled, areFumblesEnabled, getCritSound, getFumbleSound } from '../settings';
 import { TableSelector } from './TableSelector';
 import { EffectsManager } from './EffectsManager';
-
-/** Sound effect paths for crit/fumble events */
-const SOUNDS = {
-  CRIT: 'sounds/combat/epic-start-3hit.ogg',
-  FUMBLE: 'sounds/combat/epic-turn-2hit.ogg'
-} as const;
 
 /**
  * Service for managing Midi-QOL hook integration
@@ -108,7 +102,10 @@ export class MidiQolHooks {
    * Handle a critical hit
    */
   private static async handleCriticalHit(workflow: MidiQolWorkflow): Promise<void> {
-    foundry.audio.AudioHelper.play({ src: SOUNDS.CRIT, volume: 0.8 }, true);
+    const critSound = getCritSound();
+    if (critSound) {
+      foundry.audio.AudioHelper.play({ src: critSound, volume: 0.8 }, true);
+    }
 
     const attackType = TableSelector.getAttackType(workflow.item);
     const actorLevel = workflow.actor?.system?.details?.level;
@@ -144,7 +141,10 @@ export class MidiQolHooks {
    * Handle a fumble
    */
   private static async handleFumble(workflow: MidiQolWorkflow): Promise<void> {
-    foundry.audio.AudioHelper.play({ src: SOUNDS.FUMBLE, volume: 0.8 }, true);
+    const fumbleSound = getFumbleSound();
+    if (fumbleSound) {
+      foundry.audio.AudioHelper.play({ src: fumbleSound, volume: 0.8 }, true);
+    }
 
     const attackType = TableSelector.getAttackType(workflow.item);
     const actorLevel = workflow.actor?.system?.details?.level;
@@ -164,6 +164,9 @@ export class MidiQolHooks {
       return;
     }
 
+    // Get target tokens - needed for "grants" effects that should apply to targets
+    const targetTokens = [...(workflow.targets || [])];
+
     console.log(`${LOG_PREFIX} Fumble result: "${result.result.name}" → ${workflow.actor?.name}`);
 
     await EffectsManager.displayResult(
@@ -172,7 +175,13 @@ export class MidiQolHooks {
       workflow.actor?.name || 'themselves'
     );
 
-    await EffectsManager.applyResult(result, actorToken, workflow.actor, workflow.item);
+    await EffectsManager.applyFumbleResult(
+      result,
+      actorToken,
+      targetTokens,
+      workflow.actor,
+      workflow.item
+    );
   }
 
   /**
@@ -211,18 +220,21 @@ export class MidiQolHooks {
   /**
    * Test method: Simulate a fumble using the actual code path
    * @param actor - The fumbling actor
+   * @param targetToken - Optional target token (for effects that apply to defender)
    * @param attackType - Type of attack ('melee', 'ranged', 'spell')
    * @param weaponItem - Optional weapon item for disarm effects
    */
   static async testFumble(
     actor: Actor,
+    targetToken?: Token,
     attackType: 'melee' | 'ranged' | 'spell' = 'melee',
     weaponItem?: Item
   ): Promise<void> {
+    const targets = targetToken ? new Set([targetToken]) : new Set<Token>();
     const mockWorkflow: MidiQolWorkflow = {
       actor: actor,
       item: weaponItem || this.findWeaponForAttackType(actor, attackType),
-      targets: new Set(),
+      targets: targets,
       hitTargets: new Set(),
       attackRoll: {
         total: 1,
@@ -233,7 +245,10 @@ export class MidiQolHooks {
       isFumble: true
     };
 
-    console.log(`${LOG_PREFIX} [TEST] Simulating fumble: ${actor.name} [${attackType}]`);
+    const targetName = targetToken?.name || 'no target';
+    console.log(
+      `${LOG_PREFIX} [TEST] Simulating fumble: ${actor.name} → ${targetName} [${attackType}]`
+    );
     await this.handleFumble(mockWorkflow);
   }
 
