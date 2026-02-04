@@ -3,7 +3,7 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { resetMocks, createMockToken, createMockActor, createMockItem } from '../mocks/foundry';
+import { resetMocks, createMockToken, createMockItem } from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
 describe('EffectsManager', () => {

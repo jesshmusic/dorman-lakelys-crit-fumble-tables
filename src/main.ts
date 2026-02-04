@@ -7,18 +7,24 @@ import { MODULE_ID, LOG_PREFIX } from './constants';
 import { registerSettings } from './settings';
 import { MidiQolHooks, TableImporter } from './services';
 import buildInfo from '../build-info.json';
-import moduleInfo from '../module.json';
 
 const buildNumber = buildInfo.buildNumber;
-const MODULE_VERSION = moduleInfo.version;
 const MODULE_TITLE = "Dorman Lakely's Crit/Fumble Tables";
+
+/**
+ * Get the module version from the game API
+ */
+function getModuleVersion(): string {
+  return game.modules.get(MODULE_ID)?.version ?? 'unknown';
+}
 
 /**
  * Log styled module message to console
  */
 function logModuleHeader(): void {
+  const version = getModuleVersion();
   console.log(
-    '%c⚔️ ' + MODULE_TITLE + ' %cv' + MODULE_VERSION + ' %c(build ' + buildNumber + ')',
+    '%c⚔️ ' + MODULE_TITLE + ' %cv' + version + ' %c(build ' + buildNumber + ')',
     'color: #d32f2f; font-weight: bold; font-size: 16px;',
     'color: #ff9800; font-weight: bold; font-size: 14px;',
     'color: #ffeb3b; font-weight: normal; font-size: 12px;'

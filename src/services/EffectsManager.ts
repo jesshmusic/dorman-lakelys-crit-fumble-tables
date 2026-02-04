@@ -102,19 +102,22 @@ export class EffectsManager {
 
     const resultIcon = result.result.img;
 
-    // For advantage effects with "grants" target, apply to the targets instead of fumbler
+    // For advantage/disadvantage effects with "grants" target, apply to the targets instead of fumbler
     if (
-      effectConfig.effectType === EFFECT_TYPES.ADVANTAGE &&
+      (effectConfig.effectType === EFFECT_TYPES.ADVANTAGE ||
+        effectConfig.effectType === EFFECT_TYPES.DISADVANTAGE) &&
       effectConfig.advantageTarget === 'grants' &&
       targetTokens.length > 0
     ) {
-      // Remove the "grants" flag - apply regular advantage to targets
+      // Remove the "grants" flag - apply regular advantage/disadvantage to targets
       const targetConfig: TableEffectConfig = {
         ...effectConfig,
         advantageTarget: undefined
       };
+      const mode =
+        effectConfig.effectType === EFFECT_TYPES.ADVANTAGE ? 'advantage' : 'disadvantage';
       for (const target of targetTokens) {
-        await this.applyAdvantageDisadvantage(target, targetConfig, 'advantage', resultIcon);
+        await this.applyAdvantageDisadvantage(target, targetConfig, mode, resultIcon);
       }
       return;
     }

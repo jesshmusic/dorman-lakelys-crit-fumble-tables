@@ -71,18 +71,24 @@ export class TableImporter {
   }
 
   /**
-   * Compare semantic versions - returns true if v1 > v2
+   * Compare semantic versions (major.minor.patch) - returns true if v1 > v2.
+   * Only the first three numeric components are considered; additional components are ignored.
    */
   private static isNewerVersion(v1: string, v2: string): boolean {
-    const parts1 = v1.split('.').map(n => parseInt(n, 10) || 0);
-    const parts2 = v2.split('.').map(n => parseInt(n, 10) || 0);
+    const parseSemver = (version: string): [number, number, number] => {
+      const parts = version
+        .split('.')
+        .slice(0, 3)
+        .map(n => parseInt(n, 10) || 0);
+      return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
+    };
 
-    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-      const p1 = parts1[i] || 0;
-      const p2 = parts2[i] || 0;
-      if (p1 > p2) return true;
-      if (p1 < p2) return false;
-    }
+    const [major1, minor1, patch1] = parseSemver(v1);
+    const [major2, minor2, patch2] = parseSemver(v2);
+
+    if (major1 !== major2) return major1 > major2;
+    if (minor1 !== minor2) return minor1 > minor2;
+    if (patch1 !== patch2) return patch1 > patch2;
     return false;
   }
 

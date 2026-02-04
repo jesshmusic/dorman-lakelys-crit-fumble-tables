@@ -105,6 +105,7 @@ export class TableSelector {
       const d100Roll = Math.floor(Math.random() * 100) + 1;
 
       // Parse name and description from result.text (format: "Name - Description")
+      // Uses indexOf to split on the FIRST occurrence of " - ", allowing dashes in descriptions
       const resultText = result.text || '';
       const dashIndex = resultText.indexOf(' - ');
       const name =
