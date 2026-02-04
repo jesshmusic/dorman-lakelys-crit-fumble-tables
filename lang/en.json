@@ -65,7 +65,9 @@
         "Hint": "Support the development of this module on Patreon! Your contributions help fund new features and updates."
       },
       "PreviewSound": {
-        "Tooltip": "Preview sound"
+        "Tooltip": "Preview sound",
+        "NoFileSelected": "No sound file selected",
+        "PlayError": "Failed to play sound"
       }
     },
 

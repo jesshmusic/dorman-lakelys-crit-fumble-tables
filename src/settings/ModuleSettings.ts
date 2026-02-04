@@ -111,12 +111,14 @@ class PatreonLink extends FormApplication {
   }
 
   async _updateObject(_event: Event, _formData: object): Promise<void> {
-    window.open(URLS.PATREON, '_blank');
+    // Navigation handled by click listener to avoid duplicate window opens
   }
 
   activateListeners(html: JQuery) {
     super.activateListeners(html);
-    html.find('.patreon-button').on('click', () => {
+    html.find('.patreon-button').on('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
       window.open(URLS.PATREON, '_blank');
     });
   }
@@ -409,7 +411,9 @@ export function injectSoundPreviewButtons(html: JQuery | HTMLElement | unknown):
       const soundPath = (input.val() as string) || '';
 
       if (!soundPath) {
-        ui.notifications.warn('No sound file selected');
+        ui.notifications.warn(
+          game.i18n.localize('DLCRITFUMBLE.Settings.PreviewSound.NoFileSelected')
+        );
         return;
       }
 
@@ -421,7 +425,7 @@ export function injectSoundPreviewButtons(html: JQuery | HTMLElement | unknown):
         );
       } catch (error) {
         console.error(`${LOG_PREFIX} Error playing sound:`, error);
-        ui.notifications.error('Failed to play sound');
+        ui.notifications.error(game.i18n.localize('DLCRITFUMBLE.Settings.PreviewSound.PlayError'));
       }
     });
 
