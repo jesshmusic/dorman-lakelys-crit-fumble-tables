@@ -194,8 +194,14 @@ export class EffectsManager {
   }
 
   /**
-   * Apply a standard D&D 5e condition using Foundry's built-in status effects
-   * This properly integrates with the token HUD and condition automation
+   * Apply a standard D&D 5e condition using Foundry's built-in status effects.
+   * This properly integrates with the token HUD and condition automation.
+   *
+   * IMPORTANT: Duration tracking for standard conditions requires the "Times-Up" module.
+   * Without Times-Up installed, conditions will persist indefinitely until manually removed.
+   * Custom (non-standard) conditions use Active Effects with built-in duration tracking.
+   *
+   * @see https://foundryvtt.com/packages/times-up for Times-Up module
    */
   private static async applyStandardCondition(
     token: Token,
@@ -274,13 +280,16 @@ export class EffectsManager {
       const roll = new Roll(resolvedFormula);
       await roll.evaluate({ async: true });
 
-      // Resolve damage type - use weapon's damage type if "weapon" is specified
+      // Resolve damage type - use item's damage type if "weapon" or "spell" is specified
       let damageType = config.damageType || 'bludgeoning';
-      if (damageType === 'weapon' && sourceItem) {
+      if ((damageType === 'weapon' || damageType === 'spell') && sourceItem) {
         damageType = this.getWeaponDamageType(sourceItem);
       } else if (damageType === 'weapon') {
         // Fallback if no source item available
         damageType = 'bludgeoning';
+      } else if (damageType === 'spell') {
+        // Fallback if no source item available for spells
+        damageType = 'force';
       }
 
       const damageDetail = [{ damage: roll.total, type: damageType }];
@@ -301,21 +310,61 @@ export class EffectsManager {
   }
 
   /**
-   * Resolve weapon dice formula syntax (e.g., "1W" -> "1d8" for longsword)
-   * Format: "XW" where X is the number of weapon dice to roll
+   * Resolve weapon/spell dice formula syntax
+   *
+   * "XW" syntax: X dice of the weapon's damage die SIZE (not X times full weapon damage)
+   *   - Example: "2W" with a longsword (1d8) -> "2d8" (two d8s, not 2×1d8)
+   *   - Example: "3W" with a greatsword (2d6) -> "3d6" (three d6s, extracts die size only)
+   *
+   * "XS" syntax: X dice of the spell's damage die SIZE
+   *   - Example: "2S" with fire bolt (1d10) -> "2d10"
+   *   - Example: "3S" with magic missile (1d4+1) -> "3d4" (extracts die size only)
+   *
+   * If no source item is available, defaults to d6 for weapons and d8 for spells.
    */
   private static resolveWeaponDiceFormula(formula: string, sourceItem?: Item): string {
     // Check for weapon dice syntax: "1W", "2W", "3W", etc.
     const weaponDiceMatch = formula.match(/^(\d+)W$/i);
-    if (!weaponDiceMatch) {
-      // Not weapon dice syntax, return formula as-is
-      return formula;
+    if (weaponDiceMatch) {
+      const numDice = parseInt(weaponDiceMatch[1], 10);
+      const weaponDie = this.getWeaponDamageDie(sourceItem);
+      return `${numDice}${weaponDie}`;
     }
 
-    const numDice = parseInt(weaponDiceMatch[1], 10);
-    const weaponDie = this.getWeaponDamageDie(sourceItem);
+    // Check for spell dice syntax: "1S", "2S", "3S", etc.
+    const spellDiceMatch = formula.match(/^(\d+)S$/i);
+    if (spellDiceMatch) {
+      const numDice = parseInt(spellDiceMatch[1], 10);
+      const spellDie = this.getSpellDamageDie(sourceItem);
+      return `${numDice}${spellDie}`;
+    }
 
-    return `${numDice}${weaponDie}`;
+    // Not special dice syntax, return formula as-is
+    return formula;
+  }
+
+  /**
+   * Extract the damage die from a spell item (e.g., "d10" from fire bolt)
+   */
+  private static getSpellDamageDie(item?: Item): string {
+    if (!item) {
+      return 'd8'; // Fallback for spells
+    }
+
+    // D&D 5e stores damage parts as [[formula, type], [formula, type], ...]
+    const damageParts = item.system?.damage?.parts;
+    if (damageParts && damageParts.length > 0) {
+      const damageFormula = damageParts[0]?.[0];
+      if (damageFormula) {
+        // Extract the die from the formula (e.g., "1d10" -> "d10", "2d6" -> "d6")
+        const dieMatch = damageFormula.match(/d(\d+)/i);
+        if (dieMatch) {
+          return `d${dieMatch[1]}`;
+        }
+      }
+    }
+    // Fallback to d8 if no damage die found (common spell damage die)
+    return 'd8';
   }
 
   /**

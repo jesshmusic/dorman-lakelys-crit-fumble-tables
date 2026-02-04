@@ -73,8 +73,10 @@ export class TableImporter {
   /**
    * Compare semantic versions (major.minor.patch) - returns true if v1 > v2.
    * Only the first three numeric components are considered; additional components are ignored.
-   * Note: Prerelease versions (e.g., "1.0.0-alpha") are not supported and will compare
-   * as equal to their release counterparts since only numeric parts are parsed.
+   *
+   * LIMITATION: Prerelease versions (e.g., "1.0.0-alpha", "1.0.0-beta.2") are NOT supported.
+   * They will compare as equal to their release counterparts since only numeric parts are parsed.
+   * This module does not use prerelease versions - all releases use standard X.Y.Z format.
    */
   private static isNewerVersion(v1: string, v2: string): boolean {
     const parseSemver = (version: string): [number, number, number] => {

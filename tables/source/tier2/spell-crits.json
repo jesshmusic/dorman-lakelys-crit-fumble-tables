@@ -25,8 +25,8 @@
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "1d8",
-          "damageType": "force"
+          "damageFormula": "1S",
+          "damageType": "spell"
         }
       }
     },
@@ -114,8 +114,8 @@
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "2W",
-          "damageType": "weapon"
+          "damageFormula": "2S",
+          "damageType": "spell"
         }
       }
     },
@@ -185,8 +185,8 @@
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "2W",
-          "damageType": "weapon"
+          "damageFormula": "2S",
+          "damageType": "spell"
         }
       }
     },
