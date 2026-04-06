@@ -305,7 +305,7 @@ describe('TableImporter', () => {
       const { TableImporter } = await import('../../src/services/TableImporter');
       await TableImporter.checkForUpdates();
 
-      expect(Dialog.confirm).not.toHaveBeenCalled();
+      expect((foundry as any).applications.api.DialogV2.confirm).not.toHaveBeenCalled();
     });
 
     it('should prompt GM when update available', async () => {
@@ -320,7 +320,7 @@ describe('TableImporter', () => {
       const { TableImporter } = await import('../../src/services/TableImporter');
       await TableImporter.checkForUpdates();
 
-      expect(Dialog.confirm).toHaveBeenCalled();
+      expect((foundry as any).applications.api.DialogV2.confirm).toHaveBeenCalled();
     });
 
     it('should not prompt when no update available', async () => {
@@ -335,7 +335,7 @@ describe('TableImporter', () => {
       const { TableImporter } = await import('../../src/services/TableImporter');
       await TableImporter.checkForUpdates();
 
-      expect(Dialog.confirm).not.toHaveBeenCalled();
+      expect((foundry as any).applications.api.DialogV2.confirm).not.toHaveBeenCalled();
     });
   });
 
@@ -348,7 +348,7 @@ describe('TableImporter', () => {
         return true;
       });
       (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
-      (Dialog.confirm as jest.Mock<() => Promise<boolean>>).mockResolvedValue(false);
+      ((foundry as any).applications.api.DialogV2.confirm as jest.Mock<() => Promise<boolean>>).mockResolvedValue(false);
 
       const { TableImporter } = await import('../../src/services/TableImporter');
       await TableImporter.promptForUpdate();
@@ -377,7 +377,7 @@ describe('TableImporter', () => {
         }
       );
       (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
-      (Dialog.confirm as jest.Mock<() => Promise<boolean>>).mockResolvedValue(true);
+      ((foundry as any).applications.api.DialogV2.confirm as jest.Mock<() => Promise<boolean>>).mockResolvedValue(true);
 
       // Clear tables and add folder for reimport
       (game.tables as any).clear();

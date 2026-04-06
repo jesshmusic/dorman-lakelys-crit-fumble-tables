@@ -21,30 +21,53 @@ const SETTING_DEFAULTS: Record<string, boolean | string> = {
 };
 
 /**
- * Dialog for re-importing tables with confirmation
+ * Foundry v14 rewrite of the three settings menu entries.
+ *
+ * These were originally three FormApplication subclasses (ReimportTablesDialog,
+ * ResetSettingsDialog, PatreonLink), each rendering a tiny Handlebars template
+ * with a single button and showing a Dialog.confirm on submit. Foundry v14
+ * removed the legacy `FormApplication` and `Dialog` globals, so we replace each
+ * one with a minimal ApplicationV2 stub that opens a `DialogV2.confirm` (or, for
+ * the Patreon link, an ApplicationV2 with a single button) immediately on
+ * render and closes itself when the user makes their choice. Foundry's
+ * `registerMenu` API still accepts these as the `type` field.
  */
-class ReimportTablesDialog extends FormApplication {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: 'dlcritfumble-reimport-tables',
-      title: game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.DialogTitle'),
-      template: `modules/${MODULE_ID}/templates/reimport-dialog.html`,
-      width: 400
-    });
+const ApplicationV2 = (foundry as any).applications.api.ApplicationV2;
+const DialogV2 = (foundry as any).applications.api.DialogV2;
+
+class ReimportTablesDialog extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    id: 'dlcritfumble-reimport-tables',
+    classes: [],
+    tag: 'div',
+    window: {
+      title: 'DLCRITFUMBLE.Settings.ReimportTables.DialogTitle',
+      icon: 'fas fa-sync'
+    },
+    position: { width: 1, height: 1 }
+  };
+
+  // ApplicationV2 requires _renderHTML / _replaceHTML even if we never show
+  // ourselves. Return an empty container so the framework is happy, then in
+  // _onFirstRender immediately delegate to a DialogV2.confirm and close.
+  async _renderHTML(): Promise<HTMLElement> {
+    return document.createElement('div');
   }
 
-  getData() {
-    return {
-      message: game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.DialogMessage')
-    };
+  _replaceHTML(result: HTMLElement, content: HTMLElement): void {
+    content.replaceChildren(result);
   }
 
-  async _updateObject(_event: Event, _formData: object): Promise<void> {
-    const confirmed = await Dialog.confirm({
-      title: game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.ConfirmTitle'),
+  async _onFirstRender(_context: unknown, _options: unknown): Promise<void> {
+    // Hide our shell window — DialogV2 will be the user-visible UI.
+    this.element?.style?.setProperty('display', 'none');
+
+    const confirmed = await DialogV2.confirm({
+      window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.ConfirmTitle') },
       content: `<p>${game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.ConfirmMessage')}</p>
                 <p style="color: #ff6400;"><strong>${game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.Warning')}</strong></p>`,
-      defaultYes: false
+      yes: { default: false },
+      no: { default: true }
     });
 
     if (confirmed) {
@@ -52,33 +75,39 @@ class ReimportTablesDialog extends FormApplication {
       await TableImporter.reimportTables();
       ui.notifications.info(game.i18n.localize('DLCRITFUMBLE.Settings.ReimportTables.Success'));
     }
+
+    this.close();
   }
 }
 
-/**
- * Dialog for resetting settings to defaults
- */
-class ResetSettingsDialog extends FormApplication {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: 'dlcritfumble-reset-settings',
-      title: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmTitle'),
-      template: `modules/${MODULE_ID}/templates/reset-settings-dialog.html`,
-      width: 400
-    });
+class ResetSettingsDialog extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    id: 'dlcritfumble-reset-settings',
+    classes: [],
+    tag: 'div',
+    window: {
+      title: 'DLCRITFUMBLE.Settings.ResetSettings.ConfirmTitle',
+      icon: 'fas fa-undo'
+    },
+    position: { width: 1, height: 1 }
+  };
+
+  async _renderHTML(): Promise<HTMLElement> {
+    return document.createElement('div');
   }
 
-  getData() {
-    return {
-      message: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmMessage')
-    };
+  _replaceHTML(result: HTMLElement, content: HTMLElement): void {
+    content.replaceChildren(result);
   }
 
-  async _updateObject(_event: Event, _formData: object): Promise<void> {
-    const confirmed = await Dialog.confirm({
-      title: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmTitle'),
+  async _onFirstRender(_context: unknown, _options: unknown): Promise<void> {
+    this.element?.style?.setProperty('display', 'none');
+
+    const confirmed = await DialogV2.confirm({
+      window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmTitle') },
       content: `<p>${game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.ConfirmMessage')}</p>`,
-      defaultYes: false
+      yes: { default: false },
+      no: { default: true }
     });
 
     if (confirmed) {
@@ -88,39 +117,55 @@ class ResetSettingsDialog extends FormApplication {
       }
       ui.notifications.info(game.i18n.localize('DLCRITFUMBLE.Settings.ResetSettings.Success'));
     }
+
+    this.close();
   }
 }
 
-/**
- * Form application that opens Patreon link
- */
-class PatreonLink extends FormApplication {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: 'dlcritfumble-patreon',
-      title: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Name'),
-      template: `modules/${MODULE_ID}/templates/patreon-link.html`,
-      width: 400
+class PatreonLink extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    id: 'dlcritfumble-patreon',
+    classes: [],
+    tag: 'div',
+    window: {
+      title: 'DLCRITFUMBLE.Settings.Patreon.Name',
+      icon: 'fab fa-patreon'
+    },
+    position: { width: 1, height: 1 }
+  };
+
+  async _renderHTML(): Promise<HTMLElement> {
+    return document.createElement('div');
+  }
+
+  _replaceHTML(result: HTMLElement, content: HTMLElement): void {
+    content.replaceChildren(result);
+  }
+
+  async _onFirstRender(_context: unknown, _options: unknown): Promise<void> {
+    this.element?.style?.setProperty('display', 'none');
+
+    // game.i18n.localize() always returns a string (it returns the key as a
+    // fallback when the translation is missing) so a `?? 'fallback'` chain
+    // would be dead code. If the localization key is missing the user will
+    // see the literal key, which is acceptable for a hint string.
+    const hintKey = 'DLCRITFUMBLE.Settings.Patreon.Hint';
+    const hint = game.i18n.localize(hintKey);
+
+    await DialogV2.prompt({
+      window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Name') },
+      content: `<p>${hint === hintKey ? 'Open the Patreon page in a new tab.' : hint}</p>`,
+      ok: {
+        label: '<i class="fab fa-patreon"></i> Open Patreon',
+        callback: () => {
+          // `noopener,noreferrer` prevents reverse-tabnabbing — the new tab
+          // cannot navigate or read the Foundry page via window.opener.
+          window.open(URLS.PATREON, '_blank', 'noopener,noreferrer');
+        }
+      }
     });
-  }
 
-  getData() {
-    return {
-      patreonUrl: URLS.PATREON
-    };
-  }
-
-  async _updateObject(_event: Event, _formData: object): Promise<void> {
-    // Navigation handled by click listener to avoid duplicate window opens
-  }
-
-  activateListeners(html: JQuery) {
-    super.activateListeners(html);
-    html.find('.patreon-button').on('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      window.open(URLS.PATREON, '_blank');
-    });
+    this.close();
   }
 }
 
@@ -341,43 +386,37 @@ export function getFumbleSound(): string {
 }
 
 /**
- * Inject sound preview buttons next to the sound file picker settings
- * Supports both jQuery (legacy) and HTMLElement (Foundry v13 ApplicationV2)
+ * Inject sound preview buttons next to the sound file picker settings.
+ *
+ * Foundry v14 rewrite: the v13 settings panel is ApplicationV2 and the
+ * `renderSettingsConfig` hook now passes a single HTMLElement (no jQuery
+ * wrapper). This function previously handled both jQuery and HTMLElement input
+ * shapes; the rewrite drops jQuery entirely and uses native DOM only.
  */
-export function injectSoundPreviewButtons(html: JQuery | HTMLElement | unknown): void {
-  // Safety check - bail out early if html is null/undefined
-  if (!html) {
-    return;
-  }
+export function injectSoundPreviewButtons(html: HTMLElement | unknown): void {
+  // Defensive: the renderSettingsConfig hook passes an HTMLElement in v14, but
+  // legacy v12 hooks pass a jQuery object whose [0] index is the underlying
+  // element, and some odd setups pass [HTMLElement]. Use duck typing on
+  // querySelector instead of `instanceof HTMLElement` so this works regardless
+  // of which window/global the element came from (ts-jest module isolation can
+  // produce elements that aren't `instanceof` the test-file HTMLElement).
+  const isElementLike = (x: unknown): x is HTMLElement =>
+    !!x && typeof (x as { querySelector?: unknown }).querySelector === 'function';
 
-  // Try to convert to jQuery
-  let $html: JQuery;
-  try {
-    // Check if it's already jQuery-like (has find method)
-    if (typeof (html as JQuery).find === 'function') {
-      $html = html as JQuery;
-    }
-    // Check if it's an HTMLElement and $ is available
-    else if (typeof $ === 'function' && html instanceof HTMLElement) {
-      $html = $(html);
-    }
-    // Check if it's an array-like with an element (some Foundry versions pass [element])
-    else if (typeof $ === 'function' && Array.isArray(html) && html[0] instanceof HTMLElement) {
-      $html = $(html[0]);
-    }
-    // Can't handle this type
-    else {
-      return;
-    }
-  } catch {
-    // If anything goes wrong, silently bail out
-    return;
+  let root: HTMLElement | null = null;
+  if (isElementLike(html)) {
+    root = html;
+  } else if (Array.isArray(html) && isElementLike(html[0])) {
+    root = html[0];
+  } else if (
+    html &&
+    typeof html === 'object' &&
+    isElementLike((html as { [key: number]: unknown })[0])
+  ) {
+    // Legacy jQuery: index 0 is the underlying HTMLElement
+    root = (html as unknown as { [key: number]: HTMLElement })[0];
   }
-
-  // Final safety check
-  if (!$html || typeof $html.find !== 'function') {
-    return;
-  }
+  if (!root) return;
 
   const soundSettings = [
     { key: SETTINGS.CRIT_SOUND, name: 'critSound' },
@@ -385,30 +424,36 @@ export function injectSoundPreviewButtons(html: JQuery | HTMLElement | unknown):
   ];
 
   for (const { key, name } of soundSettings) {
-    const settingRow = $html.find(`[name="${MODULE_ID}.${key}"]`).closest('.form-group');
-    if (!settingRow.length) continue;
+    const input = root.querySelector(`[name="${MODULE_ID}.${key}"]`) as HTMLInputElement | null;
+    if (!input) continue;
 
-    const inputWrapper = settingRow.find('.form-fields');
-    if (!inputWrapper.length) continue;
+    const settingRow = input.closest('.form-group');
+    if (!settingRow) continue;
 
-    // Check if button already exists
-    if (inputWrapper.find('.sound-preview-btn').length) continue;
+    const inputWrapper = settingRow.querySelector('.form-fields');
+    if (!inputWrapper) continue;
 
-    const previewBtn = $(`
-      <button type="button" class="sound-preview-btn"
-              data-setting="${name}"
-              title="${game.i18n.localize('DLCRITFUMBLE.Settings.PreviewSound.Tooltip')}"
-              style="flex: 0 0 auto; margin-left: 4px; padding: 0 8px;">
-        <i class="fas fa-play"></i>
-      </button>
-    `);
+    // Check if button already exists (re-render protection)
+    if (inputWrapper.querySelector('.sound-preview-btn')) continue;
 
-    previewBtn.on('click', async event => {
+    const previewBtn = document.createElement('button');
+    previewBtn.type = 'button';
+    previewBtn.classList.add('sound-preview-btn');
+    previewBtn.dataset.setting = name;
+    previewBtn.title = game.i18n.localize('DLCRITFUMBLE.Settings.PreviewSound.Tooltip');
+    previewBtn.style.flex = '0 0 auto';
+    previewBtn.style.marginLeft = '4px';
+    previewBtn.style.padding = '0 8px';
+    previewBtn.innerHTML = '<i class="fas fa-play"></i>';
+
+    previewBtn.addEventListener('click', async event => {
       event.preventDefault();
       event.stopPropagation();
 
-      const input = settingRow.find(`[name="${MODULE_ID}.${key}"]`);
-      const soundPath = (input.val() as string) || '';
+      const currentInput = settingRow.querySelector(
+        `[name="${MODULE_ID}.${key}"]`
+      ) as HTMLInputElement | null;
+      const soundPath = currentInput?.value ?? '';
 
       if (!soundPath) {
         ui.notifications.warn(
@@ -418,8 +463,12 @@ export function injectSoundPreviewButtons(html: JQuery | HTMLElement | unknown):
       }
 
       try {
-        // Use Foundry's AudioHelper to play the sound
-        await (foundry.audio?.AudioHelper ?? AudioHelper).play(
+        // foundry.audio.AudioHelper is the v13/v14 location; the bare
+        // AudioHelper global is a legacy v12 fallback that may be removed.
+        const Helper =
+          (foundry as any).audio?.AudioHelper ??
+          (globalThis as any).AudioHelper;
+        await Helper?.play(
           { src: soundPath, volume: 0.8, autoplay: true, loop: false },
           false
         );
@@ -429,6 +478,6 @@ export function injectSoundPreviewButtons(html: JQuery | HTMLElement | unknown):
       }
     });
 
-    inputWrapper.append(previewBtn);
+    inputWrapper.appendChild(previewBtn);
   }
 }

@@ -107,14 +107,16 @@ export class TableImporter {
     const importedVersion = this.getImportedVersion() || 'unknown';
     const currentVersion = getModuleVersion();
 
-    const confirmed = await Dialog.confirm({
-      title: game.i18n.localize('DLCRITFUMBLE.Dialogs.UpdateTables.Title'),
+    // Foundry v14 removed the legacy Dialog global. Use DialogV2.confirm; the
+    // `defaultYes: true` flag becomes `yes: { default: true }` in the v14 API.
+    const confirmed = await (foundry as any).applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize('DLCRITFUMBLE.Dialogs.UpdateTables.Title') },
       content: `<p>${game.i18n.format('DLCRITFUMBLE.Dialogs.UpdateTables.Content', {
         oldVersion: importedVersion,
         newVersion: currentVersion
       })}</p>
       <p style="color: #ff9800;"><strong>${game.i18n.localize('DLCRITFUMBLE.Dialogs.UpdateTables.Warning')}</strong></p>`,
-      defaultYes: true
+      yes: { default: true }
     });
 
     if (confirmed) {

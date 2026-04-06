@@ -1,5 +1,11 @@
 /**
  * ModuleSettings Tests
+ *
+ * @jest-environment jsdom
+ *
+ * The injectSoundPreviewButtons helper uses native DOM (document.createElement,
+ * querySelector, addEventListener) so this whole test file runs under jsdom
+ * even though most of the tests in here don't actually touch the DOM.
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
@@ -370,49 +376,78 @@ describe('ModuleSettings', () => {
   });
 
   describe('injectSoundPreviewButtons', () => {
-    it('should inject preview buttons for sound settings', async () => {
+    /**
+     * Build a minimal DOM tree that matches the structure
+     * `injectSoundPreviewButtons` looks for:
+     *   <root>
+     *     <div class="form-group">
+     *       <input name="dorman-lakelys-crit-fumble-tables.critSound" />
+     *       <div class="form-fields"></div>
+     *     </div>
+     *     <div class="form-group">
+     *       <input name="dorman-lakelys-crit-fumble-tables.fumbleSound" />
+     *       <div class="form-fields"></div>
+     *     </div>
+     *   </root>
+     */
+    function buildSettingsRoot(): HTMLElement {
+      const root = document.createElement('div');
+      for (const setting of ['critSound', 'fumbleSound']) {
+        const group = document.createElement('div');
+        group.className = 'form-group';
+        const input = document.createElement('input');
+        // Use setAttribute (rather than the .name property) so jsdom's
+        // querySelector('[name="..."]') matches.
+        input.setAttribute('name', `dorman-lakelys-crit-fumble-tables.${setting}`);
+        const fields = document.createElement('div');
+        fields.className = 'form-fields';
+        group.appendChild(input);
+        group.appendChild(fields);
+        root.appendChild(group);
+      }
+      return root;
+    }
+
+    it('should inject preview buttons for both sound settings', async () => {
       const { injectSoundPreviewButtons } = await import('../../src/settings/ModuleSettings');
 
-      // Create mock HTML structure
-      const mockFormFields = {
-        find: jest.fn().mockReturnValue({ length: 0 }),
-        append: jest.fn().mockReturnThis()
-      };
-      const mockSettingRow = {
-        find: jest.fn().mockReturnValue(mockFormFields)
-      };
-      const mockInput = {
-        closest: jest.fn().mockReturnValue(mockSettingRow),
-        length: 1
-      };
-      const mockHtml = {
-        find: jest.fn().mockReturnValue(mockInput)
-      } as any;
+      const root = buildSettingsRoot();
+      injectSoundPreviewButtons(root);
 
-      injectSoundPreviewButtons(mockHtml);
+      const buttons = root.querySelectorAll('.sound-preview-btn');
+      expect(buttons.length).toBe(2);
 
-      // Should look for both sound settings
-      expect(mockHtml.find).toHaveBeenCalledWith(
-        '[name="dorman-lakelys-crit-fumble-tables.critSound"]'
-      );
-      expect(mockHtml.find).toHaveBeenCalledWith(
-        '[name="dorman-lakelys-crit-fumble-tables.fumbleSound"]'
-      );
+      const datasets = Array.from(buttons).map(btn => (btn as HTMLElement).dataset.setting);
+      expect(datasets).toContain('critSound');
+      expect(datasets).toContain('fumbleSound');
     });
 
-    it('should not inject buttons if setting row not found', async () => {
+    it('should not inject duplicate buttons on re-render', async () => {
       const { injectSoundPreviewButtons } = await import('../../src/settings/ModuleSettings');
 
-      const mockInput = {
-        closest: jest.fn().mockReturnValue({ length: 0 }),
-        length: 0
-      };
-      const mockHtml = {
-        find: jest.fn().mockReturnValue(mockInput)
-      } as any;
+      const root = buildSettingsRoot();
+      injectSoundPreviewButtons(root);
+      injectSoundPreviewButtons(root);
 
-      // Should not throw
-      expect(() => injectSoundPreviewButtons(mockHtml)).not.toThrow();
+      // Same number of buttons after a second invocation.
+      expect(root.querySelectorAll('.sound-preview-btn').length).toBe(2);
+    });
+
+    it('should not throw when the input is missing entirely', async () => {
+      const { injectSoundPreviewButtons } = await import('../../src/settings/ModuleSettings');
+
+      const empty = document.createElement('div');
+      expect(() => injectSoundPreviewButtons(empty)).not.toThrow();
+      expect(empty.querySelectorAll('.sound-preview-btn').length).toBe(0);
+    });
+
+    it('should accept an array-of-element shape (legacy hook signature)', async () => {
+      const { injectSoundPreviewButtons } = await import('../../src/settings/ModuleSettings');
+
+      const root = buildSettingsRoot();
+      // Some legacy hooks pass [HTMLElement] instead of HTMLElement.
+      injectSoundPreviewButtons([root] as any);
+      expect(root.querySelectorAll('.sound-preview-btn').length).toBe(2);
     });
   });
 });

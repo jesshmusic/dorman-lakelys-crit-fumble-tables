@@ -2,7 +2,7 @@
   "id": "dorman-lakelys-crit-fumble-tables",
   "title": "Dorman Lakely's Critical Hit & Fumble Tables",
   "description": "Generic, tier-based critical hit and fumble tables for D&D 5e with full Midi-QOL automation support. Tables scale by character level across 4 tiers.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "authors": [
     {
       "name": "Jess Music (Dorman Lakely)",
@@ -10,9 +10,8 @@
     }
   ],
   "compatibility": {
-    "minimum": "13",
-    "verified": "13",
-    "maximum": "13"
+    "minimum": "14",
+    "verified": "14"
   },
   "relationships": {
     "systems": [
@@ -28,7 +27,11 @@
       {
         "id": "midi-qol",
         "type": "module",
-        "reason": "Required for automatic critical hit and fumble detection"
+        "reason": "Required for automatic critical hit and fumble detection",
+        "compatibility": {
+          "minimum": "13.0",
+          "verified": "14.0.1"
+        }
       }
     ],
     "recommends": [
@@ -39,8 +42,12 @@
       }
     ]
   },
-  "esmodules": ["dist/main.js"],
-  "styles": ["styles/crit-fumble.css"],
+  "esmodules": [
+    "dist/main.js"
+  ],
+  "styles": [
+    "styles/crit-fumble.css"
+  ],
   "languages": [
     {
       "lang": "en",
@@ -50,7 +57,7 @@
   ],
   "url": "https://github.com/jesshmusic/dorman-lakelys-crit-fumble-tables",
   "manifest": "https://raw.githubusercontent.com/jesshmusic/dorman-lakelys-crit-fumble-tables/main/module.json",
-  "download": "https://github.com/jesshmusic/dorman-lakelys-crit-fumble-tables/releases/download/v1.1.0/module.zip",
+  "download": "https://github.com/jesshmusic/dorman-lakelys-crit-fumble-tables/releases/download/v1.2.0/module.zip",
   "license": "LICENSE",
   "readme": "README.md",
   "bugs": "https://github.com/jesshmusic/dorman-lakelys-crit-fumble-tables/issues",

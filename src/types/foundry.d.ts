@@ -4,33 +4,10 @@
  */
 
 declare global {
-  // Basic jQuery type declaration for Foundry's bundled jQuery
-  interface JQuery<TElement = HTMLElement> {
-    find(selector: string): JQuery<TElement>;
-    closest(selector: string): JQuery<TElement>;
-    on(event: string, handler: (event: Event, ...args: any[]) => void): JQuery<TElement>;
-    on(
-      event: string,
-      selector: string,
-      handler: (event: Event, ...args: any[]) => void
-    ): JQuery<TElement>;
-    append(content: JQuery | string): JQuery<TElement>;
-    val(): string | number | string[] | undefined;
-    val(value: string | number | string[]): JQuery<TElement>;
-    length: number;
-  }
-
-  // jQuery global function
-  function $(selector: string | HTMLElement): JQuery;
-  function $(html: string): JQuery;
-
-  // Legacy AudioHelper class (fallback for older Foundry versions)
-  const AudioHelper: {
-    play(
-      options: { src: string; volume?: number; autoplay?: boolean; loop?: boolean },
-      push?: boolean
-    ): Promise<any>;
-  };
+  // Note: jQuery global removed during the v14 migration. The module no longer
+  // depends on Foundry's bundled jQuery; all DOM manipulation uses native APIs.
+  // The bare `AudioHelper` global is a v12 fallback that the runtime code
+  // checks for via globalThis — no ambient declaration is needed.
   const game: {
     modules: Map<string, { active: boolean }>;
     settings: {
@@ -43,7 +20,8 @@ declare global {
           label: string;
           hint?: string;
           icon?: string;
-          type: typeof FormApplication;
+          // v14: accepts any ApplicationV2 (or legacy FormApplication) constructor.
+          type: new (...args: any[]) => any;
           restricted?: boolean;
         }
       ): void;
@@ -152,22 +130,8 @@ declare global {
     };
   };
 
-  class Dialog {
-    static confirm(options: {
-      title: string;
-      content: string;
-      defaultYes?: boolean;
-    }): Promise<boolean>;
-
-    static prompt(options: {
-      title: string;
-      content: string;
-      label?: string;
-      callback?: (html: any) => any;
-    }): Promise<any>;
-
-    static wait(options: any): Promise<any>;
-  }
+  // Note: legacy `Dialog` class declaration removed in v14 migration. Use
+  // foundry.applications.api.DialogV2 (typed loosely via `(foundry as any)`).
 
   class ChatMessage {
     static create(data: {
@@ -183,31 +147,9 @@ declare global {
     static getSpeaker(options?: { actor?: Actor; token?: Token }): any;
   }
 
-  class FormApplication {
-    static get defaultOptions(): FormApplicationOptions;
-    get options(): FormApplicationOptions;
-    getData(): object;
-    render(force?: boolean): this;
-    close(options?: object): Promise<void>;
-    activateListeners(html: JQuery): void;
-    _updateObject(event: Event, formData: object): Promise<void>;
-  }
-
-  interface FormApplicationOptions {
-    id?: string;
-    title?: string;
-    template?: string;
-    width?: number;
-    height?: number | 'auto';
-    classes?: string[];
-    popOut?: boolean;
-    minimizable?: boolean;
-    resizable?: boolean;
-    closeOnSubmit?: boolean;
-    submitOnChange?: boolean;
-    submitOnClose?: boolean;
-    editable?: boolean;
-  }
+  // Note: legacy `FormApplication` class declaration removed in v14 migration.
+  // Settings menu entries now use foundry.applications.api.ApplicationV2
+  // subclasses (typed loosely via `(foundry as any)`).
 
   class Roll {
     constructor(formula: string, data?: any);
