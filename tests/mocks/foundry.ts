@@ -185,7 +185,14 @@ export function createMockFoundry(): typeof foundry {
           render = jest.fn();
           close = jest.fn();
         },
-        HandlebarsApplicationMixin: {}
+        HandlebarsApplicationMixin: {},
+        // v14: DialogV2 replaces the legacy Dialog global. Tests now mock
+        // DialogV2.confirm/.prompt directly via foundry.applications.api.DialogV2.
+        DialogV2: {
+          confirm: jest.fn<() => Promise<boolean>>().mockResolvedValue(true),
+          prompt: jest.fn<() => Promise<any>>().mockResolvedValue(true),
+          wait: jest.fn<() => Promise<any>>().mockResolvedValue(true)
+        }
       }
     },
     audio: {
@@ -400,9 +407,12 @@ export function createMockRollTableClass(): typeof RollTable {
 }
 
 /**
- * Mock FormApplication class
+ * Mock FormApplication class — kept for legacy test compatibility even after
+ * the v14 migration removed `FormApplication` from the source. The return type
+ * is `any` because the legacy `FormApplication` ambient declaration was deleted
+ * from `src/types/foundry.d.ts`.
  */
-export function createMockFormApplication(): typeof FormApplication {
+export function createMockFormApplication(): any {
   return class MockFormApplication {
     static get defaultOptions() {
       return {

@@ -76,10 +76,11 @@ Hooks.on('updateSetting', (setting: { key: string }) => {
 });
 
 /**
- * Inject sound preview buttons when settings panel renders
- * Note: Foundry v13 ApplicationV2 passes HTMLElement, legacy passes jQuery
+ * Inject sound preview buttons when settings panel renders.
+ * Foundry v14 SettingsConfig is ApplicationV2 and the renderSettingsConfig
+ * hook now passes a single HTMLElement (no jQuery wrapper).
  */
-Hooks.on('renderSettingsConfig', (_app: Application, html: unknown) => {
+Hooks.on('renderSettingsConfig', (_app: unknown, html: HTMLElement) => {
   injectSoundPreviewButtons(html);
 });
 

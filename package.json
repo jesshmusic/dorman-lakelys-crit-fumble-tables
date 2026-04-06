@@ -1,6 +1,6 @@
 {
   "name": "dorman-lakelys-crit-fumble-tables",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Generic tier-based critical hit and fumble tables for D&D 5e with Midi-QOL integration",
   "main": "dist/main.js",
   "type": "commonjs",
@@ -46,6 +46,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.3.0",
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",

@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-04-06
+
+### Added
+
+- Foundry VTT v14 compatibility (`compatibility.verified` bumped to `14`).
+- Verified against midi-qol v14.0.1 (verified pinned in `relationships.requires.midi-qol.compatibility`).
+
+### Fixed
+
+- **Three legacy `FormApplication` subclasses rewritten as `ApplicationV2`**: `ReimportTablesDialog`, `ResetSettingsDialog`, and `PatreonLink` (registered via `game.settings.registerMenu`) previously extended the v12-era `FormApplication` class, which was removed in v14. They are now thin `foundry.applications.api.ApplicationV2` stubs that hide their own shell window in `_onFirstRender` and immediately delegate to a `DialogV2.confirm` (or `DialogV2.prompt` for the Patreon link), then close themselves.
+- **Three `Dialog.confirm` calls migrated to `DialogV2.confirm`**: two in `src/settings/ModuleSettings.ts` (the reimport and reset confirmations) and one in `src/services/TableImporter.ts` (the version-update prompt). The legacy `defaultYes: true|false` option is replaced with the v14 `yes: { default: true }` / `no: { default: true }` shape, and `title` moves under `window.title`.
+- **`renderSettingsConfig` hook signature updated**: in v14 SettingsConfig is ApplicationV2 and the hook passes a single HTMLElement (no jQuery wrapper). The handler in `src/main.ts` now declares `(_app, html: HTMLElement)`.
+- **`injectSoundPreviewButtons` rewritten to native DOM**: the previous dual-mode jQuery / HTMLElement helper used Foundry's bundled jQuery (`html.find().closest()`, `previewBtn.on('click', ...)`, `inputWrapper.append(...)`). The rewrite uses only `querySelector`, `closest`, `addEventListener`, and `appendChild`. Functionally identical, but no jQuery dependency.
+- **AudioHelper namespace**: the sound preview now resolves `AudioHelper` through `foundry.audio.AudioHelper` (the v13/v14 location) with a `globalThis.AudioHelper` fallback for v12 worlds. The bare `AudioHelper` global is no longer referenced.
+
+### Removed
+
+- jQuery type shim (`interface JQuery`, `function $`) from `src/types/foundry.d.ts`. The module no longer depends on Foundry's bundled jQuery.
+- Legacy `Dialog` and `FormApplication` ambient class declarations from `src/types/foundry.d.ts` (replaced with comments pointing at `foundry.applications.api.DialogV2` / `ApplicationV2`).
+- The `registerMenu` `type` field is now typed as a generic constructor (`new (...args: any[]) => any`) so it accepts both ApplicationV2 and any remaining FormApplication subclasses.
+
+### Notes (dnd5e 5.x audit)
+
+- The dnd5e surface in this module is small: only `actor.system.details.level` and `actor.system.details.cr` for tier scaling. Both paths are unchanged in dnd5e 5.3.
+- The bigger 5.3 risk is **midi-qol's** workflow shape (`workflow.attackRoll.terms`, `workflow.isCritical`, `workflow.isFumble`, `workflow.item`, `workflow.actor`, `workflow.hitTargets`, `workflow.targets`). midi-qol v14.0.1 maintains backwards compatibility for these — the existing `getD20Result` and `getAttackType` helpers continue to work.
+- **DiceTerm namespace**: in v14 the canonical location is `foundry.dice.terms.DiceTerm`, but the bare `term.faces` / `term.results` property access in `getD20Result` still works because midi-qol returns the same Roll instance shape.
+
 ## [1.1.0] - 2026-02-04
 
 ### Added
