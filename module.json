@@ -10,7 +10,7 @@
     }
   ],
   "compatibility": {
-    "minimum": "13",
+    "minimum": "14",
     "verified": "14"
   },
   "relationships": {
@@ -42,8 +42,12 @@
       }
     ]
   },
-  "esmodules": ["dist/main.js"],
-  "styles": ["styles/crit-fumble.css"],
+  "esmodules": [
+    "dist/main.js"
+  ],
+  "styles": [
+    "styles/crit-fumble.css"
+  ],
   "languages": [
     {
       "lang": "en",
