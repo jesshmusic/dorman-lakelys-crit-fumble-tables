@@ -145,13 +145,22 @@ class PatreonLink extends ApplicationV2 {
   async _onFirstRender(_context: unknown, _options: unknown): Promise<void> {
     this.element?.style?.setProperty('display', 'none');
 
+    // game.i18n.localize() always returns a string (it returns the key as a
+    // fallback when the translation is missing) so a `?? 'fallback'` chain
+    // would be dead code. If the localization key is missing the user will
+    // see the literal key, which is acceptable for a hint string.
+    const hintKey = 'DLCRITFUMBLE.Settings.Patreon.Hint';
+    const hint = game.i18n.localize(hintKey);
+
     await DialogV2.prompt({
       window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Name') },
-      content: `<p>${game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Hint') ?? 'Open the Patreon page in a new tab.'}</p>`,
+      content: `<p>${hint === hintKey ? 'Open the Patreon page in a new tab.' : hint}</p>`,
       ok: {
         label: '<i class="fab fa-patreon"></i> Open Patreon',
         callback: () => {
-          window.open(URLS.PATREON, '_blank');
+          // `noopener,noreferrer` prevents reverse-tabnabbing — the new tab
+          // cannot navigate or read the Foundry page via window.opener.
+          window.open(URLS.PATREON, '_blank', 'noopener,noreferrer');
         }
       }
     });
