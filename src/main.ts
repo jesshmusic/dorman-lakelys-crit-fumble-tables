@@ -43,6 +43,60 @@ function logModuleReady(): void {
 }
 
 /**
+ * Compare an installed dependency's declared Foundry compatibility against
+ * the running Foundry core version and surface a user-visible notification
+ * if the dep declares itself incompatible. Only fires for deps that ARE
+ * installed and active — the existing "midi-qol not active" error path
+ * above handles the not-installed case.
+ *
+ * This exists because upstream modules can lag behind Foundry major
+ * releases (declaring themselves v13-only in their manifest) but still be
+ * installed and active on a v14 world. The warning tells the user which
+ * specific dep is stale, not just "something is broken."
+ */
+function warnIfDepOutdated(depId: string, displayName: string): void {
+  const mod = (game as any).modules?.get(depId);
+  if (!mod || !mod.active) {
+    // Existing "not installed" / "not active" paths already handle these.
+    return;
+  }
+
+  const coreMajor =
+    (game as any).release?.generation ??
+    parseInt(String((game as any).version ?? '0'), 10);
+  if (!coreMajor || Number.isNaN(coreMajor)) return;
+
+  const parseMajor = (v: unknown): number | null => {
+    if (v == null) return null;
+    const m = String(v).match(/^(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+  };
+
+  const compat = mod.compatibility ?? {};
+  const depMax = parseMajor(compat.maximum);
+  const depVerified = parseMajor(compat.verified);
+
+  // Hard cap below current Foundry major → permanent warning
+  if (depMax != null && depMax < coreMajor) {
+    ui.notifications?.warn(
+      `${MODULE_TITLE}: ${displayName} v${mod.version} declares Foundry v${compat.maximum} as its maximum, ` +
+        `but you are running Foundry v${(game as any).version}. Expect bugs until ${displayName} ships an update.`,
+      { permanent: true }
+    );
+    return;
+  }
+
+  // No hard cap but verified is behind → transient warning
+  if (depVerified != null && depVerified < coreMajor) {
+    ui.notifications?.warn(
+      `${MODULE_TITLE}: ${displayName} v${mod.version} is only verified for Foundry v${compat.verified}. ` +
+        `You're running v${(game as any).version} — some features may not work until ${displayName} ships a v${coreMajor}-verified release.`,
+      { permanent: false }
+    );
+  }
+}
+
+/**
  * Initialize the module
  */
 Hooks.once('init', function () {
@@ -59,6 +113,10 @@ Hooks.once('ready', async function () {
     ui.notifications.error(game.i18n.localize('DLCRITFUMBLE.Errors.MidiQolRequired'));
     return;
   }
+
+  // Midi-QOL is installed and active — warn loudly if its manifest
+  // declares itself incompatible with the running Foundry version.
+  warnIfDepOutdated('midi-qol', 'Midi QoL');
 
   await TableImporter.importTables();
   await TableImporter.checkForUpdates();
