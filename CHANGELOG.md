@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-04-07
+
+### Added
+
+- **Runtime dependency version warning** for Midi QoL. When Midi QoL is installed and active but its manifest declares itself incompatible with the running Foundry version (i.e. `compatibility.maximum` is below the current Foundry major, or `compatibility.verified` is behind), a notification now fires on `ready` naming the Midi QoL version and its declared max/verified. Hard-cap mismatches are permanent notifications; stale-verified mismatches are transient. The existing "Midi-QOL not active" error path is untouched.
+- **`dungeonmaster.guru` cross-promotion link** in the PatreonLink settings menu dialog. The dialog now shows two paragraphs: the original Patreon hint, and an inline link to [dungeonmaster.guru](https://dungeonmaster.guru) for SRD rules and DM tools. The single "Open Patreon" button is unchanged.
+
 ## [1.2.0] - 2026-04-06
 
 ### Added

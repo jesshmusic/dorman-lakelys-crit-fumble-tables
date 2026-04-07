@@ -154,7 +154,18 @@ class PatreonLink extends ApplicationV2 {
 
     await DialogV2.prompt({
       window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Name') },
-      content: `<p>${hint === hintKey ? 'Open the Patreon page in a new tab.' : hint}</p>`,
+      // Two paragraphs: the original Patreon hint, and a cross-promotion to
+      // dungeonmaster.guru (Jess's SRD rules + DM tools site). The DM Guru
+      // link is inline (not a second button) to keep the single-button
+      // DialogV2.prompt shape; users click the anchor directly.
+      content: `
+        <p>${hint === hintKey ? 'Open the Patreon page in a new tab.' : hint}</p>
+        <p style="margin-top:1rem">
+          Also check out
+          <a href="https://dungeonmaster.guru" target="_blank" rel="noopener noreferrer">dungeonmaster.guru</a>
+          for SRD rules and DM tools.
+        </p>
+      `,
       ok: {
         label: '<i class="fab fa-patreon"></i> Open Patreon',
         callback: () => {
