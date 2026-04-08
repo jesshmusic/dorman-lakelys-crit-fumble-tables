@@ -166,7 +166,7 @@ class PatreonLink extends ApplicationV2 {
                   margin:1rem auto 0; background:#f9f1dc; color:#5b1d12;
                   border:1px solid #645e56; border-radius:4px; padding:12px 16px;
                   text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
-          <img src="modules/dorman-lakelys-crit-fumble-tables/icons/dmguru-logo.svg" alt=""
+          <img src="modules/${MODULE_ID}/icons/dmguru-logo.svg" alt=""
                style="width:40px; height:40px; flex-shrink:0;" />
           <div style="flex:1;">
             <strong style="display:block; font-size:0.95rem; font-weight:600;">Dungeon Master Guru</strong>
@@ -211,13 +211,18 @@ class DmGuruLink extends ApplicationV2 {
   async _onFirstRender(_context: unknown, _options: unknown): Promise<void> {
     this.element?.style?.setProperty('display', 'none');
 
+    const hintKey = 'DLCRITFUMBLE.Settings.DmGuru.Hint';
+    const hint = game.i18n.localize(hintKey);
+    const nameKey = 'DLCRITFUMBLE.Settings.DmGuru.Name';
+    const name = game.i18n.localize(nameKey);
+
     await DialogV2.prompt({
-      window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Name') },
-      content: `<p>Open the Dungeon Master Guru site in a new tab.</p>`,
+      window: { title: name === nameKey ? 'Dungeon Master Guru' : name },
+      content: `<p>${hint === hintKey ? 'Open the Dungeon Master Guru site in a new tab.' : hint}</p>`,
       ok: {
-        label: '<i class="fas fa-dragon"></i> Visit Dungeon Master Guru',
+        label: `<i class="fas fa-dragon"></i> ${name === nameKey ? 'Visit Dungeon Master Guru' : name}`,
         callback: () => {
-          window.open('https://dungeonmaster.guru', '_blank', 'noopener,noreferrer');
+          window.open(URLS.DM_GURU, '_blank', 'noopener,noreferrer');
         }
       }
     });
@@ -370,7 +375,7 @@ export function registerSettings(): void {
     hint: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Hint'),
     icon: 'fas fa-dragon',
     type: DmGuruLink,
-    restricted: true
+    restricted: false
   });
 }
 

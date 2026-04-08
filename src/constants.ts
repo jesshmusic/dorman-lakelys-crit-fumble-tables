@@ -114,7 +114,8 @@ export const DEFAULT_SOUNDS = {
  * External URLs
  */
 export const URLS = {
-  PATREON: 'https://www.patreon.com/DormanLakely'
+  PATREON: 'https://www.patreon.com/c/DormanLakely',
+  DM_GURU: 'https://dungeonmaster.guru'
 } as const;
 
 /**
