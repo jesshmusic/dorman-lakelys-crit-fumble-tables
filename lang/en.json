@@ -64,6 +64,11 @@
         "Label": "Visit Patreon",
         "Hint": "Support the development of this module on Patreon! Your contributions help fund new features and updates."
       },
+      "DmGuru": {
+        "Name": "Dungeon Master Guru",
+        "Label": "Visit Dungeon Master Guru",
+        "Hint": "SRD rules and DM tools. Free resources for Dungeon Masters at dungeonmaster.guru."
+      },
       "PreviewSound": {
         "Tooltip": "Preview sound",
         "NoFileSelected": "No sound file selected",

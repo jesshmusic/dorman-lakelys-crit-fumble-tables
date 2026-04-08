@@ -188,6 +188,44 @@ class PatreonLink extends ApplicationV2 {
   }
 }
 
+class DmGuruLink extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    id: 'dlcritfumble-dmguru',
+    classes: [],
+    tag: 'div',
+    window: {
+      title: 'DLCRITFUMBLE.Settings.DmGuru.Name',
+      icon: 'fas fa-dragon'
+    },
+    position: { width: 1, height: 1 }
+  };
+
+  async _renderHTML(): Promise<HTMLElement> {
+    return document.createElement('div');
+  }
+
+  _replaceHTML(result: HTMLElement, content: HTMLElement): void {
+    content.replaceChildren(result);
+  }
+
+  async _onFirstRender(_context: unknown, _options: unknown): Promise<void> {
+    this.element?.style?.setProperty('display', 'none');
+
+    await DialogV2.prompt({
+      window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Name') },
+      content: `<p>Open the Dungeon Master Guru site in a new tab.</p>`,
+      ok: {
+        label: '<i class="fas fa-dragon"></i> Visit Dungeon Master Guru',
+        callback: () => {
+          window.open('https://dungeonmaster.guru', '_blank', 'noopener,noreferrer');
+        }
+      }
+    });
+
+    this.close();
+  }
+}
+
 /**
  * Register all module settings
  */
@@ -324,6 +362,15 @@ export function registerSettings(): void {
     icon: 'fab fa-patreon',
     type: PatreonLink,
     restricted: false
+  });
+
+  game.settings.registerMenu(MODULE_ID, 'dmGuruLink', {
+    name: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Name'),
+    label: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Label'),
+    hint: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Hint'),
+    icon: 'fas fa-dragon',
+    type: DmGuruLink,
+    restricted: true
   });
 }
 
