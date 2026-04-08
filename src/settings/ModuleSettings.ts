@@ -154,17 +154,25 @@ class PatreonLink extends ApplicationV2 {
 
     await DialogV2.prompt({
       window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Name') },
-      // Two paragraphs: the original Patreon hint, and a cross-promotion to
-      // dungeonmaster.guru (Jess's SRD rules + DM tools site). The DM Guru
-      // link is inline (not a second button) to keep the single-button
-      // DialogV2.prompt shape; users click the anchor directly.
+      // Two sections: the original Patreon hint paragraph, and a branded
+      // Dungeon Master Guru cross-promotion card (parchment cream background,
+      // burgundy text, taupe border, dragon logo) that links to the site.
+      // The card is intentionally a regular anchor (not a second dialog
+      // button) to keep the existing single-ok-button DialogV2.prompt shape.
       content: `
         <p>${hint === hintKey ? 'Open the Patreon page in a new tab.' : hint}</p>
-        <p style="margin-top:1rem">
-          Also check out
-          <a href="https://dungeonmaster.guru" target="_blank" rel="noopener noreferrer">dungeonmaster.guru</a>
-          for SRD rules and DM tools.
-        </p>
+        <a href="https://dungeonmaster.guru" target="_blank" rel="noopener noreferrer"
+           style="display:flex; align-items:center; gap:12px; max-width:320px;
+                  margin:1rem auto 0; background:#f9f1dc; color:#5b1d12;
+                  border:1px solid #645e56; border-radius:4px; padding:12px 16px;
+                  text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+          <img src="modules/dorman-lakelys-crit-fumble-tables/icons/dmguru-logo.svg" alt=""
+               style="width:40px; height:40px; flex-shrink:0;" />
+          <div style="flex:1;">
+            <strong style="display:block; font-size:0.95rem; font-weight:600;">Dungeon Master Guru</strong>
+            <span style="font-size:0.78rem; color:#645e56;">SRD rules &amp; DM tools</span>
+          </div>
+        </a>
       `,
       ok: {
         label: '<i class="fab fa-patreon"></i> Open Patreon',
