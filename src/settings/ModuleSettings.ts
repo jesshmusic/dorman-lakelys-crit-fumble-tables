@@ -154,17 +154,25 @@ class PatreonLink extends ApplicationV2 {
 
     await DialogV2.prompt({
       window: { title: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Name') },
-      // Two paragraphs: the original Patreon hint, and a cross-promotion to
-      // dungeonmaster.guru (Jess's SRD rules + DM tools site). The DM Guru
-      // link is inline (not a second button) to keep the single-button
-      // DialogV2.prompt shape; users click the anchor directly.
+      // Two sections: the original Patreon hint paragraph, and a branded
+      // Dungeon Master Guru cross-promotion card (parchment cream background,
+      // burgundy text, taupe border, dragon logo) that links to the site.
+      // The card is intentionally a regular anchor (not a second dialog
+      // button) to keep the existing single-ok-button DialogV2.prompt shape.
       content: `
         <p>${hint === hintKey ? 'Open the Patreon page in a new tab.' : hint}</p>
-        <p style="margin-top:1rem">
-          Also check out
-          <a href="https://dungeonmaster.guru" target="_blank" rel="noopener noreferrer">dungeonmaster.guru</a>
-          for SRD rules and DM tools.
-        </p>
+        <a href="https://dungeonmaster.guru" target="_blank" rel="noopener noreferrer"
+           style="display:flex; align-items:center; gap:12px; max-width:320px;
+                  margin:1rem auto 0; background:#f9f1dc; color:#5b1d12;
+                  border:1px solid #645e56; border-radius:4px; padding:12px 16px;
+                  text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+          <img src="modules/${MODULE_ID}/icons/dmguru-logo.svg" alt=""
+               style="width:40px; height:40px; flex-shrink:0;" />
+          <div style="flex:1;">
+            <strong style="display:block; font-size:0.95rem; font-weight:600;">Dungeon Master Guru</strong>
+            <span style="font-size:0.78rem; color:#645e56;">SRD rules &amp; DM tools</span>
+          </div>
+        </a>
       `,
       ok: {
         label: '<i class="fab fa-patreon"></i> Open Patreon',
@@ -172,6 +180,49 @@ class PatreonLink extends ApplicationV2 {
           // `noopener,noreferrer` prevents reverse-tabnabbing — the new tab
           // cannot navigate or read the Foundry page via window.opener.
           window.open(URLS.PATREON, '_blank', 'noopener,noreferrer');
+        }
+      }
+    });
+
+    this.close();
+  }
+}
+
+class DmGuruLink extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    id: 'dlcritfumble-dmguru',
+    classes: [],
+    tag: 'div',
+    window: {
+      title: 'DLCRITFUMBLE.Settings.DmGuru.Name',
+      icon: 'fas fa-dragon'
+    },
+    position: { width: 1, height: 1 }
+  };
+
+  async _renderHTML(): Promise<HTMLElement> {
+    return document.createElement('div');
+  }
+
+  _replaceHTML(result: HTMLElement, content: HTMLElement): void {
+    content.replaceChildren(result);
+  }
+
+  async _onFirstRender(_context: unknown, _options: unknown): Promise<void> {
+    this.element?.style?.setProperty('display', 'none');
+
+    const hintKey = 'DLCRITFUMBLE.Settings.DmGuru.Hint';
+    const hint = game.i18n.localize(hintKey);
+    const nameKey = 'DLCRITFUMBLE.Settings.DmGuru.Name';
+    const name = game.i18n.localize(nameKey);
+
+    await DialogV2.prompt({
+      window: { title: name === nameKey ? 'Dungeon Master Guru' : name },
+      content: `<p>${hint === hintKey ? 'Open the Dungeon Master Guru site in a new tab.' : hint}</p>`,
+      ok: {
+        label: `<i class="fas fa-dragon"></i> ${name === nameKey ? 'Visit Dungeon Master Guru' : name}`,
+        callback: () => {
+          window.open(URLS.DM_GURU, '_blank', 'noopener,noreferrer');
         }
       }
     });
@@ -315,6 +366,15 @@ export function registerSettings(): void {
     hint: game.i18n.localize('DLCRITFUMBLE.Settings.Patreon.Hint'),
     icon: 'fab fa-patreon',
     type: PatreonLink,
+    restricted: false
+  });
+
+  game.settings.registerMenu(MODULE_ID, 'dmGuruLink', {
+    name: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Name'),
+    label: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Label'),
+    hint: game.i18n.localize('DLCRITFUMBLE.Settings.DmGuru.Hint'),
+    icon: 'fas fa-dragon',
+    type: DmGuruLink,
     restricted: false
   });
 }
