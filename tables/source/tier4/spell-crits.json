@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
       "weight": 25,
       "range": [1, 25],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Annihilation - Magical fire engulfs the target. They take 3d8 fire damage at the start of each turn until Dispel Magic (DC 17) or similar.",
       "weight": 9,
       "range": [26, 34],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Magic Disruption - Your spell permanently disrupts the target's magic. They have disadvantage on spell attacks and saves for 1 minute.",
       "weight": 8,
       "range": [35, 42],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Apocalyptic Blast - The force sends the target flying 60 feet, prone, stunned for 1 round, and takes 3d6 force damage.",
       "weight": 7,
       "range": [43, 49],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Vulnerability - Your magic leaves the target utterly exposed. Attacks against them have advantage for 1 minute.",
       "weight": 7,
       "range": [50, 56],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Magic Destruction - Your spell permanently disrupts the target's magic. They cannot cast spells until Remove Curse or similar is cast.",
       "weight": 6,
       "range": [57, 62],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Legendary Arcane Mastery - Your perfect casting inspires legendary power. You have advantage on all spell attacks for 1 minute.",
       "weight": 6,
       "range": [63, 68],
@@ -105,7 +105,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Elemental Apocalypse - Your spell's element utterly overwhelms the target. Add 4d6 damage of the spell's type.",
       "weight": 5,
       "range": [69, 73],
@@ -119,7 +119,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Permanent Vulnerability - The target becomes permanently vulnerable to the spell's damage type until Remove Curse is cast.",
       "weight": 5,
       "range": [74, 78],
@@ -133,7 +133,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Terrifying Magic - Your devastating spell terrifies the target to their core. They are frightened of you for 1 minute (DC 18 Wis save ends).",
       "weight": 5,
       "range": [79, 83],
@@ -147,7 +147,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Twin Spell - Your spell echoes with legendary power. Cast the same spell again immediately as a free action, at the same level.",
       "weight": 5,
       "range": [84, 88],
@@ -161,7 +161,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Overwhelming Arcane Power - Your devastating spell deals an additional 5d6 force damage.",
       "weight": 4,
       "range": [89, 92],
@@ -175,7 +175,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Perfection - Your spell is cast with legendary efficiency. Regain 1 expended spell slot up to 7th level.",
       "weight": 7,
       "range": [93, 99],
@@ -189,7 +189,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Soul Searing - If target has 50 HP or fewer, they must make DC 20 Wis save or die instantly as their soul is burned away.",
       "weight": 1,
       "range": [100, 100],

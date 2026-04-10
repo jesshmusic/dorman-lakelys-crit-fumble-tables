@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - You stumble slightly but recover quickly with no additional penalty.",
       "weight": 40,
       "range": [1, 40],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Off Balance - Your wild swing throws you off balance. Your next attack has disadvantage.",
       "weight": 8,
       "range": [41, 48],
@@ -32,7 +32,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Overextended - You reach too far and leave yourself open. The target gains advantage on their next attack against you.",
       "weight": 7,
       "range": [49, 55],
@@ -48,7 +48,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Strained Muscle - You overextend and pull a muscle. Take 1d4 bludgeoning damage.",
       "weight": 7,
       "range": [56, 62],
@@ -62,7 +62,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Slips - Your weapon slips in your grip. You have disadvantage on attack rolls until the end of your next turn.",
       "weight": 6,
       "range": [63, 68],
@@ -77,7 +77,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Trip Over Feet - You stumble over your own feet and fall prone.",
       "weight": 6,
       "range": [69, 74],
@@ -91,7 +91,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Telegraphed Attack - Your attack was obvious. The target has advantage on their next saving throw against you.",
       "weight": 5,
       "range": [75, 79],
@@ -107,7 +107,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Lost Momentum - Your swing goes wide and you lose your rhythm. You cannot take reactions until the start of your next turn.",
       "weight": 5,
       "range": [80, 84],
@@ -121,7 +121,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Winded - The exertion leaves you gasping. You have disadvantage on Constitution checks until the end of your next turn.",
       "weight": 4,
       "range": [85, 88],
@@ -136,7 +136,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Opening Created - Your clumsy attack leaves you exposed. The target may make an opportunity attack against you.",
       "weight": 4,
       "range": [89, 92],
@@ -150,7 +150,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Notched - Your weapon hits something hard and is damaged. -1 to attack rolls until repaired.",
       "weight": 3,
       "range": [93, 95],
@@ -165,7 +165,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Embarrassing Miss - Your pathetic swing draws mocking laughter. You have disadvantage on Intimidation checks for 1 minute.",
       "weight": 2,
       "range": [96, 97],
@@ -180,7 +180,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Dropped - Your weapon flies from your grasp, landing 10 feet away in a random direction.",
       "weight": 2,
       "range": [98, 99],
@@ -192,7 +192,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Wild Swing - Your uncontrolled swing hits an ally within 5 feet (DM's choice). Roll attack against ally's AC; on hit, deal normal weapon damage.",
       "weight": 1,
       "range": [100, 100],

@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.",
       "weight": 25,
       "range": [1, 25],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Total Ammo Loss - All your ammunition scatters or is destroyed completely.",
       "weight": 9,
       "range": [26, 34],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Completely Exposed - Your fumble leaves you utterly vulnerable. Attacks against you have advantage for 1 minute.",
       "weight": 8,
       "range": [35, 42],
@@ -47,7 +47,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Strain - You badly tear multiple muscles. Take 3d6 bludgeoning damage.",
       "weight": 7,
       "range": [43, 49],
@@ -61,7 +61,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Shattered Confidence - Your failure rattles you to your core. You have disadvantage on all ranged attacks and saving throws for 1 minute.",
       "weight": 7,
       "range": [50, 56],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Badly Damaged - Your weapon is badly damaged. -3 to attack rolls until repaired by a skilled smith.",
       "weight": 6,
       "range": [57, 62],
@@ -91,7 +91,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Self-Injury - You severely injure yourself. Take 3d8 damage.",
       "weight": 6,
       "range": [63, 68],
@@ -105,7 +105,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Completely Helpless - You fumble so badly you are incapacitated and prone until the start of your next turn.",
       "weight": 5,
       "range": [69, 73],
@@ -119,7 +119,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Fatigued - The catastrophic failure utterly exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.",
       "weight": 5,
       "range": [74, 78],
@@ -134,7 +134,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarmed - Your weapon flies from your hands, landing 30 feet away.",
       "weight": 5,
       "range": [79, 83],
@@ -146,7 +146,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Destroyed - Your bow shatters or crossbow mechanism breaks completely. It is destroyed beyond repair.",
       "weight": 5,
       "range": [84, 88],
@@ -160,7 +160,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Devastating Self-Wound - Your weapon rebounds catastrophically. Take 4d8 damage.",
       "weight": 4,
       "range": [89, 92],
@@ -174,7 +174,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severely Self-Impaled - Your projectile impales you. Take 5d6 damage and speed halved until healed.",
       "weight": 7,
       "range": [93, 99],
@@ -188,7 +188,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Critically Hit Ally - Your shot critically strikes an ally. Roll attack vs ally's AC; on hit, deal triple weapon damage.",
       "weight": 1,
       "range": [100, 100],

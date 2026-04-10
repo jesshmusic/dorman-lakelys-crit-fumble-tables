@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 35,
       "range": [1, 35],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Staggering Blow - Your powerful strike sends the target reeling. They are knocked prone.",
       "weight": 8,
       "range": [36, 43],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disorienting Hit - Your devastating strike leaves your target dazed. They have disadvantage on all attacks until the end of their next turn.",
       "weight": 7,
       "range": [44, 50],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Deep Wound - Your strike opens a grievous wound. Target takes 1d8 extra damage.",
       "weight": 7,
       "range": [51, 57],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Exposed Defenses - Your attack reveals the target's weaknesses. Attacks against them have advantage until the end of your next turn.",
       "weight": 6,
       "range": [58, 63],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Armor Breach - Your attack finds a gap and damages their protection. -2 AC until the armor is repaired.",
       "weight": 6,
       "range": [64, 69],
@@ -91,7 +91,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Rattling Strike - The blow shakes your foe's confidence. They have disadvantage on their next saving throw.",
       "weight": 5,
       "range": [70, 74],
@@ -106,7 +106,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Momentum Surge - Your perfect form carries you forward. You have advantage on your next melee attack.",
       "weight": 5,
       "range": [75, 79],
@@ -121,7 +121,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Crippling Strike - Your blow strikes a leg. Target's speed is halved until they receive healing.",
       "weight": 5,
       "range": [80, 84],
@@ -135,7 +135,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Concentration Breaker - Your powerful hit disrupts focus. If concentrating, they have disadvantage on the concentration save.",
       "weight": 4,
       "range": [85, 88],
@@ -150,7 +150,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarming Strike - Your strike sends the target's weapon flying. They are disarmed.",
       "weight": 4,
       "range": [89, 92],
@@ -162,7 +162,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Stunning Impact - Your devastating hit stuns the target. They are stunned until the end of your next turn.",
       "weight": 3,
       "range": [93, 95],
@@ -176,7 +176,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Brutal Blow - Your mighty strike deals an additional 2d6 damage from the sheer force.",
       "weight": 3,
       "range": [96, 98],
@@ -190,7 +190,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Devastating Strike - A masterful blow! Deal maximum weapon damage and the target is frightened of you for 1 minute.",
       "weight": 2,
       "range": [99, 100],

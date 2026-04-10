@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your shot goes wide but you recover your composure with no additional penalty.",
       "weight": 40,
       "range": [1, 40],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Dropped Ammo - In your haste, you drop 1d4 pieces of ammunition.",
       "weight": 8,
       "range": [41, 48],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Off Target - Your aim was completely off. Your next ranged attack has disadvantage.",
       "weight": 7,
       "range": [49, 55],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Strained Arm - You overextend and strain your arm. Take 1d4 bludgeoning damage.",
       "weight": 7,
       "range": [56, 62],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Exposed Position - Your awkward positioning leaves you vulnerable. Attacks against you have advantage until the start of your next turn.",
       "weight": 6,
       "range": [63, 68],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Bowstring Snap - Your bowstring snaps or crossbow mechanism jams. Spend an action to restring or switch weapons.",
       "weight": 6,
       "range": [69, 74],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Lost Focus - Your concentration breaks. You have disadvantage on Perception checks until the end of your next turn.",
       "weight": 5,
       "range": [75, 79],
@@ -105,7 +105,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Tangled Equipment - Your quiver strap or weapon sling gets tangled. You can't draw or stow weapons until you use a bonus action to untangle.",
       "weight": 5,
       "range": [80, 84],
@@ -119,7 +119,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Hesitation - Your missed shot makes you hesitant. You have disadvantage on your next attack roll.",
       "weight": 4,
       "range": [85, 88],
@@ -134,7 +134,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Telegraphed Shot - Your target sees your aim and prepares. They have advantage on their next saving throw against you.",
       "weight": 4,
       "range": [89, 92],
@@ -150,7 +150,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Nicked - Your weapon takes a minor beating. -1 to attack rolls until you spend a short rest maintaining it.",
       "weight": 3,
       "range": [93, 95],
@@ -165,7 +165,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Ammunition Lost - Your projectile ricochets and is lost. Lose 1 piece of ammunition.",
       "weight": 2,
       "range": [96, 97],
@@ -179,7 +179,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Dropped - Your ranged weapon slips from your grasp, landing at your feet.",
       "weight": 2,
       "range": [98, 99],
@@ -191,7 +191,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Friendly Fire Risk - Your shot veers dangerously toward an ally. If there's an ally in the path, roll your attack against their AC.",
       "weight": 1,
       "range": [100, 100],

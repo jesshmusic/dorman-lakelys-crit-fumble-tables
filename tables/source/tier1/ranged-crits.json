@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 40,
       "range": [1, 40],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Pinning Shot - Your projectile pins part of the target's clothing or armor to nearby terrain. Their speed is reduced by 10 feet until they use an action to free themselves.",
       "weight": 8,
       "range": [41, 48],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Eye Threat - Your projectile flies dangerously close to the target's eyes. They have disadvantage on their next ranged attack.",
       "weight": 7,
       "range": [49, 55],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Bleeding Wound - Your projectile leaves a deep wound. Target takes 1d4 extra damage.",
       "weight": 7,
       "range": [56, 62],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Staggering Impact - The force of your shot staggers the target. They must succeed on a DC 10 Strength save or be pushed 5 feet.",
       "weight": 6,
       "range": [63, 68],
@@ -75,7 +75,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Rattled Target - Your shot startles the target. They have disadvantage on their next ability check.",
       "weight": 6,
       "range": [69, 74],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Exposed Target - Your shot forces the target to flinch and expose themselves. Attacks against them have advantage until the end of your next turn.",
       "weight": 5,
       "range": [75, 79],
@@ -106,7 +106,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarming Shot - Your projectile strikes the target's weapon hand. They have disadvantage on attack rolls until the end of their next turn.",
       "weight": 5,
       "range": [80, 84],
@@ -121,7 +121,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Perfect Aim - Your incredible accuracy impresses allies. You have advantage on your next ranged attack.",
       "weight": 4,
       "range": [85, 88],
@@ -136,7 +136,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Distracting Shot - Your shot forces the target to focus on dodging. They have disadvantage on their next saving throw.",
       "weight": 4,
       "range": [89, 92],
@@ -151,7 +151,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Armor Piercing - Your shot finds a weak spot in the target's armor. They take -1 to AC until they spend an action to adjust it.",
       "weight": 3,
       "range": [93, 95],
@@ -166,7 +166,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Hamstring Shot - Your projectile strikes the target's leg. Their speed is reduced by half until the end of their next turn.",
       "weight": 2,
       "range": [96, 97],
@@ -180,7 +180,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Penetrating Shot - Your projectile tears through, dealing an additional 1d6 damage.",
       "weight": 2,
       "range": [98, 99],
@@ -194,7 +194,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Deadly Precision - A masterful shot! Deal maximum weapon damage instead of rolling, and the target is frightened of you until the end of their next turn.",
       "weight": 1,
       "range": [100, 100],

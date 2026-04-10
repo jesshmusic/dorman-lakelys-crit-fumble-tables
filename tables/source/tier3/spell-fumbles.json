@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
       "weight": 30,
       "range": [1, 30],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Backlash - The spell's energy rebounds violently. Take 2d8 force damage.",
       "weight": 9,
       "range": [31, 39],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Vulnerability - Your failed spell leaves you exposed. Attacks against you have advantage for 1 minute.",
       "weight": 8,
       "range": [40, 47],
@@ -47,7 +47,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Magic Burnout - Your magic fails completely. You cannot cast spells for 1 minute.",
       "weight": 8,
       "range": [48, 55],
@@ -61,7 +61,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Shattered Focus - Your failure destroys your concentration. You have disadvantage on spell attacks and concentration checks for 1 minute.",
       "weight": 7,
       "range": [56, 62],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Total Sensory Overload - You are blinded and stunned until the end of your next turn.",
       "weight": 6,
       "range": [63, 68],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Spell Fully Rebounds - Your spell affects you at full power. Take 3d6 force damage.",
       "weight": 5,
       "range": [69, 73],
@@ -104,7 +104,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Multiple Slot Burn - The failed casting burns out multiple spell slots. Lose 1d4 spell slots.",
       "weight": 5,
       "range": [74, 78],
@@ -118,7 +118,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Fatigued - The failed spell drains you completely. You have disadvantage on attack rolls and ability checks for 1 minute.",
       "weight": 5,
       "range": [79, 83],
@@ -133,7 +133,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Shock - Magical energy jolts through you. You can't take reactions and have disadvantage on Dexterity saves for 1 minute.",
       "weight": 4,
       "range": [84, 87],
@@ -148,7 +148,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Valuable Component Destroyed - A valuable material component is destroyed. Lose 100gp worth of components.",
       "weight": 4,
       "range": [88, 91],
@@ -162,7 +162,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Magical Rebound - Your spell affects you severely. Take 3d8 force damage.",
       "weight": 4,
       "range": [92, 95],
@@ -176,7 +176,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Catastrophic Failure - Your spell fails catastrophically. Take 4d8 force damage.",
       "weight": 3,
       "range": [96, 98],
@@ -190,7 +190,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Wild Magic Explosion - A wild magic explosion occurs centered on you. All creatures within 20 feet must make DC 15 Dex save or take 3d6 force damage.",
       "weight": 2,
       "range": [99, 100],

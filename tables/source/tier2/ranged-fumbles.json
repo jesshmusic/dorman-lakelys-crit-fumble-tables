@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.",
       "weight": 35,
       "range": [1, 35],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Scatter Ammo - In your fumble, you drop 2d4 pieces of ammunition that scatter around you.",
       "weight": 8,
       "range": [36, 43],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Off Target - Your aim was completely off. You have disadvantage on your next ranged attack.",
       "weight": 7,
       "range": [44, 50],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Torn Muscle - You badly strain your arm. Take 1d6 bludgeoning damage.",
       "weight": 7,
       "range": [51, 57],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Completely Exposed - Your awkward position leaves you defenseless. Attacks against you have advantage until the start of your next turn.",
       "weight": 6,
       "range": [58, 63],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Bowstring Snapped - Your bowstring snaps or crossbow mechanism jams. Spend an action to fix or switch weapons.",
       "weight": 6,
       "range": [64, 69],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Shaken Aim - Your failure rattles you. You have disadvantage on ranged attacks until the end of your next turn.",
       "weight": 5,
       "range": [70, 74],
@@ -105,7 +105,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Telegraphed Shot - Your target saw you coming. They have advantage on their next saving throw against you.",
       "weight": 5,
       "range": [75, 79],
@@ -121,7 +121,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarmed - Your weapon flies from your hands, landing 20 feet away.",
       "weight": 5,
       "range": [80, 84],
@@ -133,7 +133,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Damaged - Your weapon is damaged. -2 to attack rolls until repaired.",
       "weight": 4,
       "range": [85, 88],
@@ -148,7 +148,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Lost Focus - Your concentration breaks. You can't take reactions until the start of your next turn.",
       "weight": 4,
       "range": [89, 92],
@@ -162,7 +162,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Self-Injury - The weapon rebounds and injures you. Take 1d8 bludgeoning damage.",
       "weight": 3,
       "range": [93, 95],
@@ -176,7 +176,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Breaks - Your weapon breaks from the strain. It is destroyed and cannot be used.",
       "weight": 3,
       "range": [96, 98],
@@ -190,7 +190,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Hit Ally - Your shot hits a nearby ally. Roll attack against ally's AC; on hit, deal weapon damage.",
       "weight": 2,
       "range": [99, 100],

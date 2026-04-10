@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
       "weight": 40,
       "range": [1, 40],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Magical Feedback - The spell's energy rebounds slightly. Take 1d4 force damage.",
       "weight": 8,
       "range": [41, 48],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Hiccup - Your magic stutters. Your next spell attack has disadvantage.",
       "weight": 7,
       "range": [49, 55],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Visual Distortion - The spell creates brief visual noise. You have disadvantage on Perception checks until the end of your next turn.",
       "weight": 7,
       "range": [56, 62],
@@ -61,7 +61,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Exposed Caster - Your failed casting leaves you open. Attacks against you have advantage until the start of your next turn.",
       "weight": 6,
       "range": [63, 68],
@@ -77,7 +77,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Spell Slot Strain - The failed casting strains your magical reserves. Your next spell that requires a spell slot costs an additional slot of 1st level (if you have one).",
       "weight": 6,
       "range": [69, 74],
@@ -91,7 +91,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Magical Fatigue - The failed spell drains you. You have disadvantage on Constitution checks until the end of your next turn.",
       "weight": 5,
       "range": [75, 79],
@@ -106,7 +106,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Wild Magic Spark - A tiny surge of wild magic occurs. DM rolls on a minor effect table or chooses a harmless cosmetic effect.",
       "weight": 5,
       "range": [80, 84],
@@ -120,7 +120,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Concentration Shaken - The failure shakes your confidence. You have disadvantage on concentration checks until the end of your next turn.",
       "weight": 4,
       "range": [85, 88],
@@ -135,7 +135,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Telegraphed Magic - Your target sensed your failed spell. They have advantage on their next saving throw against your spells.",
       "weight": 4,
       "range": [89, 92],
@@ -151,7 +151,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Component Mishap - A material component is accidentally destroyed or consumed. Lose one use of a material component you were using (if applicable).",
       "weight": 3,
       "range": [93, 95],
@@ -165,7 +165,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Shock - Magical energy jolts through you. You cannot take reactions until the start of your next turn.",
       "weight": 2,
       "range": [96, 97],
@@ -179,7 +179,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Magical Surge - Uncontrolled energy damages you. Take 1d6 force damage.",
       "weight": 2,
       "range": [98, 99],
@@ -193,7 +193,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Self-Target - Your spell briefly affects you instead of your target. Take the spell's effect on yourself at half damage (or the effect with a DC 10 save, if applicable).",
       "weight": 1,
       "range": [100, 100],

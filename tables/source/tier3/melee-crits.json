@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 30,
       "range": [1, 30],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Crushing Blow - Your devastating strike sends the target sprawling. They are prone and stunned until the end of your next turn.",
       "weight": 9,
       "range": [31, 39],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disorienting Blow - Your devastating hit leaves the target reeling. They have disadvantage on all attacks and saving throws until the end of their next turn.",
       "weight": 8,
       "range": [40, 47],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Deep Wound - Your strike opens a terrible wound. Target takes 2d6 extra damage.",
       "weight": 8,
       "range": [48, 55],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Exposed Defenses - Your attack exposes critical weaknesses. Attacks against the target have advantage for 1 minute.",
       "weight": 7,
       "range": [56, 62],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Limb Strike - Your blow cripples a limb. Target's speed is halved until healed.",
       "weight": 6,
       "range": [63, 68],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Combat Mastery - Your perfect strike inspires you. You have advantage on all melee attacks for 1 minute.",
       "weight": 5,
       "range": [69, 73],
@@ -105,7 +105,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Armor Shattered - Your attack shatters their armor. -3 AC until repaired by a skilled smith.",
       "weight": 5,
       "range": [74, 78],
@@ -120,7 +120,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarming Strike - Your powerful strike disarms the target, sending their weapon 20 feet away.",
       "weight": 5,
       "range": [79, 83],
@@ -132,7 +132,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Terrifying Strike - Your brutal attack terrifies the target. They are frightened of you for 1 minute.",
       "weight": 4,
       "range": [84, 87],
@@ -146,7 +146,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disemboweling Strike - Your blade tears through vital organs. Target must make DC 15 Con save or be incapacitated for 1 round.",
       "weight": 4,
       "range": [88, 91],
@@ -161,7 +161,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Brutal Devastation - Your mighty strike deals an additional 3d6 damage.",
       "weight": 4,
       "range": [92, 95],
@@ -175,7 +175,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Overwhelming Force - Your devastating blow deals an additional 4d6 damage and knocks the target prone.",
       "weight": 3,
       "range": [96, 98],
@@ -189,7 +189,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Near-Fatal Blow - Your strike nearly kills the target. If they have fewer than 30 HP, they must make DC 18 Con save or drop to 0 HP.",
       "weight": 2,
       "range": [99, 100],

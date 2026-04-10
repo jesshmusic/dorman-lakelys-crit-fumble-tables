@@ -132,7 +132,7 @@ function getTierFromLevel(level: number): number {
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your strike deals damage as normal.",
       "weight": 60,
       "range": [1, 60],
@@ -144,7 +144,7 @@ function getTierFromLevel(level: number): number {
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Knockdown - Target is knocked prone.",
       "weight": 10,
       "range": [61, 70],

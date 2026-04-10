@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
       "weight": 35,
       "range": [1, 35],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Burn - Magical energy sears the target. They take 1d8 force damage at the start of their next turn.",
       "weight": 8,
       "range": [36, 43],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Magic Disruption - Your spell disrupts their magical abilities. Target has disadvantage on spell attacks for 1 minute.",
       "weight": 7,
       "range": [44, 50],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Powerful Knockback - The force of your spell sends the target flying. They are pushed 15 feet and fall prone.",
       "weight": 7,
       "range": [51, 57],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Vulnerability - Your magic leaves the target exposed. Attacks against them have advantage until the end of your next turn.",
       "weight": 6,
       "range": [58, 63],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Concentration Shatter - Your spell disrupts focus. If concentrating, they have disadvantage on the save with a -5 penalty.",
       "weight": 6,
       "range": [64, 69],
@@ -91,7 +91,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Insight - Your magical senses sharpen. You have advantage on your next spell attack.",
       "weight": 5,
       "range": [70, 74],
@@ -106,7 +106,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Elemental Surge - Your spell's element flares dramatically. Add 2d6 damage of the spell's type.",
       "weight": 5,
       "range": [75, 79],
@@ -120,7 +120,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Mind Fog - Your spell clouds the target's mind. They have disadvantage on their next saving throw.",
       "weight": 5,
       "range": [80, 84],
@@ -135,7 +135,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Dazzling Display - Your spell creates a blinding flash. The target is blinded until the end of their next turn.",
       "weight": 4,
       "range": [85, 88],
@@ -149,7 +149,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Spell Echo - Your spell echoes with power. You may cast the same cantrip again as a bonus action.",
       "weight": 4,
       "range": [89, 92],
@@ -163,7 +163,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Stunning Spell - The magical energy overwhelms the target. They are stunned until the end of your next turn.",
       "weight": 3,
       "range": [93, 95],
@@ -177,7 +177,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Amplification - Your magical power surges! Deal an additional 2d8 force damage.",
       "weight": 3,
       "range": [96, 98],
@@ -191,7 +191,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Perfect Casting - A masterful spell! Deal maximum damage and regain 1 expended spell slot up to 2nd level.",
       "weight": 2,
       "range": [99, 100],

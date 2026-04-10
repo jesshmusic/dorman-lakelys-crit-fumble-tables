@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 30,
       "range": [1, 30],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Penetrating Shot - Your projectile strikes with devastating force. Deal an additional 2d6 piercing damage.",
       "weight": 9,
       "range": [31, 39],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Staggering Shot - Your shot staggers the target badly. They have disadvantage on all attacks and saving throws until the end of their next turn.",
       "weight": 8,
       "range": [40, 47],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arterial Hit - Your shot strikes a major artery. Target takes 2d6 piercing damage at the start of their next turn.",
       "weight": 8,
       "range": [48, 55],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Exposed Target - Your shot exposes critical weaknesses. Attacks against the target have advantage for 1 minute.",
       "weight": 7,
       "range": [56, 62],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Crippling Shot - Your shot shatters bone. Target's speed is halved until magically healed.",
       "weight": 6,
       "range": [63, 68],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Marksman's Focus - Your perfect shot inspires you. You have advantage on all ranged attacks for 1 minute.",
       "weight": 5,
       "range": [69, 73],
@@ -105,7 +105,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Blinding Shot - Your shot strikes near the target's eyes. They are blinded for 1 minute or until healed.",
       "weight": 5,
       "range": [74, 78],
@@ -119,7 +119,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Pinned to Wall - Your shot pins the target to a nearby surface. They are restrained until they use an action to pull free.",
       "weight": 5,
       "range": [79, 83],
@@ -133,7 +133,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Terrifying Shot - Your brutal accuracy terrifies the target. They are frightened of you for 1 minute.",
       "weight": 4,
       "range": [84, 87],
@@ -147,7 +147,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Armor Piercing - Your shot finds a critical weak spot. Target takes -3 to AC until repaired.",
       "weight": 4,
       "range": [88, 91],
@@ -162,7 +162,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Devastating Shot - Your perfectly placed shot deals an additional 3d6 piercing damage.",
       "weight": 4,
       "range": [92, 95],
@@ -176,7 +176,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Overwhelming Shot - Your devastating shot deals an additional 4d6 piercing damage and knocks the target prone.",
       "weight": 3,
       "range": [96, 98],
@@ -190,7 +190,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Heart Shot - Your shot strikes true to a vital organ. Target must make DC 18 Con save or drop to 0 HP if under 30 HP.",
       "weight": 2,
       "range": [99, 100],

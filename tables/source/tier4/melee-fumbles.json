@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - You stumble but recover with no additional penalty.",
       "weight": 25,
       "range": [1, 25],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Catastrophic Fall - You fall prone and are stunned until end of your next turn.",
       "weight": 9,
       "range": [26, 34],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Utterly Exposed - Your catastrophic failure leaves you completely vulnerable. Attacks against you have advantage for 1 minute.",
       "weight": 8,
       "range": [35, 42],
@@ -47,7 +47,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Self-Injury - You critically wound yourself. Take 3d6 damage.",
       "weight": 7,
       "range": [43, 49],
@@ -61,7 +61,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Shattered Confidence - Your failure rattles you to your core. You have disadvantage on all attacks and saving throws for 1 minute.",
       "weight": 7,
       "range": [50, 56],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Badly Damaged - Your weapon is badly damaged. -3 to attack and damage rolls until repaired.",
       "weight": 6,
       "range": [57, 62],
@@ -91,7 +91,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Hit Yourself Critically - Your weapon rebounds and strikes you critically. Take 3d8 damage.",
       "weight": 6,
       "range": [63, 68],
@@ -105,7 +105,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Incapacitated - Your catastrophic failure stuns you completely. You are incapacitated and prone until start of your next turn.",
       "weight": 5,
       "range": [69, 73],
@@ -119,7 +119,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Fatigued - The fumble utterly exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.",
       "weight": 5,
       "range": [74, 78],
@@ -134,7 +134,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarmed - Your weapon flies from your grasp, landing 30 feet away in a random direction.",
       "weight": 5,
       "range": [79, 83],
@@ -146,7 +146,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Lost Initiative - Your fumble leaves you completely off guard. You can't take reactions and go last in initiative next round.",
       "weight": 5,
       "range": [84, 88],
@@ -160,7 +160,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Destroyed - Your legendary weapon shatters catastrophically. It is destroyed beyond repair.",
       "weight": 4,
       "range": [89, 92],
@@ -174,7 +174,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Devastating Self-Wound - Your weapon rebounds catastrophically. Take 4d8 damage.",
       "weight": 7,
       "range": [93, 99],
@@ -188,7 +188,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Devastate All Allies - Your wild swing strikes all allies within 10 feet. Roll attack against each; hit deals weapon damage.",
       "weight": 1,
       "range": [100, 100],

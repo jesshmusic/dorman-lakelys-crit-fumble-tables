@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.",
       "weight": 30,
       "range": [1, 30],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Scatter All Ammo - You drop your entire quiver. All ammunition scatters around you.",
       "weight": 9,
       "range": [31, 39],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Completely Exposed - Your fumble leaves you exposed. Attacks against you have advantage for 1 minute.",
       "weight": 8,
       "range": [40, 47],
@@ -47,7 +47,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Strain - You badly tear a muscle. Take 2d6 bludgeoning damage.",
       "weight": 8,
       "range": [48, 55],
@@ -61,7 +61,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Shattered Confidence - Your failure rattles you deeply. You have disadvantage on all ranged attacks and saving throws for 1 minute.",
       "weight": 7,
       "range": [56, 62],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Bowstring Snapped - Your bowstring snaps or weapon mechanism jams. Spend an action to fix or switch weapons.",
       "weight": 6,
       "range": [63, 68],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Self-Injury - You severely injure yourself. Take 2d8 damage.",
       "weight": 5,
       "range": [69, 73],
@@ -104,7 +104,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Incapacitated - Your fumble leaves you defenseless. You are incapacitated until the start of your next turn.",
       "weight": 5,
       "range": [74, 78],
@@ -118,7 +118,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarmed - Your weapon flies from your hands, landing 25 feet away.",
       "weight": 5,
       "range": [79, 83],
@@ -130,7 +130,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Fatigued - The catastrophic failure exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.",
       "weight": 4,
       "range": [84, 87],
@@ -145,7 +145,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Badly Damaged - Your weapon is badly damaged. -3 to attack rolls until repaired.",
       "weight": 4,
       "range": [88, 91],
@@ -160,7 +160,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Breaks - Your weapon breaks from the strain. It is destroyed and cannot be used.",
       "weight": 4,
       "range": [92, 95],
@@ -174,7 +174,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Self-Injury - Your weapon rebounds critically. Take 3d8 damage.",
       "weight": 3,
       "range": [96, 98],
@@ -188,7 +188,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Hit Ally Critically - Your shot hits an ally for critical damage. Roll attack vs ally's AC; on hit, deal double weapon damage.",
       "weight": 2,
       "range": [99, 100],

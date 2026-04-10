@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 35,
       "range": [1, 35],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Through and Through - Your projectile passes through with devastating force. Deal an additional 1d6 damage.",
       "weight": 8,
       "range": [36, 43],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Staggering Shot - Your shot staggers the target. They have disadvantage on their next attack roll.",
       "weight": 7,
       "range": [44, 50],
@@ -46,7 +46,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arterial Hit - Your shot strikes an artery. Target takes 1d8 extra damage.",
       "weight": 7,
       "range": [51, 57],
@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Exposed Target - Your shot reveals the target's weakness. Attacks against them have advantage until the end of your next turn.",
       "weight": 6,
       "range": [58, 63],
@@ -76,7 +76,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Crippling Shot - Your shot strikes a limb. Target's speed is reduced by 15 feet until healed.",
       "weight": 6,
       "range": [64, 69],
@@ -90,7 +90,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Perfect Aim - Your incredible accuracy gives you confidence. You have advantage on your next ranged attack.",
       "weight": 5,
       "range": [70, 74],
@@ -105,7 +105,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Knock Down - The force of your shot knocks the target off their feet. They fall prone.",
       "weight": 5,
       "range": [75, 79],
@@ -119,7 +119,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disrupting Shot - Your shot breaks the target's focus. They have disadvantage on their next saving throw.",
       "weight": 5,
       "range": [80, 84],
@@ -134,7 +134,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Eye Shot - Your shot threatens the target's eyes. They are blinded until the end of their next turn.",
       "weight": 4,
       "range": [85, 88],
@@ -148,7 +148,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Pinned to Ground - Your shot pins the target in place. They are restrained until they use an action to pull free.",
       "weight": 4,
       "range": [89, 92],
@@ -162,7 +162,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Armor Piercing - Your shot finds a weak spot. Target takes -2 to AC until they spend an action to adjust their armor.",
       "weight": 3,
       "range": [93, 95],
@@ -177,7 +177,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Devastating Shot - Your perfectly placed shot deals an additional 2d6 damage.",
       "weight": 3,
       "range": [96, 98],
@@ -191,7 +191,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Legendary Shot - A masterful shot! Deal maximum weapon damage and the target is frightened of you for 1 minute.",
       "weight": 2,
       "range": [99, 100],
