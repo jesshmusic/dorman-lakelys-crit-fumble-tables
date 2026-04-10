@@ -5,10 +5,13 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your shot goes wide but you recover with no additional penalty.",
       "weight": 25,
-      "range": [1, 25],
+      "range": [
+        1,
+        25
+      ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -17,10 +20,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Total Ammo Loss - All your ammunition scatters or is destroyed completely.",
       "weight": 9,
-      "range": [26, 34],
+      "range": [
+        26,
+        34
+      ],
       "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -31,10 +37,13 @@
       }
     },
     {
-      "type": 0,
-      "text": "Completely Exposed - Your fumble leaves you utterly vulnerable. Attacks against you have advantage for 1 minute.",
+      "type": "text",
+      "text": "Completely Exposed - Your fumble leaves you utterly vulnerable. Attacks against you have advantage for 3 rounds.",
       "weight": 8,
-      "range": [35, 42],
+      "range": [
+        35,
+        42
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -42,15 +51,18 @@
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
           "effectName": "Completely Exposed",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Strain - You badly tear multiple muscles. Take 3d6 bludgeoning damage.",
       "weight": 7,
-      "range": [43, 49],
+      "range": [
+        43,
+        49
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -61,25 +73,34 @@
       }
     },
     {
-      "type": 0,
-      "text": "Shattered Confidence - Your failure rattles you to your core. You have disadvantage on all ranged attacks and saving throws for 1 minute.",
+      "type": "text",
+      "text": "Shattered Confidence - Your failure rattles you to your core. You have disadvantage on all ranged attacks and saving throws for 3 rounds.",
       "weight": 7,
-      "range": [50, 56],
+      "range": [
+        50,
+        56
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.rwak", "save.all"],
+          "advantageScope": [
+            "attack.rwak",
+            "save.all"
+          ],
           "effectName": "Shattered Confidence",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Badly Damaged - Your weapon is badly damaged. -3 to attack rolls until repaired by a skilled smith.",
       "weight": 6,
-      "range": [57, 62],
+      "range": [
+        57,
+        62
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -91,10 +112,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Self-Injury - You severely injure yourself. Take 3d8 damage.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -105,10 +129,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Completely Helpless - You fumble so badly you are incapacitated and prone until the start of your next turn.",
       "weight": 5,
-      "range": [69, 73],
+      "range": [
+        69,
+        73
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -119,25 +146,34 @@
       }
     },
     {
-      "type": 0,
-      "text": "Fatigued - The catastrophic failure utterly exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.",
+      "type": "text",
+      "text": "Fatigued - The catastrophic failure utterly exhausts you. You have disadvantage on attack rolls and ability checks for 3 rounds.",
       "weight": 5,
-      "range": [74, 78],
+      "range": [
+        74,
+        78
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "ability.all"],
+          "advantageScope": [
+            "attack.all",
+            "ability.all"
+          ],
           "effectName": "Fatigued",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarmed - Your weapon flies from your hands, landing 30 feet away.",
       "weight": 5,
-      "range": [79, 83],
+      "range": [
+        79,
+        83
+      ],
       "img": "icons/weapons/bows/longbow-recurve-brown.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -146,10 +182,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Destroyed - Your bow shatters or crossbow mechanism breaks completely. It is destroyed beyond repair.",
       "weight": 5,
-      "range": [84, 88],
+      "range": [
+        84,
+        88
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -160,10 +199,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Devastating Self-Wound - Your weapon rebounds catastrophically. Take 4d8 damage.",
       "weight": 4,
-      "range": [89, 92],
+      "range": [
+        89,
+        92
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -174,10 +216,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severely Self-Impaled - Your projectile impales you. Take 5d6 damage and speed halved until healed.",
       "weight": 7,
-      "range": [93, 99],
+      "range": [
+        93,
+        99
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -188,10 +233,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Critically Hit Ally - Your shot critically strikes an ally. Roll attack vs ally's AC; on hit, deal triple weapon damage.",
       "weight": 1,
-      "range": [100, 100],
+      "range": [
+        100,
+        100
+      ],
       "img": "icons/svg/combat.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

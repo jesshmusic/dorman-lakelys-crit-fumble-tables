@@ -5,10 +5,13 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - You stumble but recover with no additional penalty.",
       "weight": 30,
-      "range": [1, 30],
+      "range": [
+        1,
+        30
+      ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -17,10 +20,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Prone and Vulnerable - You fall prone and attacks against you have advantage until the start of your next turn.",
       "weight": 9,
-      "range": [31, 39],
+      "range": [
+        31,
+        39
+      ],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -31,10 +37,13 @@
       }
     },
     {
-      "type": 0,
-      "text": "Massive Opening - Your catastrophic failure leaves you exposed. Attacks against you have advantage for 1 minute.",
+      "type": "text",
+      "text": "Massive Opening - Your catastrophic failure leaves you exposed. Attacks against you have advantage for 3 rounds.",
       "weight": 8,
-      "range": [40, 47],
+      "range": [
+        40,
+        47
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -42,15 +51,18 @@
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
           "effectName": "Massive Opening",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Muscle Tear - You badly injure yourself. Take 2d6 bludgeoning damage.",
       "weight": 8,
-      "range": [48, 55],
+      "range": [
+        48,
+        55
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -61,25 +73,34 @@
       }
     },
     {
-      "type": 0,
-      "text": "Shattered Confidence - Your failure rattles you deeply. You have disadvantage on all attacks and saving throws for 1 minute.",
+      "type": "text",
+      "text": "Shattered Confidence - Your failure rattles you deeply. You have disadvantage on all attacks and saving throws for 3 rounds.",
       "weight": 7,
-      "range": [56, 62],
+      "range": [
+        56,
+        62
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "save.all"],
+          "advantageScope": [
+            "attack.all",
+            "save.all"
+          ],
           "effectName": "Shattered Confidence",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Badly Damaged - Your weapon is badly damaged. -3 to attack and damage rolls until repaired.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -91,10 +112,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Hit Yourself Hard - Your weapon rebounds and strikes you critically. Take 2d8 damage.",
       "weight": 5,
-      "range": [69, 73],
+      "range": [
+        69,
+        73
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -105,10 +129,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Stunning Embarrassment - Your catastrophic failure stuns you with humiliation. You are stunned until the end of your next turn.",
       "weight": 5,
-      "range": [74, 78],
+      "range": [
+        74,
+        78
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -119,10 +146,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarmed - Your weapon flies from your grasp, landing 20 feet away in a random direction.",
       "weight": 5,
-      "range": [79, 83],
+      "range": [
+        79,
+        83
+      ],
       "img": "icons/skills/melee/strike-sword-slashing-red.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -131,25 +161,34 @@
       }
     },
     {
-      "type": 0,
-      "text": "Fatigued - The fumble exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.",
+      "type": "text",
+      "text": "Fatigued - The fumble exhausts you. You have disadvantage on attack rolls and ability checks for 3 rounds.",
       "weight": 4,
-      "range": [84, 87],
+      "range": [
+        84,
+        87
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "ability.all"],
+          "advantageScope": [
+            "attack.all",
+            "ability.all"
+          ],
           "effectName": "Fatigued",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Lost Initiative - Your fumble leaves you completely off guard. You can't take reactions and go last in initiative order next round.",
       "weight": 4,
-      "range": [88, 91],
+      "range": [
+        88,
+        91
+      ],
       "img": "icons/svg/clockwork.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -160,10 +199,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Breaks - Your weapon shatters on impact. It is destroyed and cannot be used.",
       "weight": 4,
-      "range": [92, 95],
+      "range": [
+        92,
+        95
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -174,10 +216,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Severe Self-Injury - Your weapon rebounds critically. Take 3d8 damage.",
       "weight": 3,
-      "range": [96, 98],
+      "range": [
+        96,
+        98
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -188,10 +233,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Hit Multiple Allies - Your wild swing threatens all allies within 5 feet. Roll attack against each ally's AC.",
       "weight": 2,
-      "range": [99, 100],
+      "range": [
+        99,
+        100
+      ],
       "img": "icons/svg/combat.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

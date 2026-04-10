@@ -5,10 +5,13 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
       "weight": 25,
-      "range": [1, 25],
+      "range": [
+        1,
+        25
+      ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -17,10 +20,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Catastrophic Backlash - The spell's energy rebounds devastatingly. Take 3d8 force damage.",
       "weight": 9,
-      "range": [26, 34],
+      "range": [
+        26,
+        34
+      ],
       "img": "icons/svg/lightning.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -31,10 +37,13 @@
       }
     },
     {
-      "type": 0,
-      "text": "Arcane Vulnerability - Your failed spell leaves you utterly exposed. Attacks against you have advantage for 1 minute.",
+      "type": "text",
+      "text": "Arcane Vulnerability - Your failed spell leaves you utterly exposed. Attacks against you have advantage for 3 rounds.",
       "weight": 8,
-      "range": [35, 42],
+      "range": [
+        35,
+        42
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -42,15 +51,18 @@
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
           "effectName": "Arcane Vulnerability",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Magic Burnout - Your magic fails completely. You cannot cast spells until you complete a short rest.",
       "weight": 7,
-      "range": [43, 49],
+      "range": [
+        43,
+        49
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -61,25 +73,35 @@
       }
     },
     {
-      "type": 0,
-      "text": "Shattered Focus - Your failure destroys your concentration completely. You have disadvantage on spell attacks and concentration for 1 minute.",
+      "type": "text",
+      "text": "Shattered Focus - Your failure destroys your concentration completely. You have disadvantage on spell attacks and concentration for 3 rounds.",
       "weight": 7,
-      "range": [50, 56],
+      "range": [
+        50,
+        56
+      ],
       "img": "icons/svg/silenced.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.msak", "attack.rsak", "concentration"],
+          "advantageScope": [
+            "attack.msak",
+            "attack.rsak",
+            "concentration"
+          ],
           "effectName": "Shattered Focus",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Complete Sensory Overload - You are blinded, deafened, stunned, and prone until the end of your next turn.",
       "weight": 6,
-      "range": [57, 62],
+      "range": [
+        57,
+        62
+      ],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -90,10 +112,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Spell Fully Rebounds - Your spell affects you at critical power. Take 4d6 force damage.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -104,10 +129,13 @@
       }
     },
     {
-      "type": 0,
-      "text": "Massive Slot Burn - The failed casting burns out many spell slots. Lose 2d4 spell slots.",
+      "type": "text",
+      "text": "Massive Slot Burn - The failed casting burns out many spell slots. Lose 1 spell slot of your highest available level and 1 additional slot of any level.",
       "weight": 5,
-      "range": [69, 73],
+      "range": [
+        69,
+        73
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -118,40 +146,52 @@
       }
     },
     {
-      "type": 0,
-      "text": "Fatigued - The failed spell utterly drains you. You have disadvantage on attack rolls and ability checks for 1 minute.",
+      "type": "text",
+      "text": "Fatigued - The failed spell utterly drains you. You have disadvantage on attack rolls and ability checks for 3 rounds.",
       "weight": 5,
-      "range": [74, 78],
+      "range": [
+        74,
+        78
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "ability.all"],
+          "advantageScope": [
+            "attack.all",
+            "ability.all"
+          ],
           "effectName": "Fatigued",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
-      "text": "Arcane Shock - Devastating magical energy jolts through you. You can't take reactions and have disadvantage on Dex saves for 1 minute.",
+      "type": "text",
+      "text": "Arcane Shock - Devastating magical energy jolts through you. You can't take reactions and have disadvantage on Dex saves for 3 rounds.",
       "weight": 5,
-      "range": [79, 83],
+      "range": [
+        79,
+        83
+      ],
       "img": "icons/svg/lightning.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
           "advantageScope": "save.dex",
           "effectName": "Arcane Shock",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Precious Component Destroyed - A very valuable material component is destroyed. Lose 500gp worth of components.",
       "weight": 5,
-      "range": [84, 88],
+      "range": [
+        84,
+        88
+      ],
       "img": "icons/commodities/gems/gem-fragments-red.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -162,10 +202,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Devastating Magical Rebound - Your spell affects you with devastating force. Take 5d8 force damage.",
       "weight": 4,
-      "range": [89, 92],
+      "range": [
+        89,
+        92
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -176,10 +219,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Catastrophic Failure - Your spell fails with catastrophic force. Take 6d6 force damage as the magical backlash overwhelms you.",
       "weight": 6,
-      "range": [93, 98],
+      "range": [
+        93,
+        98
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -190,10 +236,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Catastrophic Wild Magic - A devastating wild magic explosion occurs. All creatures within 30 feet must make DC 18 Dex save or take 5d6 force damage.",
       "weight": 2,
-      "range": [99, 100],
+      "range": [
+        99,
+        100
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

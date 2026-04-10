@@ -5,10 +5,13 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 30,
-      "range": [1, 30],
+      "range": [
+        1,
+        30
+      ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -17,10 +20,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Crushing Blow - Your devastating strike sends the target sprawling. They are prone and stunned until the end of your next turn.",
       "weight": 9,
-      "range": [31, 39],
+      "range": [
+        31,
+        39
+      ],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -31,25 +37,34 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disorienting Blow - Your devastating hit leaves the target reeling. They have disadvantage on all attacks and saving throws until the end of their next turn.",
       "weight": 8,
-      "range": [40, 47],
+      "range": [
+        40,
+        47
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "save.all"],
+          "advantageScope": [
+            "attack.all",
+            "save.all"
+          ],
           "effectName": "Disoriented",
           "duration": 1
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Deep Wound - Your strike opens a terrible wound. Target takes 2d6 extra damage.",
       "weight": 8,
-      "range": [48, 55],
+      "range": [
+        48,
+        55
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -60,10 +75,13 @@
       }
     },
     {
-      "type": 0,
-      "text": "Exposed Defenses - Your attack exposes critical weaknesses. Attacks against the target have advantage for 1 minute.",
+      "type": "text",
+      "text": "Exposed Defenses - Your attack exposes critical weaknesses. Attacks against the target have advantage for 3 rounds.",
       "weight": 7,
-      "range": [56, 62],
+      "range": [
+        56,
+        62
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -71,15 +89,18 @@
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
           "effectName": "Exposed Defenses",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Limb Strike - Your blow cripples a limb. Target's speed is halved until healed.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -90,25 +111,28 @@
       }
     },
     {
-      "type": 0,
-      "text": "Combat Mastery - Your perfect strike inspires you. You have advantage on all melee attacks for 1 minute.",
+      "type": "text",
+      "text": "Combat Mastery - Your perfect strike inspires you. You have advantage on all melee attacks for 3 rounds (DM adjudicates).",
       "weight": 5,
-      "range": [69, 73],
+      "range": [
+        69,
+        73
+      ],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "attack.mwak",
-          "effectName": "Combat Mastery",
-          "duration": 10
+          "effectType": "none"
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Armor Shattered - Your attack shatters their armor. -3 AC until repaired by a skilled smith.",
       "weight": 5,
-      "range": [74, 78],
+      "range": [
+        74,
+        78
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -120,10 +144,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarming Strike - Your powerful strike disarms the target, sending their weapon 20 feet away.",
       "weight": 5,
-      "range": [79, 83],
+      "range": [
+        79,
+        83
+      ],
       "img": "icons/svg/sword.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -132,24 +159,30 @@
       }
     },
     {
-      "type": 0,
-      "text": "Terrifying Strike - Your brutal attack terrifies the target. They are frightened of you for 1 minute.",
+      "type": "text",
+      "text": "Terrifying Strike - Your brutal attack terrifies the target. They are frightened of you for 3 rounds.",
       "weight": 4,
-      "range": [84, 87],
+      "range": [
+        84,
+        87
+      ],
       "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "frightened",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disemboweling Strike - Your blade tears through vital organs. Target must make DC 15 Con save or be incapacitated for 1 round.",
       "weight": 4,
-      "range": [88, 91],
+      "range": [
+        88,
+        91
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -161,10 +194,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Brutal Devastation - Your mighty strike deals an additional 3d6 damage.",
       "weight": 4,
-      "range": [92, 95],
+      "range": [
+        92,
+        95
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -175,10 +211,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Overwhelming Force - Your devastating blow deals an additional 4d6 damage and knocks the target prone.",
       "weight": 3,
-      "range": [96, 98],
+      "range": [
+        96,
+        98
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -189,17 +228,22 @@
       }
     },
     {
-      "type": 0,
-      "text": "Near-Fatal Blow - Your strike nearly kills the target. If they have fewer than 30 HP, they must make DC 18 Con save or drop to 0 HP.",
+      "type": "text",
+      "text": "Near-Fatal Blow - Your strike nearly kills the target. If they have fewer than 30 HP, they must make DC 16 CON save or take 4d10 extra damage.",
       "weight": 2,
-      "range": [99, 100],
+      "range": [
+        99,
+        100
+      ],
       "img": "icons/svg/skull.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 18,
+          "saveDC": 16,
           "saveAbility": "con",
-          "failEffect": "Drop to 0 HP if under 30 HP"
+          "failEffect": "Takes 4d10 extra damage",
+          "damageFormula": "4d10",
+          "damageType": "weapon"
         }
       }
     }

@@ -15,7 +15,7 @@ function getModuleVersion(): string {
 }
 
 interface TableResultData {
-  type: number;
+  type: 'text' | 'document' | 'pack';
   text: string;
   weight: number;
   range: [number, number];
@@ -250,7 +250,7 @@ export class TableImporter {
         displayRoll: true,
         folder: folder?.id ?? null,
         results: tableData.results.map((r: TableResultData) => ({
-          type: r.type || 0,
+          type: typeof r.type === 'string' ? r.type : 'text',
           text: r.text,
           img: r.img,
           weight: r.weight,

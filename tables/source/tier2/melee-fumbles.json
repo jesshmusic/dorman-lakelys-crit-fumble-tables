@@ -5,7 +5,7 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - You stumble but recover with no additional penalty.",
       "weight": 35,
       "range": [1, 35],
@@ -17,7 +17,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Off Balance - Your wild swing throws you off balance. You fall prone.",
       "weight": 8,
       "range": [36, 43],
@@ -31,7 +31,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Telegraphed Attack - Your target reads your movements. They have advantage on their next attack against you.",
       "weight": 7,
       "range": [44, 50],
@@ -47,7 +47,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Muscle Tear - You badly strain a muscle. Take 1d6 bludgeoning damage.",
       "weight": 7,
       "range": [51, 57],
@@ -61,7 +61,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Massive Opening - Your clumsy attack leaves you exposed. Attacks against you have advantage until the start of your next turn.",
       "weight": 6,
       "range": [58, 63],
@@ -77,7 +77,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Shaken Confidence - Your failure rattles you. You have disadvantage on attack rolls until the end of your next turn.",
       "weight": 6,
       "range": [64, 69],
@@ -92,7 +92,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Damaged - Your weapon strikes something hard. -2 to attack rolls until repaired.",
       "weight": 5,
       "range": [70, 74],
@@ -107,7 +107,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Lost Grip - Your weapon slips in your grip. You have disadvantage on your next attack with this weapon.",
       "weight": 5,
       "range": [75, 79],
@@ -122,7 +122,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Disarmed - Your weapon flies from your grasp, landing 15 feet away in a random direction.",
       "weight": 5,
       "range": [80, 84],
@@ -134,7 +134,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Vulnerable Position - Your stumble leaves you defenseless. You can't take reactions until the start of your next turn.",
       "weight": 4,
       "range": [85, 88],
@@ -148,7 +148,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Opportunity Created - Your clumsy attack allows a free strike. The target may make an opportunity attack against you.",
       "weight": 4,
       "range": [89, 92],
@@ -162,7 +162,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Hit Yourself - Your weapon rebounds and strikes you. Take 1d8 damage.",
       "weight": 3,
       "range": [93, 95],
@@ -176,7 +176,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Weapon Breaks - Your weapon shatters on impact. It is destroyed and cannot be used.",
       "weight": 3,
       "range": [96, 98],
@@ -190,7 +190,7 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Strike Ally - Your uncontrolled swing hits a nearby ally. Roll attack against ally's AC; on hit, deal weapon damage.",
       "weight": 2,
       "range": [99, 100],

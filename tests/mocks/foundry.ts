@@ -511,7 +511,7 @@ export function setupMocks(): void {
           formula: '1d100',
           results: [
             {
-              type: 0,
+              type: 'text',
               text: 'Test Result',
               weight: 100,
               range: [1, 100],

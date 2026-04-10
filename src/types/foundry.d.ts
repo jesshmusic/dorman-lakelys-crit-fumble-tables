@@ -191,7 +191,7 @@ declare global {
       displayRoll?: boolean;
       folder?: string | null;
       results?: Array<{
-        type: number;
+        type: 'text' | 'document' | 'pack';
         text: string;
         img?: string;
         weight: number;

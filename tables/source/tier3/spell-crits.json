@@ -5,10 +5,13 @@
   "formula": "1d100",
   "results": [
     {
-      "type": 0,
+      "type": "text",
       "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
       "weight": 30,
-      "range": [1, 30],
+      "range": [
+        1,
+        30
+      ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -17,10 +20,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Immolation - Magical energy sears the target. They take 2d8 force damage at the start of their next turn.",
       "weight": 9,
-      "range": [31, 39],
+      "range": [
+        31,
+        39
+      ],
       "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -31,25 +37,35 @@
       }
     },
     {
-      "type": 0,
-      "text": "Magic Disruption - Your spell disrupts their magical abilities. Target has disadvantage on spell attacks and saving throws for 1 minute.",
+      "type": "text",
+      "text": "Magic Disruption - Your spell disrupts their magical abilities. Target has disadvantage on spell attacks and saving throws for 3 rounds.",
       "weight": 8,
-      "range": [40, 47],
+      "range": [
+        40,
+        47
+      ],
       "img": "icons/svg/silenced.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.msak", "attack.rsak", "save.all"],
+          "advantageScope": [
+            "attack.msak",
+            "attack.rsak",
+            "save.all"
+          ],
           "effectName": "Magic Disruption",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Powerful Blast - The force sends the target flying 30 feet, prone, and stunned until end of their next turn.",
       "weight": 8,
-      "range": [48, 55],
+      "range": [
+        48,
+        55
+      ],
       "img": "icons/svg/thrust.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -60,10 +76,13 @@
       }
     },
     {
-      "type": 0,
-      "text": "Arcane Vulnerability - Your magic leaves the target exposed. Attacks against them have advantage for 1 minute.",
+      "type": "text",
+      "text": "Arcane Vulnerability - Your magic leaves the target exposed. Attacks against them have advantage for 3 rounds.",
       "weight": 7,
-      "range": [56, 62],
+      "range": [
+        56,
+        62
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -71,44 +90,50 @@
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
           "effectName": "Arcane Vulnerability",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
-      "text": "Magic Nullification - Your spell disrupts the target's magic completely. They cannot cast spells for 1 minute.",
+      "type": "text",
+      "text": "Magic Nullification - Your spell disrupts the target's magic completely. They cannot cast spells for 3 rounds.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/silenced.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "silenced",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
-      "text": "Arcane Mastery - Your perfect casting inspires you. You have advantage on all spell attacks for 1 minute.",
+      "type": "text",
+      "text": "Arcane Mastery - Your perfect casting inspires you. You have advantage on all spell attacks for 3 rounds (DM adjudicates).",
       "weight": 5,
-      "range": [69, 73],
+      "range": [
+        69,
+        73
+      ],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": ["attack.msak", "attack.rsak"],
-          "effectName": "Arcane Mastery",
-          "duration": 10
+          "effectType": "none"
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Elemental Devastation - Your spell's element overwhelms the target. Add 3d6 damage of the spell's type.",
       "weight": 5,
-      "range": [74, 78],
+      "range": [
+        74,
+        78
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -119,38 +144,47 @@
       }
     },
     {
-      "type": 0,
-      "text": "Spell Vulnerability - The target becomes vulnerable to the spell's damage type for 1 minute.",
+      "type": "text",
+      "text": "Spell Vulnerability - The target becomes vulnerable to the spell's damage type for 3 rounds.",
       "weight": 5,
-      "range": [79, 83],
+      "range": [
+        79,
+        83
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "vulnerable",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
-      "text": "Terrifying Magic - Your spell terrifies the target. They are frightened of you for 1 minute.",
+      "type": "text",
+      "text": "Terrifying Magic - Your spell terrifies the target. They are frightened of you for 3 rounds.",
       "weight": 4,
-      "range": [84, 87],
+      "range": [
+        84,
+        87
+      ],
       "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "frightened",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Spell Echo - Your spell echoes with tremendous power. Cast the same spell again immediately as a free action.",
       "weight": 4,
-      "range": [88, 91],
+      "range": [
+        88,
+        91
+      ],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -161,10 +195,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Arcane Amplification - Your magical power surges! Deal an additional 3d8 force damage.",
       "weight": 4,
-      "range": [92, 95],
+      "range": [
+        92,
+        95
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -175,10 +212,13 @@
       }
     },
     {
-      "type": 0,
+      "type": "text",
       "text": "Overwhelming Power - Your devastating spell deals an additional 4d8 force damage.",
       "weight": 3,
-      "range": [96, 98],
+      "range": [
+        96,
+        98
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -189,10 +229,13 @@
       }
     },
     {
-      "type": 0,
-      "text": "Perfect Casting - A masterful spell! Regain 1 expended spell slot up to 4th level.",
+      "type": "text",
+      "text": "Perfect Casting - A masterful spell! Regain 1 expended spell slot of up to 2nd level.",
       "weight": 2,
-      "range": [99, 100],
+      "range": [
+        99,
+        100
+      ],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
