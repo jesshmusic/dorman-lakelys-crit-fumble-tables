@@ -8,7 +8,10 @@
       "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 25,
-      "range": [1, 25],
+      "range": [
+        1,
+        25
+      ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -20,7 +23,10 @@
       "type": "text",
       "text": "Devastating Impact - Your shot strikes with tremendous force. Deal an additional 3d6 piercing damage.",
       "weight": 9,
-      "range": [26, 34],
+      "range": [
+        26,
+        34
+      ],
       "img": "icons/svg/thrust.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -34,12 +40,18 @@
       "type": "text",
       "text": "Staggering Shot - Your devastating shot staggers the target completely. They have disadvantage on all attacks and saves until end of their next turn.",
       "weight": 8,
-      "range": [35, 42],
+      "range": [
+        35,
+        42
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "save.all"],
+          "advantageScope": [
+            "attack.all",
+            "save.all"
+          ],
           "effectName": "Staggered",
           "duration": 1
         }
@@ -49,7 +61,10 @@
       "type": "text",
       "text": "Mortal Wound - Your shot strikes a vital area. Target takes 3d6 damage at the start of each turn. DC 17 Medicine or magical healing stops bleeding.",
       "weight": 7,
-      "range": [43, 49],
+      "range": [
+        43,
+        49
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -61,9 +76,12 @@
     },
     {
       "type": "text",
-      "text": "Completely Exposed - Your shot exposes critical weaknesses. Attacks against the target have advantage for 1 minute.",
+      "text": "Completely Exposed - Your shot exposes critical weaknesses. Attacks against the target have advantage for 3 rounds.",
       "weight": 7,
-      "range": [50, 56],
+      "range": [
+        50,
+        56
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -71,7 +89,7 @@
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
           "effectName": "Completely Exposed",
-          "duration": 10
+          "duration": 3
         }
       }
     },
@@ -79,7 +97,10 @@
       "type": "text",
       "text": "Crippling Devastation - Your shot shatters multiple bones. Target's speed is 0 and they have disadvantage on attacks until magically healed.",
       "weight": 6,
-      "range": [57, 62],
+      "range": [
+        57,
+        62
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -94,7 +115,10 @@
       "type": "text",
       "text": "Blinding Strike - Your shot damages the target's eyes permanently. They are blinded until healed with Regenerate or similar magic.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -106,16 +130,16 @@
     },
     {
       "type": "text",
-      "text": "Legendary Marksman - Your perfect shot inspires legendary confidence. You have advantage on all ranged attacks for 1 minute.",
+      "text": "Legendary Marksman - Your perfect shot inspires legendary confidence. You have advantage on all ranged attacks for 3 rounds.",
       "weight": 5,
-      "range": [69, 73],
+      "range": [
+        69,
+        73
+      ],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "attack.rwak",
-          "effectName": "Legendary Marksman",
-          "duration": 10
+          "effectType": "none"
         }
       }
     },
@@ -123,7 +147,10 @@
       "type": "text",
       "text": "Pinned and Helpless - Your shot pins the target completely. They are restrained until they use an action to pull free (DC 18 Str check).",
       "weight": 5,
-      "range": [74, 78],
+      "range": [
+        74,
+        78
+      ],
       "img": "icons/svg/anchor.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -135,15 +162,18 @@
     },
     {
       "type": "text",
-      "text": "Terror Shot - Your brutal accuracy terrifies the target to their core. They are frightened of you for 1 minute (DC 18 Wis save ends).",
+      "text": "Terror Shot - Your brutal accuracy terrifies the target to their core. They are frightened of you for 3 rounds (DC 18 Wis save ends).",
       "weight": 5,
-      "range": [79, 83],
+      "range": [
+        79,
+        83
+      ],
       "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "frightened",
-          "duration": 10
+          "duration": 3
         }
       }
     },
@@ -151,7 +181,10 @@
       "type": "text",
       "text": "Armor Destroyed - Your shot finds the critical weak spot. Target takes -4 to AC until armor is replaced or magically repaired.",
       "weight": 5,
-      "range": [84, 88],
+      "range": [
+        84,
+        88
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -166,7 +199,10 @@
       "type": "text",
       "text": "Devastating Shot - Your perfectly placed shot deals an additional 4d6 piercing damage.",
       "weight": 4,
-      "range": [89, 92],
+      "range": [
+        89,
+        92
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -180,7 +216,10 @@
       "type": "text",
       "text": "Overwhelming Shot - Your legendary shot deals an additional 5d6 piercing damage and knocks the target prone.",
       "weight": 7,
-      "range": [93, 99],
+      "range": [
+        93,
+        99
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -192,16 +231,21 @@
     },
     {
       "type": "text",
-      "text": "Instant Kill Shot - If target has 50 HP or fewer, they must make DC 20 Con save or die instantly. Otherwise, they drop to 0 HP.",
+      "text": "Heart-Piercing Shot - If target has 50 HP or fewer, they must make DC 18 CON save or take 6d10 extra damage.",
       "weight": 1,
-      "range": [100, 100],
+      "range": [
+        100,
+        100
+      ],
       "img": "icons/svg/skull.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 20,
+          "saveDC": 18,
           "saveAbility": "con",
-          "failEffect": "Instant death if under 50 HP"
+          "failEffect": "Instant death if under 50 HP",
+          "damageFormula": "6d10",
+          "damageType": "weapon"
         }
       }
     }

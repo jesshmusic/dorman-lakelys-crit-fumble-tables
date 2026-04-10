@@ -8,7 +8,10 @@
       "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 40,
-      "range": [1, 40],
+      "range": [
+        1,
+        40
+      ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -20,7 +23,10 @@
       "type": "text",
       "text": "Knockdown - The force of your blow sends your target sprawling. They are knocked prone.",
       "weight": 8,
-      "range": [41, 48],
+      "range": [
+        41,
+        48
+      ],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -34,7 +40,10 @@
       "type": "text",
       "text": "Dazed - Your devastating hit leaves your target momentarily stunned. They have disadvantage on their next attack roll.",
       "weight": 7,
-      "range": [49, 55],
+      "range": [
+        49,
+        55
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -49,7 +58,10 @@
       "type": "text",
       "text": "Bleeding Wound - Your strike opens a nasty wound that bleeds freely. Target takes 1d4 extra damage.",
       "weight": 7,
-      "range": [56, 62],
+      "range": [
+        56,
+        62
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -63,7 +75,10 @@
       "type": "text",
       "text": "Staggering Blow - Your powerful hit staggers your foe. Their speed is reduced by 10 feet until the end of their next turn.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -77,7 +92,10 @@
       "type": "text",
       "text": "Rattled - The impact rattles your opponent. They have disadvantage on their next ability check.",
       "weight": 6,
-      "range": [69, 74],
+      "range": [
+        69,
+        74
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -90,15 +108,19 @@
     },
     {
       "type": "text",
-      "text": "Shield Bash - If using a shield, you bash your foe for an extra 1d4 bludgeoning damage. Otherwise, deal 1d4 extra damage from a pommel strike.",
+      "text": "Shield Sundered - Your strike damages the target's shield or armor. They take -2 AC until repaired with Mending or smith's tools.",
       "weight": 5,
-      "range": [75, 79],
-      "img": "icons/equipment/shield/buckler-wooden-round.webp",
+      "range": [
+        75,
+        79
+      ],
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1d4",
-          "damageType": "bludgeoning"
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": -1
         }
       }
     },
@@ -106,7 +128,10 @@
       "type": "text",
       "text": "Exposed Weakness - Your keen eye spots an opening. Attacks against this target have advantage until the end of your next turn.",
       "weight": 5,
-      "range": [80, 84],
+      "range": [
+        80,
+        84
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -122,7 +147,10 @@
       "type": "text",
       "text": "Painful Strike - The excruciating pain distracts your foe. They have disadvantage on concentration checks until the end of their next turn.",
       "weight": 4,
-      "range": [85, 88],
+      "range": [
+        85,
+        88
+      ],
       "img": "icons/svg/lightning.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -137,7 +165,10 @@
       "type": "text",
       "text": "Disorienting Hit - Your blow leaves the target seeing stars. They have disadvantage on their next saving throw.",
       "weight": 4,
-      "range": [89, 92],
+      "range": [
+        89,
+        92
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -152,7 +183,10 @@
       "type": "text",
       "text": "Armor Dent - Your strike dents the target's armor. They take -1 to AC until they spend an action to adjust it.",
       "weight": 3,
-      "range": [93, 95],
+      "range": [
+        93,
+        95
+      ],
       "img": "icons/equipment/chest/breastplate-banded-steel-gold.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -167,7 +201,10 @@
       "type": "text",
       "text": "Momentum Strike - Your follow-through is perfect. You may immediately make another attack against the same target as a bonus action.",
       "weight": 2,
-      "range": [96, 97],
+      "range": [
+        96,
+        97
+      ],
       "img": "icons/svg/sword.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -181,7 +218,10 @@
       "type": "text",
       "text": "Brutal Impact - Your mighty strike deals an additional 1d6 damage from the sheer force of impact.",
       "weight": 2,
-      "range": [98, 99],
+      "range": [
+        98,
+        99
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -195,7 +235,10 @@
       "type": "text",
       "text": "Perfect Strike - A masterful blow! Deal maximum weapon damage instead of rolling, plus the target is frightened of you until the end of their next turn.",
       "weight": 1,
-      "range": [100, 100],
+      "range": [
+        100,
+        100
+      ],
       "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

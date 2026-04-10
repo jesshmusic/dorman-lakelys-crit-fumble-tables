@@ -8,7 +8,10 @@
       "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 25,
-      "range": [1, 25],
+      "range": [
+        1,
+        25
+      ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -20,7 +23,10 @@
       "type": "text",
       "text": "Annihilating Blow - Your strike is utterly devastating. Target is stunned until the end of their next turn.",
       "weight": 9,
-      "range": [26, 34],
+      "range": [
+        26,
+        34
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -34,7 +40,10 @@
       "type": "text",
       "text": "Mortal Wound - Your strike opens a mortal wound. Target takes 3d6 extra damage. DC 17 Medicine or magical healing stops continued bleeding.",
       "weight": 8,
-      "range": [35, 42],
+      "range": [
+        35,
+        42
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -48,7 +57,10 @@
       "type": "text",
       "text": "Armor Shattered - Your devastating strike shatters their armor. -3 AC until repaired with smith's tools or magic.",
       "weight": 7,
-      "range": [43, 49],
+      "range": [
+        43,
+        49
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -63,7 +75,10 @@
       "type": "text",
       "text": "Deep Organ Strike - Your blade pierces vital organs. Target must make DC 18 Con save or be paralyzed for 1 round.",
       "weight": 7,
-      "range": [50, 56],
+      "range": [
+        50,
+        56
+      ],
       "img": "icons/svg/skull.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -80,7 +95,10 @@
       "type": "text",
       "text": "Legendary Devastation - Your legendary strike deals an additional 4d6 damage.",
       "weight": 6,
-      "range": [57, 62],
+      "range": [
+        57,
+        62
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -94,7 +112,10 @@
       "type": "text",
       "text": "Crippling Wound - Your devastating blow cripples a limb. Target has disadvantage on attack rolls until healed with Regenerate or similar magic.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -107,9 +128,12 @@
     },
     {
       "type": "text",
-      "text": "Completely Exposed - Your strike leaves the target utterly exposed. Attacks against them have advantage for 1 minute.",
+      "text": "Completely Exposed - Your strike leaves the target utterly exposed. Attacks against them have advantage for 3 rounds.",
       "weight": 5,
-      "range": [69, 73],
+      "range": [
+        69,
+        73
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -117,21 +141,24 @@
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
           "effectName": "Completely Exposed",
-          "duration": 10
+          "duration": 3
         }
       }
     },
     {
       "type": "text",
-      "text": "Terror Incarnate - Your devastating strike terrifies the target. They are frightened of you for 1 minute (DC 18 Wis save ends).",
+      "text": "Terror Incarnate - Your devastating strike terrifies the target. They are frightened of you for 3 rounds (DC 18 Wis save ends).",
       "weight": 5,
-      "range": [74, 78],
+      "range": [
+        74,
+        78
+      ],
       "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "frightened",
-          "duration": 10
+          "duration": 3
         }
       }
     },
@@ -139,7 +166,10 @@
       "type": "text",
       "text": "Perfect Cleave - Your strike continues through to another enemy within 5 feet. Make an attack roll against them at advantage.",
       "weight": 5,
-      "range": [79, 83],
+      "range": [
+        79,
+        83
+      ],
       "img": "icons/svg/combat.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -151,16 +181,16 @@
     },
     {
       "type": "text",
-      "text": "Legendary Precision - Your perfect strike inspires legendary confidence. You have advantage on all melee attacks for 1 minute.",
+      "text": "Legendary Precision - Your perfect strike inspires legendary confidence. You have advantage on all melee attacks for 3 rounds.",
       "weight": 5,
-      "range": [84, 88],
+      "range": [
+        84,
+        88
+      ],
       "img": "icons/svg/upgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "attack.mwak",
-          "effectName": "Legendary Precision",
-          "duration": 10
+          "effectType": "none"
         }
       }
     },
@@ -168,7 +198,10 @@
       "type": "text",
       "text": "Spine Severing - Your strike damages the spine. Target is paralyzed until magically healed.",
       "weight": 4,
-      "range": [89, 92],
+      "range": [
+        89,
+        92
+      ],
       "img": "icons/svg/paralysis.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -182,7 +215,10 @@
       "type": "text",
       "text": "Overwhelming Power - Your devastating blow deals an additional 5d6 damage and knocks the target prone.",
       "weight": 7,
-      "range": [93, 99],
+      "range": [
+        93,
+        99
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -194,16 +230,21 @@
     },
     {
       "type": "text",
-      "text": "Decapitating Strike - If target has 50 HP or fewer, they must make DC 20 Con save or die instantly. Otherwise, drop to 0 HP.",
+      "text": "Devastating Strike - If target has 50 HP or fewer, they must make DC 18 CON save or take 6d10 extra damage.",
       "weight": 1,
-      "range": [100, 100],
+      "range": [
+        100,
+        100
+      ],
       "img": "icons/svg/skull.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 20,
+          "saveDC": 18,
           "saveAbility": "con",
-          "failEffect": "Instant death if under 50 HP"
+          "failEffect": "Instant death if under 50 HP",
+          "damageFormula": "6d10",
+          "damageType": "weapon"
         }
       }
     }

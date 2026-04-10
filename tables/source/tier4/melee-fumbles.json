@@ -8,7 +8,10 @@
       "type": "text",
       "text": "Nothing Special - You stumble but recover with no additional penalty.",
       "weight": 25,
-      "range": [1, 25],
+      "range": [
+        1,
+        25
+      ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -20,7 +23,10 @@
       "type": "text",
       "text": "Catastrophic Fall - You fall prone and are stunned until end of your next turn.",
       "weight": 9,
-      "range": [26, 34],
+      "range": [
+        26,
+        34
+      ],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -32,9 +38,12 @@
     },
     {
       "type": "text",
-      "text": "Utterly Exposed - Your catastrophic failure leaves you completely vulnerable. Attacks against you have advantage for 1 minute.",
+      "text": "Utterly Exposed - Your catastrophic failure leaves you completely vulnerable. Attacks against you have advantage for 3 rounds.",
       "weight": 8,
-      "range": [35, 42],
+      "range": [
+        35,
+        42
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -42,7 +51,7 @@
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
           "effectName": "Utterly Exposed",
-          "duration": 10
+          "duration": 3
         }
       }
     },
@@ -50,7 +59,10 @@
       "type": "text",
       "text": "Severe Self-Injury - You critically wound yourself. Take 3d6 damage.",
       "weight": 7,
-      "range": [43, 49],
+      "range": [
+        43,
+        49
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -62,16 +74,22 @@
     },
     {
       "type": "text",
-      "text": "Shattered Confidence - Your failure rattles you to your core. You have disadvantage on all attacks and saving throws for 1 minute.",
+      "text": "Shattered Confidence - Your failure rattles you to your core. You have disadvantage on all attacks and saving throws for 3 rounds.",
       "weight": 7,
-      "range": [50, 56],
+      "range": [
+        50,
+        56
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "save.all"],
+          "advantageScope": [
+            "attack.all",
+            "save.all"
+          ],
           "effectName": "Shattered Confidence",
-          "duration": 10
+          "duration": 3
         }
       }
     },
@@ -79,7 +97,10 @@
       "type": "text",
       "text": "Weapon Badly Damaged - Your weapon is badly damaged. -3 to attack and damage rolls until repaired.",
       "weight": 6,
-      "range": [57, 62],
+      "range": [
+        57,
+        62
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -94,7 +115,10 @@
       "type": "text",
       "text": "Hit Yourself Critically - Your weapon rebounds and strikes you critically. Take 3d8 damage.",
       "weight": 6,
-      "range": [63, 68],
+      "range": [
+        63,
+        68
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -108,7 +132,10 @@
       "type": "text",
       "text": "Incapacitated - Your catastrophic failure stuns you completely. You are incapacitated and prone until start of your next turn.",
       "weight": 5,
-      "range": [69, 73],
+      "range": [
+        69,
+        73
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -120,16 +147,22 @@
     },
     {
       "type": "text",
-      "text": "Fatigued - The fumble utterly exhausts you. You have disadvantage on attack rolls and ability checks for 1 minute.",
+      "text": "Fatigued - The fumble utterly exhausts you. You have disadvantage on attack rolls and ability checks for 3 rounds.",
       "weight": 5,
-      "range": [74, 78],
+      "range": [
+        74,
+        78
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "ability.all"],
+          "advantageScope": [
+            "attack.all",
+            "ability.all"
+          ],
           "effectName": "Fatigued",
-          "duration": 10
+          "duration": 3
         }
       }
     },
@@ -137,7 +170,10 @@
       "type": "text",
       "text": "Disarmed - Your weapon flies from your grasp, landing 30 feet away in a random direction.",
       "weight": 5,
-      "range": [79, 83],
+      "range": [
+        79,
+        83
+      ],
       "img": "icons/skills/melee/strike-sword-slashing-red.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -149,7 +185,10 @@
       "type": "text",
       "text": "Lost Initiative - Your fumble leaves you completely off guard. You can't take reactions and go last in initiative next round.",
       "weight": 5,
-      "range": [84, 88],
+      "range": [
+        84,
+        88
+      ],
       "img": "icons/svg/clockwork.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -163,7 +202,10 @@
       "type": "text",
       "text": "Weapon Destroyed - Your legendary weapon shatters catastrophically. It is destroyed beyond repair.",
       "weight": 4,
-      "range": [89, 92],
+      "range": [
+        89,
+        92
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -177,7 +219,10 @@
       "type": "text",
       "text": "Devastating Self-Wound - Your weapon rebounds catastrophically. Take 4d8 damage.",
       "weight": 7,
-      "range": [93, 99],
+      "range": [
+        93,
+        99
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -191,7 +236,10 @@
       "type": "text",
       "text": "Devastate All Allies - Your wild swing strikes all allies within 10 feet. Roll attack against each; hit deals weapon damage.",
       "weight": 1,
-      "range": [100, 100],
+      "range": [
+        100,
+        100
+      ],
       "img": "icons/svg/combat.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {

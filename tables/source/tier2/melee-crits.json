@@ -8,7 +8,10 @@
       "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
       "weight": 35,
-      "range": [1, 35],
+      "range": [
+        1,
+        35
+      ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -20,7 +23,10 @@
       "type": "text",
       "text": "Staggering Blow - Your powerful strike sends the target reeling. They are knocked prone.",
       "weight": 8,
-      "range": [36, 43],
+      "range": [
+        36,
+        43
+      ],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -34,7 +40,10 @@
       "type": "text",
       "text": "Disorienting Hit - Your devastating strike leaves your target dazed. They have disadvantage on all attacks until the end of their next turn.",
       "weight": 7,
-      "range": [44, 50],
+      "range": [
+        44,
+        50
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -49,7 +58,10 @@
       "type": "text",
       "text": "Deep Wound - Your strike opens a grievous wound. Target takes 1d8 extra damage.",
       "weight": 7,
-      "range": [51, 57],
+      "range": [
+        51,
+        57
+      ],
       "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -63,7 +75,10 @@
       "type": "text",
       "text": "Exposed Defenses - Your attack reveals the target's weaknesses. Attacks against them have advantage until the end of your next turn.",
       "weight": 6,
-      "range": [58, 63],
+      "range": [
+        58,
+        63
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -78,8 +93,11 @@
     {
       "type": "text",
       "text": "Armor Breach - Your attack finds a gap and damages their protection. -2 AC until the armor is repaired.",
-      "weight": 6,
-      "range": [64, 69],
+      "weight": 3,
+      "range": [
+        64,
+        66
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -92,9 +110,30 @@
     },
     {
       "type": "text",
+      "text": "Bleeding Wound - Your strike opens a bleeding wound. The target takes 1d4 damage at the start of each of its turns until it receives magical healing or someone uses an action to make a DC 10 Medicine check to stop the bleeding.",
+      "img": "icons/svg/blood.svg",
+      "weight": 3,
+      "range": [
+        67,
+        69
+      ],
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d4",
+          "damageType": "weapon",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
       "text": "Rattling Strike - The blow shakes your foe's confidence. They have disadvantage on their next saving throw.",
       "weight": 5,
-      "range": [70, 74],
+      "range": [
+        70,
+        74
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -107,16 +146,18 @@
     },
     {
       "type": "text",
-      "text": "Momentum Surge - Your perfect form carries you forward. You have advantage on your next melee attack.",
+      "text": "Weapon Lodged - Your weapon lodges deep in the target, dealing 1d6 extra damage. You must use a bonus action to pull it free or switch weapons.",
       "weight": 5,
-      "range": [75, 79],
-      "img": "icons/svg/upgrade.svg",
+      "range": [
+        75,
+        79
+      ],
+      "img": "icons/svg/sword.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "attack.mwak",
-          "effectName": "Momentum Surge",
-          "duration": 0
+          "effectType": "damage",
+          "damageFormula": "1d6",
+          "damageType": "weapon"
         }
       }
     },
@@ -124,7 +165,10 @@
       "type": "text",
       "text": "Crippling Strike - Your blow strikes a leg. Target's speed is halved until they receive healing.",
       "weight": 5,
-      "range": [80, 84],
+      "range": [
+        80,
+        84
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -138,7 +182,10 @@
       "type": "text",
       "text": "Concentration Breaker - Your powerful hit disrupts focus. If concentrating, they have disadvantage on the concentration save.",
       "weight": 4,
-      "range": [85, 88],
+      "range": [
+        85,
+        88
+      ],
       "img": "icons/svg/silenced.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -153,7 +200,10 @@
       "type": "text",
       "text": "Disarming Strike - Your strike sends the target's weapon flying. They are disarmed.",
       "weight": 4,
-      "range": [89, 92],
+      "range": [
+        89,
+        92
+      ],
       "img": "icons/svg/sword.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -165,7 +215,10 @@
       "type": "text",
       "text": "Stunning Impact - Your devastating hit stuns the target. They are stunned until the end of your next turn.",
       "weight": 3,
-      "range": [93, 95],
+      "range": [
+        93,
+        95
+      ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -179,7 +232,10 @@
       "type": "text",
       "text": "Brutal Blow - Your mighty strike deals an additional 2d6 damage from the sheer force.",
       "weight": 3,
-      "range": [96, 98],
+      "range": [
+        96,
+        98
+      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -191,15 +247,18 @@
     },
     {
       "type": "text",
-      "text": "Devastating Strike - A masterful blow! Deal maximum weapon damage and the target is frightened of you for 1 minute.",
+      "text": "Devastating Strike - A masterful blow! Deal maximum weapon damage and the target is frightened of you for 2 rounds.",
       "weight": 2,
-      "range": [99, 100],
+      "range": [
+        99,
+        100
+      ],
       "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "frightened",
-          "duration": 10
+          "duration": 2
         }
       }
     }

@@ -8,7 +8,10 @@
       "type": "text",
       "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
       "weight": 35,
-      "range": [1, 35],
+      "range": [
+        1,
+        35
+      ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -20,7 +23,10 @@
       "type": "text",
       "text": "Magical Backlash - The spell's energy rebounds painfully. Take 1d8 force damage.",
       "weight": 8,
-      "range": [36, 43],
+      "range": [
+        36,
+        43
+      ],
       "img": "icons/svg/lightning.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -34,12 +40,18 @@
       "type": "text",
       "text": "Arcane Hiccup - Your magic stutters. You have disadvantage on spell attacks until the end of your next turn.",
       "weight": 7,
-      "range": [44, 50],
+      "range": [
+        44,
+        50
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.msak", "attack.rsak"],
+          "advantageScope": [
+            "attack.msak",
+            "attack.rsak"
+          ],
           "effectName": "Arcane Hiccup",
           "duration": 1
         }
@@ -49,7 +61,10 @@
       "type": "text",
       "text": "Arcane Lockout - Your magic stutters badly. You cannot cast spells until the end of your next turn.",
       "weight": 7,
-      "range": [51, 57],
+      "range": [
+        51,
+        57
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -63,7 +78,10 @@
       "type": "text",
       "text": "Exposed Caster - Your failed casting leaves you vulnerable. Attacks against you have advantage until the start of your next turn.",
       "weight": 6,
-      "range": [58, 63],
+      "range": [
+        58,
+        63
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -79,7 +97,10 @@
       "type": "text",
       "text": "Sensory Overload - The failed spell overwhelms your senses. You are blinded until the end of your next turn.",
       "weight": 6,
-      "range": [64, 69],
+      "range": [
+        64,
+        69
+      ],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -91,16 +112,19 @@
     },
     {
       "type": "text",
-      "text": "Concentration Shaken - The failure shakes your focus. You have disadvantage on concentration checks for 1 minute.",
+      "text": "Concentration Shaken - The failure shakes your focus. You have disadvantage on concentration checks for 2 rounds.",
       "weight": 5,
-      "range": [70, 74],
+      "range": [
+        70,
+        74
+      ],
       "img": "icons/svg/silenced.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
           "advantageScope": "concentration",
           "effectName": "Concentration Shaken",
-          "duration": 10
+          "duration": 2
         }
       }
     },
@@ -108,7 +132,10 @@
       "type": "text",
       "text": "Telegraphed Magic - Your target sensed your failure. They have advantage on their next saving throw against your spells.",
       "weight": 5,
-      "range": [75, 79],
+      "range": [
+        75,
+        79
+      ],
       "img": "icons/svg/eye.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -124,7 +151,10 @@
       "type": "text",
       "text": "Spell Slot Burn - The failed casting burns out a spell slot. Lose an additional spell slot of 1st or 2nd level.",
       "weight": 5,
-      "range": [80, 84],
+      "range": [
+        80,
+        84
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -138,7 +168,10 @@
       "type": "text",
       "text": "Magical Fatigue - The failed spell exhausts you. You can't take reactions until the start of your next turn.",
       "weight": 4,
-      "range": [85, 88],
+      "range": [
+        85,
+        88
+      ],
       "img": "icons/svg/clockwork.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -152,7 +185,10 @@
       "type": "text",
       "text": "Spell Rebounds - Your spell affects you instead. Take 2d6 force damage.",
       "weight": 4,
-      "range": [89, 92],
+      "range": [
+        89,
+        92
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -164,16 +200,22 @@
     },
     {
       "type": "text",
-      "text": "Fatigued - The failed spell drains you. You have disadvantage on attack rolls and ability checks for 1 minute.",
+      "text": "Fatigued - The failed spell drains you. You have disadvantage on attack rolls and ability checks for 2 rounds.",
       "weight": 3,
-      "range": [93, 95],
+      "range": [
+        93,
+        95
+      ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": ["attack.all", "ability.all"],
+          "advantageScope": [
+            "attack.all",
+            "ability.all"
+          ],
           "effectName": "Fatigued",
-          "duration": 10
+          "duration": 2
         }
       }
     },
@@ -181,7 +223,10 @@
       "type": "text",
       "text": "Component Destroyed - A valuable material component is destroyed. Lose 25gp worth of components.",
       "weight": 3,
-      "range": [96, 98],
+      "range": [
+        96,
+        98
+      ],
       "img": "icons/commodities/gems/gem-fragments-red.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -193,15 +238,16 @@
     },
     {
       "type": "text",
-      "text": "Wild Magic Surge - A wild magic surge occurs. DM rolls on the Wild Magic table or chooses a significant magical effect.",
+      "text": "Unstable Magic - Uncontrolled magic displaces you. You teleport 10 feet in a random direction.",
       "weight": 2,
-      "range": [99, 100],
+      "range": [
+        99,
+        100
+      ],
       "img": "icons/svg/dice-target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "wild_magic_surge",
-          "duration": 0
+          "effectType": "none"
         }
       }
     }
