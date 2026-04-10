@@ -113,7 +113,7 @@
     },
     {
       "type": "text",
-      "text": "Legendary Arcane Mastery - Your perfect casting inspires legendary power. You have advantage on all spell attacks for 3 rounds.",
+      "text": "Legendary Arcane Mastery - Your perfect casting inspires legendary power. You have advantage on all spell attacks for 3 rounds (DM adjudicates).",
       "weight": 6,
       "range": [
         64,
@@ -242,7 +242,7 @@
           "effectType": "save",
           "saveDC": 18,
           "saveAbility": "wis",
-          "failEffect": "Instant death if under 50 HP",
+          "failEffect": "Takes 6d10 force extra damage",
           "damageFormula": "6d10",
           "damageType": "force"
         }

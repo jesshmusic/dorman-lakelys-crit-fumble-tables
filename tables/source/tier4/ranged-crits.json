@@ -130,7 +130,7 @@
     },
     {
       "type": "text",
-      "text": "Legendary Marksman - Your perfect shot inspires legendary confidence. You have advantage on all ranged attacks for 3 rounds.",
+      "text": "Legendary Marksman - Your perfect shot inspires legendary confidence. You have advantage on all ranged attacks for 3 rounds (DM adjudicates).",
       "weight": 5,
       "range": [
         69,
@@ -243,7 +243,7 @@
           "effectType": "save",
           "saveDC": 18,
           "saveAbility": "con",
-          "failEffect": "Instant death if under 50 HP",
+          "failEffect": "Takes 6d10 extra damage",
           "damageFormula": "6d10",
           "damageType": "weapon"
         }

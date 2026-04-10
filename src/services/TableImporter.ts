@@ -250,7 +250,7 @@ export class TableImporter {
         displayRoll: true,
         folder: folder?.id ?? null,
         results: tableData.results.map((r: TableResultData) => ({
-          type: r.type || 'text',
+          type: typeof r.type === 'string' ? r.type : 'text',
           text: r.text,
           img: r.img,
           weight: r.weight,

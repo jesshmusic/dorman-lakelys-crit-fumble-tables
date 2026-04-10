@@ -112,7 +112,7 @@
     },
     {
       "type": "text",
-      "text": "Marksman's Focus - Your perfect shot inspires you. You have advantage on all ranged attacks for 3 rounds.",
+      "text": "Marksman's Focus - Your perfect shot inspires you. You have advantage on all ranged attacks for 3 rounds (DM adjudicates).",
       "weight": 5,
       "range": [
         69,
@@ -242,7 +242,7 @@
           "effectType": "save",
           "saveDC": 16,
           "saveAbility": "con",
-          "failEffect": "Drop to 0 HP if under 30 HP",
+          "failEffect": "Takes 4d10 extra damage",
           "damageFormula": "4d10",
           "damageType": "weapon"
         }
