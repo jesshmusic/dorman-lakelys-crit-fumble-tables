@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-10
+
+### Fixed
+
+- **Effect durations no longer vanish when the turn advances.** Timed effects (advantage/disadvantage, custom conditions, weapon/armor penalties) previously used `duration.turns` anchored to the attacker's turn, so a debuff applied to a target expired the instant the attacker clicked "Next". They now use DAE's combatant-relative `duration.expiry: "targetEnd"`, so they last until the end of the affected token's next turn. Requires DAE (already a Midi-QOL dependency).
+- **Advantage/disadvantage on saves and ability checks now actually applies.** The Midi-QOL flag keys were built with an invalid `.ability.` segment (`flags.midi-qol.advantage.ability.save.dex`); corrected to Midi-QOL 14's real paths (`flags.midi-qol.advantage.save.dex`, `...advantage.check.str`). Attack and concentration keys were already correct.
+- **Bonus crit/fumble damage now applies via Foundry's native damage card.** Damage die/type were read from the dnd5e ≤4.x `system.damage.parts`, which dnd5e 5.x removed — so `"1W"`/`"2S"` and weapon damage types silently fell back to `d6`/`bludgeoning`, and `MidiQOL.applyTokenDamage` applied nothing without a Midi setting. Damage is now rolled as a dnd5e `DamageRoll` read from `system.damage.base` (weapons) / the damage activity (spells), and posted as a standard damage card with **Apply / ½ / 2×** buttons pre-targeted to the crit/fumble token, for the GM to apply.
+
+### Added
+
+- **Logical per-event damage types.** Bonus damage now resolves a type appropriate to the result: explicit types (e.g. `force`, `fire`) are used as authored, while `"weapon"`/`"spell"` resolve to the source item's actual damage type. Spell-crit results that describe raw arcane damage now deal `force` (or `fire` where the flavor is explicitly fiery).
+- **"Attack nearest ally" fumbles.** The previously-inert Wild Swing / Friendly Fire Risk fumbles (and their per-tier equivalents) now use a new `attackAlly` effect type: the fumbler targets their nearest living ally and is prompted to roll a real attack against them, resolving normal weapon damage on a hit. A re-entry guard prevents the forced attack from itself triggering crit/fumble handling.
+- **Smoke-test harness** on the `DormanLakely` console API (`listResults`, `test`, `sweep`, `clearEffects`) for driving many crit/fumble results without live rolls.
+- **Triple/quadruple-damage support** via new `"NWB"`/`"NSB"` damage tokens (N full copies of the weapon's/spell's base dice). Since a crit already rolls 2× dice on the attack card, a "triple damage" result adds `"1WB"` on the bonus card.
+
+### Changed
+
+- **Expanded and rebalanced all 24 tables.** Every table now carries more mechanically-real effects (standard-condition saves, real advantage/disadvantage, penalties, control effects), and the chance of "nothing happens" was lowered from a flat 40% to **25% at tier 1, 18% / 12% / 6%** at tiers 2–4. Weights follow a descending ladder so mild effects are common and game-swinging ones (stun, paralysis, exhaustion, max/burst damage) stay pinned at weight 1–2 and get relatively rarer at higher tiers.
+- **Removed cosmetic "dead" conditions** (`slowed`, `glowing`, `bonus_attack`, `spell_locked`, `no_reactions`, `ammo_*`, `weapon_jammed`, etc.) that created a labeled Active Effect but enforced nothing, replacing them with standard conditions, penalties, `disarm`, `attackAlly`, or advantage/disadvantage that actually apply. Save DCs now scale by tier (11/13/15/17).
+
 ## [1.2.2] - 2026-04-08
 
 ### Added

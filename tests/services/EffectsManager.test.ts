@@ -3,7 +3,13 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { resetMocks, createMockToken, createMockItem, createMockActor } from '../mocks/foundry';
+import {
+  resetMocks,
+  createMockToken,
+  createMockItem,
+  createMockActor,
+  rollToMessage
+} from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
 describe('EffectsManager', () => {
@@ -109,8 +115,9 @@ describe('EffectsManager', () => {
 
       await EffectsManager.applyResult(result, token);
 
-      // Damage is applied via MidiQOL.applyTokenDamage
-      expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
+      // Damage now posts a dnd5e DamageRoll chat card (roll.toMessage), not MidiQOL
+      expect(rollToMessage).toHaveBeenCalled();
+      expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
     });
   });
 
@@ -170,7 +177,7 @@ describe('EffectsManager', () => {
   });
 
   describe('applyDamage', () => {
-    it('should roll damage and apply via MidiQOL', async () => {
+    it('should roll damage and post a dnd5e damage card', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
       const token = createMockToken();
@@ -180,8 +187,21 @@ describe('EffectsManager', () => {
         damageType: 'piercing'
       });
 
-      // Damage is applied via MidiQOL.applyTokenDamage
-      expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
+      // Damage now posts a native dnd5e damage card via roll.toMessage
+      expect(rollToMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flavor: expect.stringContaining('piercing'),
+          flags: expect.objectContaining({
+            dnd5e: expect.objectContaining({
+              roll: { type: 'damage' },
+              targets: expect.arrayContaining([
+                expect.objectContaining({ uuid: token.actor.uuid, name: token.name })
+              ])
+            })
+          })
+        })
+      );
+      expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
     });
 
     it('should handle missing damage formula gracefully', async () => {
@@ -192,7 +212,7 @@ describe('EffectsManager', () => {
       // Should not throw when damageFormula is missing
       await (EffectsManager as any).applyDamage(token, {});
 
-      expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
+      expect(rollToMessage).not.toHaveBeenCalled();
     });
   });
 
@@ -358,7 +378,7 @@ describe('EffectsManager', () => {
                 value: '1'
               }),
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.ability.save.dex',
+                key: 'flags.midi-qol.disadvantage.save.dex',
                 value: '1'
               })
             ])
@@ -379,12 +399,15 @@ describe('EffectsManager', () => {
 
       await EffectsManager.applyResult(result, token);
 
+      // duration 0 -> rounds:1 cap + DAE specialDuration 'turnEnd' (the flag that
+      // actually deletes the effect at the affected creature's next turn end)
       expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
         'ActiveEffect',
         expect.arrayContaining([
           expect.objectContaining({
-            duration: expect.objectContaining({
-              turns: 1
+            duration: { rounds: 1 },
+            flags: expect.objectContaining({
+              dae: { specialDuration: ['turnEnd'] }
             })
           })
         ])
@@ -403,14 +426,12 @@ describe('EffectsManager', () => {
 
       await EffectsManager.applyResult(result, token);
 
+      // -1 -> permanent effect (isTemporary === false), empty duration object
       expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
         'ActiveEffect',
         expect.arrayContaining([
           expect.objectContaining({
-            duration: expect.objectContaining({
-              seconds: null,
-              rounds: null
-            })
+            duration: {}
           })
         ])
       );
@@ -487,7 +508,7 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.ability.check.str',
+                key: 'flags.midi-qol.disadvantage.check.str',
                 value: '1'
               })
             ])
@@ -524,15 +545,38 @@ describe('EffectsManager', () => {
     });
   });
 
+  // Helpers for the dnd5e 5.x damage schema
+  const weaponItem = (denomination: number, type: string, number = 1, name = 'Weapon') =>
+    createMockItem({
+      name,
+      type: 'weapon',
+      system: {
+        actionType: 'mwak',
+        damage: { base: { number, denomination, types: new Set([type]) } }
+      }
+    });
+
+  const spellItem = (denomination: number, type: string, name = 'Spell') =>
+    createMockItem({
+      name,
+      type: 'spell',
+      system: {
+        actionType: 'rsak',
+        activities: {
+          contents: [{ damage: { parts: [{ number: 1, denomination, types: new Set([type]) }] } }]
+        }
+      }
+    });
+
+  // Item with no resolvable damage data at all (no base, no activities)
+  const emptyItem = () => createMockItem({ system: { damage: {} } });
+
   describe('weapon dice formula support', () => {
     describe('resolveWeaponDiceFormula', () => {
       it('should convert 1W to weapon die (1d8 for longsword)', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Longsword',
-          system: { damage: { parts: [['1d8', 'slashing']] } }
-        });
+        const item = weaponItem(8, 'slashing', 1, 'Longsword');
 
         const result = (EffectsManager as any).resolveWeaponDiceFormula('1W', item);
         expect(result).toBe('1d8');
@@ -541,10 +585,7 @@ describe('EffectsManager', () => {
       it('should convert 2W to 2 weapon dice', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Longsword',
-          system: { damage: { parts: [['1d8', 'slashing']] } }
-        });
+        const item = weaponItem(8, 'slashing', 1, 'Longsword');
 
         const result = (EffectsManager as any).resolveWeaponDiceFormula('2W', item);
         expect(result).toBe('2d8');
@@ -553,10 +594,7 @@ describe('EffectsManager', () => {
       it('should convert 3W to 3 weapon dice', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Greataxe',
-          system: { damage: { parts: [['1d12', 'slashing']] } }
-        });
+        const item = weaponItem(12, 'slashing', 1, 'Greataxe');
 
         const result = (EffectsManager as any).resolveWeaponDiceFormula('3W', item);
         expect(result).toBe('3d12');
@@ -565,9 +603,7 @@ describe('EffectsManager', () => {
       it('should handle lowercase w', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          system: { damage: { parts: [['1d6', 'piercing']] } }
-        });
+        const item = weaponItem(6, 'piercing');
 
         const result = (EffectsManager as any).resolveWeaponDiceFormula('2w', item);
         expect(result).toBe('2d6');
@@ -589,15 +625,68 @@ describe('EffectsManager', () => {
         expect(result).toBe('2d6');
       });
 
-      it('should default to d6 when item has no damage parts', async () => {
+      it('should default to d6 when item has no damage data', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          system: { damage: { parts: [] } }
-        });
-
-        const result = (EffectsManager as any).resolveWeaponDiceFormula('2W', item);
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('2W', emptyItem());
         expect(result).toBe('2d6');
+      });
+
+      // "XWB"/"XSB" = X full copies of the weapon's/spell's BASE dice (number × size)
+      it('should convert 1WB to one full weapon base (longsword 1d8 -> 1d8)', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = weaponItem(8, 'slashing', 1, 'Longsword');
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('1WB', item);
+        expect(result).toBe('1d8');
+      });
+
+      it('should respect multi-die weapons for WB (greatsword 2d6 -> 1WB = 2d6)', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = weaponItem(6, 'slashing', 2, 'Greatsword');
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('1WB', item);
+        expect(result).toBe('2d6');
+      });
+
+      it('should scale WB copies (greatsword 2d6 -> 2WB = 4d6)', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = weaponItem(6, 'slashing', 2, 'Greatsword');
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('2WB', item);
+        expect(result).toBe('4d6');
+      });
+
+      it('should convert 1SB to one full spell base (fire bolt 1d10 -> 1d10)', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const item = spellItem(10, 'fire', 'Fire Bolt');
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('1SB', item);
+        expect(result).toBe('1d10');
+      });
+
+      it('should default WB to single d6 when no item provided', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('1WB', undefined);
+        expect(result).toBe('1d6');
+      });
+
+      it('should default SB to single d8 when no item provided', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('1SB', undefined);
+        expect(result).toBe('1d8');
+      });
+
+      it('should fall back (not produce d0) when the weapon denomination is 0', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        // A weapon whose damage.base has a type but a 0 denomination must not
+        // yield an invalid "1d0" that throws on evaluate.
+        const item = weaponItem(0, 'slashing', 1, 'Oddball');
+        const result = (EffectsManager as any).resolveWeaponDiceFormula('1WB', item);
+        expect(result).toBe('1d6');
       });
     });
 
@@ -605,9 +694,7 @@ describe('EffectsManager', () => {
       it('should extract d8 from longsword', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          system: { damage: { parts: [['1d8+3', 'slashing']] } }
-        });
+        const item = weaponItem(8, 'slashing', 1, 'Longsword');
 
         const result = (EffectsManager as any).getWeaponDamageDie(item);
         expect(result).toBe('d8');
@@ -616,14 +703,7 @@ describe('EffectsManager', () => {
       it('should extract d10 from fire bolt spell', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Fire Bolt',
-          type: 'spell',
-          system: {
-            actionType: 'rsak',
-            damage: { parts: [['1d10', 'fire']] }
-          }
-        });
+        const item = spellItem(10, 'fire', 'Fire Bolt');
 
         const result = (EffectsManager as any).getWeaponDamageDie(item);
         expect(result).toBe('d10');
@@ -632,22 +712,16 @@ describe('EffectsManager', () => {
       it('should extract d12 from greataxe', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Greataxe',
-          system: { damage: { parts: [['1d12+4', 'slashing']] } }
-        });
+        const item = weaponItem(12, 'slashing', 1, 'Greataxe');
 
         const result = (EffectsManager as any).getWeaponDamageDie(item);
         expect(result).toBe('d12');
       });
 
-      it('should extract die from formula with multiple dice', async () => {
+      it('should extract die from a multi-dice weapon (2d6 greatsword)', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Greatsword',
-          system: { damage: { parts: [['2d6+3', 'slashing']] } }
-        });
+        const item = weaponItem(6, 'slashing', 2, 'Greatsword');
 
         const result = (EffectsManager as any).getWeaponDamageDie(item);
         expect(result).toBe('d6');
@@ -656,11 +730,7 @@ describe('EffectsManager', () => {
       it('should return d6 when item has no damage', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          system: { damage: { parts: [] } }
-        });
-
-        const result = (EffectsManager as any).getWeaponDamageDie(item);
+        const result = (EffectsManager as any).getWeaponDamageDie(emptyItem());
         expect(result).toBe('d6');
       });
 
@@ -676,9 +746,7 @@ describe('EffectsManager', () => {
       it('should get slashing from longsword', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          system: { damage: { parts: [['1d8', 'slashing']] } }
-        });
+        const item = weaponItem(8, 'slashing', 1, 'Longsword');
 
         const result = (EffectsManager as any).getWeaponDamageType(item);
         expect(result).toBe('slashing');
@@ -687,14 +755,7 @@ describe('EffectsManager', () => {
       it('should get fire from fire bolt', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Fire Bolt',
-          type: 'spell',
-          system: {
-            actionType: 'rsak',
-            damage: { parts: [['1d10', 'fire']] }
-          }
-        });
+        const item = spellItem(10, 'fire', 'Fire Bolt');
 
         const result = (EffectsManager as any).getWeaponDamageType(item);
         expect(result).toBe('fire');
@@ -703,39 +764,68 @@ describe('EffectsManager', () => {
       it('should get piercing from shortbow', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Shortbow',
-          system: {
-            actionType: 'rwak',
-            damage: { parts: [['1d6', 'piercing']] }
-          }
-        });
+        const item = weaponItem(6, 'piercing', 1, 'Shortbow');
 
         const result = (EffectsManager as any).getWeaponDamageType(item);
         expect(result).toBe('piercing');
       });
 
-      it('should return bludgeoning as default when no damage parts', async () => {
+      it('should return empty string when no damage type present', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          system: { damage: { parts: [] } }
-        });
+        // getWeaponDamageType returns '' when unresolved; the fallback
+        // (bludgeoning/force) lives in resolveDamageType, not here.
+        const result = (EffectsManager as any).getWeaponDamageType(emptyItem());
+        expect(result).toBe('');
+      });
+    });
 
-        const result = (EffectsManager as any).getWeaponDamageType(item);
+    describe('resolveDamageType', () => {
+      it('should pass an explicit type through unchanged', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).resolveDamageType('fire', weaponItem(8, 'slashing'));
+        expect(result).toBe('fire');
+      });
+
+      it('should resolve "weapon" to the weapon actual type', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).resolveDamageType(
+          'weapon',
+          weaponItem(8, 'slashing')
+        );
+        expect(result).toBe('slashing');
+      });
+
+      it('should resolve "spell" to the spell actual type', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).resolveDamageType('spell', spellItem(10, 'fire'));
+        expect(result).toBe('fire');
+      });
+
+      it('should fall back to bludgeoning for unresolved weapon type', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).resolveDamageType('weapon', emptyItem());
         expect(result).toBe('bludgeoning');
+      });
+
+      it('should fall back to force for unresolved spell type', async () => {
+        const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+        const result = (EffectsManager as any).resolveDamageType('spell', undefined);
+        expect(result).toBe('force');
       });
     });
 
     describe('applyDamage with weapon dice', () => {
-      it('should resolve weapon dice formula when applying damage', async () => {
+      it('should resolve weapon dice formula when posting the damage card', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
         const token = createMockToken();
-        const item = createMockItem({
-          name: 'Longsword',
-          system: { damage: { parts: [['1d8', 'slashing']] } }
-        });
+        const item = weaponItem(8, 'slashing', 1, 'Longsword');
 
         await (EffectsManager as any).applyDamage(
           token,
@@ -746,22 +836,17 @@ describe('EffectsManager', () => {
           item
         );
 
-        // Damage should be applied via MidiQOL
-        expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
+        // Damage card posted with the resolved (slashing) type in the flavor
+        expect(rollToMessage).toHaveBeenCalledWith(
+          expect.objectContaining({ flavor: expect.stringContaining('slashing') })
+        );
       });
 
       it('should use weapon damage type when damageType is weapon', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
         const token = createMockToken();
-        const item = createMockItem({
-          name: 'Fire Bolt',
-          type: 'spell',
-          system: {
-            actionType: 'rsak',
-            damage: { parts: [['1d10', 'fire']] }
-          }
-        });
+        const item = spellItem(10, 'fire', 'Fire Bolt');
 
         await (EffectsManager as any).applyDamage(
           token,
@@ -772,10 +857,9 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
-        // The call args should include the fire damage type
-        const callArgs = (MidiQOL.applyTokenDamage as jest.Mock).mock.calls[0];
-        expect(callArgs[0][0].type).toBe('fire');
+        expect(rollToMessage).toHaveBeenCalledWith(
+          expect.objectContaining({ flavor: expect.stringContaining('fire') })
+        );
       });
 
       it('should use explicit damage type when provided', async () => {
@@ -793,9 +877,9 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
-        const callArgs = (MidiQOL.applyTokenDamage as jest.Mock).mock.calls[0];
-        expect(callArgs[0][0].type).toBe('bludgeoning');
+        expect(rollToMessage).toHaveBeenCalledWith(
+          expect.objectContaining({ flavor: expect.stringContaining('bludgeoning') })
+        );
       });
     });
 
@@ -803,11 +887,7 @@ describe('EffectsManager', () => {
       it('should convert 1S to spell die', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Fire Bolt',
-          type: 'spell',
-          system: { actionType: 'rsak', damage: { parts: [['1d10', 'fire']] } }
-        });
+        const item = spellItem(10, 'fire', 'Fire Bolt');
 
         const result = (EffectsManager as any).resolveWeaponDiceFormula('1S', item);
         expect(result).toBe('1d10');
@@ -816,11 +896,7 @@ describe('EffectsManager', () => {
       it('should convert 3S to 3 spell dice', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Eldritch Blast',
-          type: 'spell',
-          system: { actionType: 'rsak', damage: { parts: [['1d10', 'force']] } }
-        });
+        const item = spellItem(10, 'force', 'Eldritch Blast');
 
         const result = (EffectsManager as any).resolveWeaponDiceFormula('3S', item);
         expect(result).toBe('3d10');
@@ -829,11 +905,7 @@ describe('EffectsManager', () => {
       it('should handle lowercase s', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Fire Bolt',
-          type: 'spell',
-          system: { damage: { parts: [['1d10', 'fire']] } }
-        });
+        const item = spellItem(10, 'fire', 'Fire Bolt');
 
         const result = (EffectsManager as any).resolveWeaponDiceFormula('2s', item);
         expect(result).toBe('2d10');
@@ -846,14 +918,10 @@ describe('EffectsManager', () => {
         expect(result).toBe('2d8');
       });
 
-      it('should default to d8 when spell has no damage parts', async () => {
+      it('should default to d8 when spell has no damage data', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Utility Spell',
-          type: 'spell',
-          system: { damage: { parts: [] } }
-        });
+        const item = createMockItem({ type: 'spell', system: { damage: {} } });
 
         const result = (EffectsManager as any).resolveWeaponDiceFormula('2S', item);
         expect(result).toBe('2d8');
@@ -864,11 +932,7 @@ describe('EffectsManager', () => {
       it('should extract d10 from fire bolt', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          name: 'Fire Bolt',
-          type: 'spell',
-          system: { damage: { parts: [['1d10', 'fire']] } }
-        });
+        const item = spellItem(10, 'fire', 'Fire Bolt');
 
         const result = (EffectsManager as any).getSpellDamageDie(item);
         expect(result).toBe('d10');
@@ -881,14 +945,10 @@ describe('EffectsManager', () => {
         expect(result).toBe('d8');
       });
 
-      it('should return d8 when no damage parts', async () => {
+      it('should return d8 when no damage data', async () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-        const item = createMockItem({
-          system: { damage: { parts: [] } }
-        });
-
-        const result = (EffectsManager as any).getSpellDamageDie(item);
+        const result = (EffectsManager as any).getSpellDamageDie(emptyItem());
         expect(result).toBe('d8');
       });
     });
@@ -898,11 +958,7 @@ describe('EffectsManager', () => {
         const { EffectsManager } = await import('../../src/services/EffectsManager');
 
         const token = createMockToken();
-        const item = createMockItem({
-          name: 'Fire Bolt',
-          type: 'spell',
-          system: { actionType: 'rsak', damage: { parts: [['1d10', 'fire']] } }
-        });
+        const item = spellItem(10, 'fire', 'Fire Bolt');
 
         await (EffectsManager as any).applyDamage(
           token,
@@ -910,9 +966,9 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
-        const callArgs = (MidiQOL.applyTokenDamage as jest.Mock).mock.calls[0];
-        expect(callArgs[0][0].type).toBe('fire');
+        expect(rollToMessage).toHaveBeenCalledWith(
+          expect.objectContaining({ flavor: expect.stringContaining('fire') })
+        );
       });
 
       it('should use force as default when damageType is spell and no item', async () => {
@@ -926,9 +982,9 @@ describe('EffectsManager', () => {
           undefined
         );
 
-        expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
-        const callArgs = (MidiQOL.applyTokenDamage as jest.Mock).mock.calls[0];
-        expect(callArgs[0][0].type).toBe('force');
+        expect(rollToMessage).toHaveBeenCalledWith(
+          expect.objectContaining({ flavor: expect.stringContaining('force') })
+        );
       });
     });
   });
@@ -1071,7 +1127,7 @@ describe('EffectsManager', () => {
         damageType: 'fire'
       });
 
-      expect(MidiQOL.applyTokenDamage).toHaveBeenCalled();
+      expect(rollToMessage).toHaveBeenCalled();
     });
 
     it('should not apply when missing required config', async () => {
@@ -1550,7 +1606,7 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.advantage.ability.check.all'
+                key: 'flags.midi-qol.advantage.check.all'
               })
             ])
           })
@@ -1591,7 +1647,7 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.advantage.ability.save.all'
+                key: 'flags.midi-qol.advantage.save.all'
               })
             ])
           })
@@ -1623,6 +1679,136 @@ describe('EffectsManager', () => {
           })
         ])
       );
+    });
+  });
+
+  describe('applyAttackAlly', () => {
+    // Build a canvas token with the fields findNearestAlly / applyAttackAlly read.
+    const makeToken = (
+      id: string,
+      opts: { disposition: number; x: number; y: number; hp?: number; name?: string }
+    ): any => ({
+      id,
+      name: opts.name ?? id,
+      document: { disposition: opts.disposition },
+      center: { x: opts.x, y: opts.y },
+      setTarget: jest.fn(),
+      actor:
+        opts.hp === undefined
+          ? { name: opts.name ?? id }
+          : { name: opts.name ?? id, system: { attributes: { hp: { value: opts.hp } } } }
+    });
+
+    // Source actor that carries a usable weapon.
+    const makeSourceActor = () => {
+      const weapon = {
+        id: 'weapon-id',
+        name: 'Longsword',
+        type: 'weapon',
+        use: jest.fn<() => Promise<any>>().mockResolvedValue(undefined)
+      };
+      const actor: any = {
+        name: 'Fumbler',
+        items: { get: jest.fn().mockReturnValue(weapon), values: () => [weapon][Symbol.iterator]() }
+      };
+      return { actor, weapon, sourceItem: { id: 'weapon-id' } as any };
+    };
+
+    it('should pick the nearer of two same-disposition living allies', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const allyNear = makeToken('ally-near', { disposition: 1, x: 100, y: 0, hp: 10 });
+      const allyFar = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, allyNear, allyFar];
+
+      const { actor, weapon, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-near']);
+      expect(allyNear.setTarget).toHaveBeenCalled();
+      expect(allyFar.setTarget).not.toHaveBeenCalled();
+      expect(weapon.use).toHaveBeenCalled();
+    });
+
+    it('should exclude tokens of a different disposition', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const enemyNear = makeToken('enemy-near', { disposition: -1, x: 50, y: 0, hp: 10 });
+      const allyFar = makeToken('ally-far', { disposition: 1, x: 400, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, enemyNear, allyFar];
+
+      const { actor, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+
+      // The nearer enemy is skipped; the farther same-disposition ally is chosen
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-far']);
+    });
+
+    it('should exclude downed allies (hp <= 0)', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const allyDowned = makeToken('ally-downed', { disposition: 1, x: 50, y: 0, hp: 0 });
+      const allyUp = makeToken('ally-up', { disposition: 1, x: 400, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, allyDowned, allyUp];
+
+      const { actor, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-up']);
+    });
+
+    it('should use the weapon and set the re-entrancy guard', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { MidiQolHooks } = await import('../../src/services/MidiQolHooks');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally', { disposition: 1, x: 100, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, weapon, sourceItem } = makeSourceActor();
+
+      MidiQolHooks.suppressNextWorkflow = false;
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+
+      expect(weapon.use).toHaveBeenCalled();
+      expect(MidiQolHooks.suppressNextWorkflow).toBe(true);
+    });
+
+    it('should no-op gracefully when no ally exists', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const enemy = makeToken('enemy', { disposition: -1, x: 50, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, enemy];
+
+      const { actor, weapon, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+
+      expect(weapon.use).not.toHaveBeenCalled();
+      expect((game.user as any).updateTokenTargets).not.toHaveBeenCalled();
+      expect((ui.notifications as any).info).toHaveBeenCalled();
+    });
+
+    it('should be routed from applyResult for effectType attackAlly', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally', { disposition: 1, x: 100, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, weapon, sourceItem } = makeSourceActor();
+      const result = createMockRolledResult({ effectType: 'attackAlly' });
+
+      await EffectsManager.applyResult(result, fumbler, actor, sourceItem);
+
+      expect(weapon.use).toHaveBeenCalled();
     });
   });
 });

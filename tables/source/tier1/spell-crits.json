@@ -7,10 +7,10 @@
     {
       "type": "text",
       "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
-      "weight": 40,
+      "weight": 25,
       "range": [
         1,
-        40
+        25
       ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
@@ -21,28 +21,64 @@
     },
     {
       "type": "text",
-      "text": "Arcane Burn - Your spell leaves lingering magical energy. Target takes 1d4 force damage at the start of their next turn.",
+      "text": "Ringing Aura - A piercing arcane tone rings in the target's ears, leaving them deafened.",
       "weight": 8,
       "range": [
-        41,
-        48
+        26,
+        33
       ],
-      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1S",
-          "damageType": "spell"
+          "effectType": "condition",
+          "effectCondition": "deafened",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Spell Feedback - Your spell disrupts the target's concentration. If concentrating, they must make a concentration save with disadvantage.",
+      "weight": 7,
+      "range": [
+        34,
+        40
+      ],
+      "img": "icons/svg/silenced.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "concentration",
+          "effectName": "Spell Feedback",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Mental Disruption - Your spell rattles the target's mind. They have disadvantage on their next ability check.",
+      "weight": 7,
+      "range": [
+        41,
+        47
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "ability.all",
+          "effectName": "Mental Disruption",
+          "duration": 0
         }
       }
     },
     {
       "type": "text",
       "text": "Magical Overload - The target's senses are briefly overwhelmed. They have disadvantage on their next saving throw.",
-      "weight": 7,
+      "weight": 6,
       "range": [
-        49,
-        55
+        48,
+        53
       ],
       "img": "icons/svg/daze.svg",
       "flags": {
@@ -56,29 +92,186 @@
     },
     {
       "type": "text",
-      "text": "Knockback - The force of your spell pushes the target. They must succeed on a DC 10 Strength save or be pushed 10 feet away from you.",
-      "weight": 7,
+      "text": "Dazzling Spell - Your spell produces a brilliant flash. The target has disadvantage on their next attack roll.",
+      "weight": 6,
       "range": [
-        56,
-        62
+        54,
+        59
       ],
-      "img": "icons/svg/thrust.svg",
+      "img": "icons/svg/light.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "effectName": "Dazzled",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Burn - Your spell leaves lingering magical energy. Target takes 1d4 force damage at the start of their next turn.",
+      "weight": 5,
+      "range": [
+        60,
+        64
+      ],
+      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1S",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Elemental Surge - Your spell's element flares. Add 1d6 damage of the spell's damage type.",
+      "weight": 5,
+      "range": [
+        65,
+        69
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1S",
+          "damageType": "spell"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Hex of Frailty - A hex of frailty erodes the target's defenses, giving them a -2 penalty to AC until removed.",
+      "weight": 5,
+      "range": [
+        70,
+        74
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Amplification - Your magical power surges! Deal an additional 1d8 force damage.",
+      "weight": 4,
+      "range": [
+        75,
+        78
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1S",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Concussive Blast - A concussive shockwave hammers the target; they must succeed on a DC 11 Strength save or be knocked prone.",
+      "weight": 4,
+      "range": [
+        79,
+        82
+      ],
+      "img": "icons/svg/lightning.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 10,
+          "saveDC": 11,
           "saveAbility": "str",
-          "failEffect": "Pushed 10 feet"
+          "effectCondition": "prone"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Withering Curse - A withering hex corrodes the target from within; they must succeed on a DC 11 Constitution save or be poisoned.",
+      "weight": 4,
+      "range": [
+        83,
+        86
+      ],
+      "img": "icons/svg/poison.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 11,
+          "saveAbility": "con",
+          "effectCondition": "poisoned"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Searing Flash - A blinding burst of arcane light sears the target's eyes, leaving them blinded until the end of their next turn.",
+      "weight": 4,
+      "range": [
+        87,
+        90
+      ],
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Mind Spike - A lance of psychic force stabs the target's mind; they must succeed on a DC 11 Wisdom save or be frightened of you.",
+      "weight": 3,
+      "range": [
+        91,
+        93
+      ],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 11,
+          "saveAbility": "wis",
+          "effectCondition": "frightened"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Magical Knockdown - The force of your spell knocks the target prone.",
+      "weight": 3,
+      "range": [
+        94,
+        96
+      ],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "prone",
+          "duration": 0
         }
       }
     },
     {
       "type": "text",
       "text": "Arcane Vulnerability - Your magic disrupts the target's defenses. Attacks against them have advantage until the end of your next turn.",
-      "weight": 6,
+      "weight": 2,
       "range": [
-        63,
-        68
+        97,
+        98
       ],
       "img": "icons/svg/target.svg",
       "flags": {
@@ -93,147 +286,10 @@
     },
     {
       "type": "text",
-      "text": "Spell Feedback - Your spell disrupts the target's concentration. If concentrating, they must make a concentration save with disadvantage.",
-      "weight": 6,
-      "range": [
-        69,
-        74
-      ],
-      "img": "icons/svg/silenced.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "concentration",
-          "effectName": "Spell Feedback",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Dazzling Spell - Your spell produces a brilliant flash. The target has disadvantage on their next attack roll.",
-      "weight": 5,
-      "range": [
-        75,
-        79
-      ],
-      "img": "icons/svg/light.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "attack.all",
-          "effectName": "Dazzled",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Elemental Surge - Your spell's element flares. Add 1d6 damage of the spell's damage type.",
-      "weight": 5,
-      "range": [
-        80,
-        84
-      ],
-      "img": "icons/svg/explosion.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1S",
-          "damageType": "spell"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Arcane Insight - Your magical senses sharpen. You have advantage on your next spell attack (DM adjudicates).",
-      "weight": 4,
-      "range": [
-        85,
-        88
-      ],
-      "img": "icons/svg/upgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "none"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Lingering Magic - Magical energy clings to the target. They glow faintly and can't benefit from invisibility until the end of their next turn.",
-      "weight": 4,
-      "range": [
-        89,
-        92
-      ],
-      "img": "icons/svg/light.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "glowing",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Mental Disruption - Your spell rattles the target's mind. They have disadvantage on their next ability check.",
-      "weight": 3,
-      "range": [
-        93,
-        95
-      ],
-      "img": "icons/svg/hazard.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "ability.all",
-          "effectName": "Mental Disruption",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Magical Knockdown - The force of your spell knocks the target prone.",
-      "weight": 2,
-      "range": [
-        96,
-        97
-      ],
-      "img": "icons/svg/falling.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "prone",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Arcane Amplification - Your magical power surges! Deal an additional 1d8 force damage.",
-      "weight": 2,
-      "range": [
-        98,
-        99
-      ],
-      "img": "icons/svg/explosion.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1S",
-          "damageType": "spell"
-        }
-      }
-    },
-    {
-      "type": "text",
       "text": "Perfect Casting - A masterful spell! Deal maximum spell damage instead of rolling, plus the target is frightened of you until the end of their next turn.",
-      "weight": 1,
+      "weight": 2,
       "range": [
-        100,
+        99,
         100
       ],
       "img": "icons/svg/terror.svg",

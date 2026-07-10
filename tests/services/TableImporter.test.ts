@@ -348,7 +348,9 @@ describe('TableImporter', () => {
         return true;
       });
       (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
-      ((foundry as any).applications.api.DialogV2.confirm as jest.Mock<() => Promise<boolean>>).mockResolvedValue(false);
+      (
+        (foundry as any).applications.api.DialogV2.confirm as jest.Mock<() => Promise<boolean>>
+      ).mockResolvedValue(false);
 
       const { TableImporter } = await import('../../src/services/TableImporter');
       await TableImporter.promptForUpdate();
@@ -377,7 +379,9 @@ describe('TableImporter', () => {
         }
       );
       (game.modules.get as jest.Mock).mockReturnValue({ active: true, version: '1.0.1' });
-      ((foundry as any).applications.api.DialogV2.confirm as jest.Mock<() => Promise<boolean>>).mockResolvedValue(true);
+      (
+        (foundry as any).applications.api.DialogV2.confirm as jest.Mock<() => Promise<boolean>>
+      ).mockResolvedValue(true);
 
       // Clear tables and add folder for reimport
       (game.tables as any).clear();

@@ -7,10 +7,10 @@
     {
       "type": "text",
       "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
-      "weight": 30,
+      "weight": 12,
       "range": [
         1,
-        30
+        12
       ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
@@ -21,28 +21,48 @@
     },
     {
       "type": "text",
-      "text": "Arcane Immolation - Magical energy sears the target. They take 2d8 force damage at the start of their next turn.",
-      "weight": 9,
+      "text": "Sluggish Mind - The target's thoughts turn to sludge, giving them disadvantage on saving throws until the end of their next turn.",
+      "weight": 8,
       "range": [
-        31,
-        39
+        13,
+        20
       ],
-      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "2S",
-          "damageType": "spell"
+          "effectType": "disadvantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "self",
+          "effectName": "Sluggish Mind",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Hex of Frailty - A hex of frailty erodes the target's defenses, giving them a -2 penalty to AC until removed.",
+      "weight": 7,
+      "range": [
+        21,
+        27
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": -1
         }
       }
     },
     {
       "type": "text",
       "text": "Magic Disruption - Your spell disrupts their magical abilities. Target has disadvantage on spell attacks and saving throws for 3 rounds.",
-      "weight": 8,
+      "weight": 7,
       "range": [
-        40,
-        47
+        28,
+        34
       ],
       "img": "icons/svg/silenced.svg",
       "flags": {
@@ -60,69 +80,88 @@
     },
     {
       "type": "text",
-      "text": "Powerful Blast - The force sends the target flying 30 feet, prone, and stunned until end of their next turn.",
-      "weight": 8,
-      "range": [
-        48,
-        55
-      ],
-      "img": "icons/svg/thrust.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "stunned",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Arcane Vulnerability - Your magic leaves the target exposed. Attacks against them have advantage for 3 rounds.",
+      "text": "Searing Flash - A blinding burst of arcane light sears the target's eyes, leaving them blinded until the end of their next turn.",
       "weight": 7,
       "range": [
-        56,
-        62
+        35,
+        41
       ],
-      "img": "icons/svg/target.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "attack.all",
-          "advantageTarget": "grants",
-          "effectName": "Arcane Vulnerability",
-          "duration": 3
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Magic Nullification - Your spell disrupts the target's magic completely. They cannot cast spells for 3 rounds.",
-      "weight": 6,
-      "range": [
-        63,
-        68
-      ],
-      "img": "icons/svg/silenced.svg",
+      "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "silenced",
-          "duration": 3
+          "effectCondition": "blinded",
+          "duration": 0
         }
       }
     },
     {
       "type": "text",
-      "text": "Arcane Mastery - Your perfect casting inspires you. You have advantage on all spell attacks for 3 rounds (DM adjudicates).",
-      "weight": 5,
+      "text": "Mana Burn - Raw magic ignites the target's own reserves, dealing 2d6 force damage.",
+      "weight": 6,
       "range": [
-        69,
-        73
+        42,
+        47
       ],
-      "img": "icons/svg/upgrade.svg",
+      "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "none"
+          "effectType": "damage",
+          "damageFormula": "2d6",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Withering Curse - A withering hex corrodes the target from within; they must succeed on a DC 15 Constitution save or be poisoned.",
+      "weight": 6,
+      "range": [
+        48,
+        53
+      ],
+      "img": "icons/svg/poison.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "con",
+          "effectCondition": "poisoned"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Immolation - Magical energy sears the target. They take 2d8 force damage at the start of their next turn.",
+      "weight": 6,
+      "range": [
+        54,
+        59
+      ],
+      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2S",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Concussive Blast - A concussive shockwave hammers the target; they must succeed on a DC 15 Strength save or be knocked prone.",
+      "weight": 5,
+      "range": [
+        60,
+        64
+      ],
+      "img": "icons/svg/lightning.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "str",
+          "effectCondition": "prone"
         }
       }
     },
@@ -131,8 +170,8 @@
       "text": "Elemental Devastation - Your spell's element overwhelms the target. Add 3d6 damage of the spell's type.",
       "weight": 5,
       "range": [
-        74,
-        78
+        65,
+        69
       ],
       "img": "icons/svg/explosion.svg",
       "flags": {
@@ -145,18 +184,54 @@
     },
     {
       "type": "text",
-      "text": "Spell Vulnerability - The target becomes vulnerable to the spell's damage type for 3 rounds.",
+      "text": "Numbing Frost - Creeping frost locks the target's limbs; they must succeed on a DC 15 Strength save or be restrained.",
       "weight": 5,
       "range": [
-        79,
-        83
+        70,
+        74
       ],
-      "img": "icons/svg/downgrade.svg",
+      "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "vulnerable",
-          "duration": 3
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "str",
+          "effectCondition": "restrained"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Mind Spike - A lance of psychic force stabs the target's mind; they must succeed on a DC 15 Wisdom save or be frightened of you.",
+      "weight": 5,
+      "range": [
+        75,
+        79
+      ],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "wis",
+          "effectCondition": "frightened"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Amplification - Your magical power surges! Deal an additional 3d8 force damage.",
+      "weight": 4,
+      "range": [
+        80,
+        83
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3S",
+          "damageType": "force"
         }
       }
     },
@@ -179,69 +254,89 @@
     },
     {
       "type": "text",
-      "text": "Spell Echo - Your spell echoes with tremendous power. Cast the same spell again immediately as a free action.",
+      "text": "Arcane Vulnerability - Your magic leaves the target exposed. Attacks against them have advantage for 3 rounds.",
       "weight": 4,
       "range": [
         88,
         91
       ],
-      "img": "icons/svg/upgrade.svg",
+      "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "spell_echo",
-          "duration": 0
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Arcane Vulnerability",
+          "duration": 3
         }
       }
     },
     {
       "type": "text",
-      "text": "Arcane Amplification - Your magical power surges! Deal an additional 3d8 force damage.",
-      "weight": 4,
-      "range": [
-        92,
-        95
-      ],
-      "img": "icons/svg/explosion.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "3S",
-          "damageType": "spell"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Overwhelming Power - Your devastating spell deals an additional 4d8 force damage.",
+      "text": "Soulscored - The spell scars the target's very soul, inflicting one level of exhaustion.",
       "weight": 3,
       "range": [
-        96,
-        98
+        92,
+        94
       ],
-      "img": "icons/svg/explosion.svg",
+      "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "3S",
-          "damageType": "spell"
+          "effectType": "condition",
+          "effectCondition": "exhaustion",
+          "duration": -1
         }
       }
     },
     {
       "type": "text",
-      "text": "Perfect Casting - A masterful spell! Regain 1 expended spell slot of up to 2nd level.",
-      "weight": 2,
+      "text": "Powerful Blast - The force sends the target flying 30 feet, prone, and stunned until end of their next turn.",
+      "weight": 3,
       "range": [
-        99,
-        100
+        95,
+        97
       ],
-      "img": "icons/svg/upgrade.svg",
+      "img": "icons/svg/thrust.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "spell_slot_recovered",
-          "duration": 0
+          "effectCondition": "stunned",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Lock - Binding sigils seize the target's body; they must succeed on a DC 15 Constitution save or be paralyzed.",
+      "weight": 2,
+      "range": [
+        98,
+        99
+      ],
+      "img": "icons/svg/paralysis.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "con",
+          "effectCondition": "paralyzed"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Elemental Detonation - The spell's energy detonates catastrophically, dealing bonus damage equal to the spell's slot-scaled magnitude.",
+      "weight": 1,
+      "range": [
+        100,
+        100
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1SB",
+          "damageType": "spell"
         }
       }
     }

@@ -536,13 +536,8 @@ export function injectSoundPreviewButtons(html: HTMLElement | unknown): void {
       try {
         // foundry.audio.AudioHelper is the v13/v14 location; the bare
         // AudioHelper global is a legacy v12 fallback that may be removed.
-        const Helper =
-          (foundry as any).audio?.AudioHelper ??
-          (globalThis as any).AudioHelper;
-        await Helper?.play(
-          { src: soundPath, volume: 0.8, autoplay: true, loop: false },
-          false
-        );
+        const Helper = (foundry as any).audio?.AudioHelper ?? (globalThis as any).AudioHelper;
+        await Helper?.play({ src: soundPath, volume: 0.8, autoplay: true, loop: false }, false);
       } catch (error) {
         console.error(`${LOG_PREFIX} Error playing sound:`, error);
         ui.notifications.error(game.i18n.localize('DLCRITFUMBLE.Settings.PreviewSound.PlayError'));

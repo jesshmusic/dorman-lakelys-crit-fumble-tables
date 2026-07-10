@@ -16,6 +16,14 @@ export class MidiQolHooks {
   private static hookId: number | null = null;
 
   /**
+   * Re-entrancy guard. Set true immediately before the module solicits an
+   * attack on the fumbler's behalf (the "attack nearest ally" fumble). The next
+   * AttackRollComplete is then skipped so that forced attack cannot itself roll
+   * a crit/fumble and recurse.
+   */
+  static suppressNextWorkflow = false;
+
+  /**
    * Register the Midi-QOL hooks
    */
   static register(): void {
@@ -49,6 +57,14 @@ export class MidiQolHooks {
    */
   private static async onAttackRollComplete(workflow: MidiQolWorkflow): Promise<void> {
     try {
+      // Skip crit/fumble handling for an attack the module itself solicited
+      // (e.g. the "attack nearest ally" fumble), preventing recursion.
+      if (this.suppressNextWorkflow) {
+        this.suppressNextWorkflow = false;
+        console.log(`${LOG_PREFIX} Skipping crit/fumble for module-solicited attack`);
+        return;
+      }
+
       const d20Result = this.getD20Result(workflow);
       const isCrit = workflow.isCritical ?? d20Result === 20;
       const isFumble = workflow.isFumble ?? d20Result === 1;
@@ -254,8 +270,9 @@ export class MidiQolHooks {
 
   /**
    * Find a weapon on the actor matching the attack type
+   * Public so the test harness can resolve a source item for damage effects.
    */
-  private static findWeaponForAttackType(actor: Actor, attackType: string): any {
+  static findWeaponForAttackType(actor: Actor, attackType: string): any {
     const items = [...(actor.items?.values() || [])] as any[];
     const weapons = items.filter((i: any) => i.type === 'weapon');
 

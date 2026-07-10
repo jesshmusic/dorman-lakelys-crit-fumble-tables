@@ -5,7 +5,7 @@
 
 import { MODULE_ID, LOG_PREFIX } from './constants';
 import { registerSettings, injectSoundPreviewButtons, getFumbleSound } from './settings';
-import { MidiQolHooks, TableImporter } from './services';
+import { MidiQolHooks, TableImporter, TestHarness } from './services';
 import buildInfo from '../build-info.json';
 
 const buildNumber = buildInfo.buildNumber;
@@ -62,8 +62,7 @@ function warnIfDepOutdated(depId: string, displayName: string): void {
   }
 
   const coreMajor =
-    (game as any).release?.generation ??
-    parseInt(String((game as any).version ?? '0'), 10);
+    (game as any).release?.generation ?? parseInt(String((game as any).version ?? '0'), 10);
   if (!coreMajor || Number.isNaN(coreMajor)) return;
 
   const parseMajor = (v: unknown): number | null => {
@@ -325,15 +324,69 @@ if (typeof globalThis !== 'undefined') {
         actor,
         null
       );
+    },
+
+    // ---- Smoke-test harness (see TestHarness service) --------------------
+
+    /**
+     * List every result in a table with roll range + configured effect.
+     * @param type 'crit' | 'fumble'
+     * @param attackType 'melee' | 'ranged' | 'spell'
+     * @param source actor name used to pick the tier (default 'Daevon')
+     */
+    listResults(
+      type: 'crit' | 'fumble' = 'crit',
+      attackType: 'melee' | 'ranged' | 'spell' = 'melee',
+      source = 'Daevon'
+    ) {
+      return TestHarness.listResults(type, attackType, source);
+    },
+
+    /**
+     * Apply ONE result through the real effect path.
+     * @param selector roll number (e.g. 62) OR name substring (e.g. 'Bleeding')
+     */
+    test(
+      type: 'crit' | 'fumble',
+      attackType: 'melee' | 'ranged' | 'spell',
+      selector: number | string,
+      source = 'Daevon',
+      target?: string
+    ) {
+      return TestHarness.apply(type, attackType, selector, source, target);
+    },
+
+    /**
+     * Sweep an entire table — apply every result one at a time with a delay,
+     * auto-clearing effects between each. Returns a structured summary.
+     * @param opts { source, target, delay, clearBetween, only }
+     */
+    sweep(
+      type: 'crit' | 'fumble' = 'crit',
+      attackType: 'melee' | 'ranged' | 'spell' = 'melee',
+      opts: {
+        source?: string;
+        target?: string;
+        delay?: number;
+        clearBetween?: boolean;
+        only?: string;
+      } = {}
+    ) {
+      return TestHarness.sweep(type, attackType, opts);
+    },
+
+    /** Remove all module-applied effects/conditions from a token by name. */
+    clearEffects(name: string) {
+      return TestHarness.clearEffects(name);
     }
   };
 
-  console.log(`${LOG_PREFIX} Debug functions available:`);
-  console.log(`  DormanLakely.simulateCrit('Attacker', 'Target', 'melee')`);
-  console.log(`  DormanLakely.simulateFumble('Fumbler', 'Target', 'melee')`);
-  console.log(`  DormanLakely.testSpecificFumble('Fumbler', 'Target', 'Massive Opening', 'melee')`);
-  console.log(`  DormanLakely.listActors()`);
-  console.log(`  DormanLakely.listTokens()`);
+  console.log(`${LOG_PREFIX} Debug + smoke-test functions available on DormanLakely:`);
+  console.log(`  listResults('crit'|'fumble','melee'|'ranged'|'spell','SourceActor')`);
+  console.log(`  test('crit','melee', 62 | 'Bleeding', 'Attacker', 'Target')`);
+  console.log(`  sweep('crit','melee', { source:'Attacker', target:'Target', delay:1600 })`);
+  console.log(`  clearEffects('TokenName')`);
+  console.log(`  simulateCrit / simulateFumble / testSpecificFumble / listActors / listTokens`);
 }
 export * from './types';
 export * from './constants';

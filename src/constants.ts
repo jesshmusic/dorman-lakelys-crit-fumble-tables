@@ -44,7 +44,9 @@ export const EFFECT_TYPES = {
   DISARM: 'disarm',
   PENALTY: 'penalty',
   ADVANTAGE: 'advantage',
-  DISADVANTAGE: 'disadvantage'
+  DISADVANTAGE: 'disadvantage',
+  /** Fumble: the fumbler is forced to attack their nearest ally */
+  ATTACK_ALLY: 'attackAlly'
 } as const;
 
 /**
@@ -65,6 +67,32 @@ export const CONDITIONS = {
   EXHAUSTION: 'exhaustion',
   FATIGUED: 'fatigued'
 } as const;
+
+/**
+ * Standard D&D 5e conditions that Foundry exposes as built-in status effects.
+ * These are toggled via the status-effect system (and can carry durations);
+ * anything NOT in this list is treated as a custom Active Effect.
+ *
+ * Single source of truth — imported by EffectsManager (application) and the
+ * TestHarness (cleanup). Keep in sync with dnd5e's status effect ids.
+ */
+export const STANDARD_CONDITIONS = [
+  'blinded',
+  'charmed',
+  'deafened',
+  'frightened',
+  'grappled',
+  'incapacitated',
+  'invisible',
+  'paralyzed',
+  'petrified',
+  'poisoned',
+  'prone',
+  'restrained',
+  'stunned',
+  'unconscious',
+  'exhaustion'
+] as const;
 
 /**
  * Damage types for D&D 5e

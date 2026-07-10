@@ -7,43 +7,40 @@
     {
       "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
-      "weight": 40,
-      "range": [
-        1,
-        40
-      ],
+      "weight": 25,
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "none"
         }
-      }
+      },
+      "range": [
+        1,
+        25
+      ]
     },
     {
       "type": "text",
-      "text": "Pinning Shot - Your projectile pins part of the target's clothing or armor to nearby terrain. Their speed is reduced by 10 feet until they use an action to free themselves.",
+      "text": "Rattled Target - Your shot startles the target, giving them disadvantage on their next ability check.",
       "weight": 8,
-      "range": [
-        41,
-        48
-      ],
-      "img": "icons/svg/anchor.svg",
+      "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "slowed",
-          "duration": -1
+          "effectType": "disadvantage",
+          "advantageScope": "ability.all",
+          "effectName": "Rattled",
+          "duration": 0
         }
-      }
+      },
+      "range": [
+        26,
+        33
+      ]
     },
     {
       "type": "text",
-      "text": "Eye Threat - Your projectile flies dangerously close to the target's eyes. They have disadvantage on their next ranged attack.",
+      "text": "Eye Threat - The projectile whistles past the target's eyes, giving them disadvantage on their next ranged attack.",
       "weight": 7,
-      "range": [
-        49,
-        55
-      ],
       "img": "icons/svg/eye.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -52,69 +49,123 @@
           "effectName": "Eye Threat",
           "duration": 0
         }
-      }
+      },
+      "range": [
+        34,
+        40
+      ]
     },
     {
       "type": "text",
-      "text": "Bleeding Wound - Your projectile leaves a deep wound. Target takes 1d4 extra damage.",
+      "text": "Muffled Ears - The shot clips the side of the target's head, leaving them deafened until the wound is treated.",
       "weight": 7,
-      "range": [
-        56,
-        62
-      ],
-      "img": "icons/svg/blood.svg",
+      "img": "icons/svg/silenced.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1W",
-          "damageType": "weapon"
+          "effectType": "condition",
+          "effectCondition": "deafened",
+          "duration": -1
         }
-      }
+      },
+      "range": [
+        41,
+        47
+      ]
     },
     {
       "type": "text",
-      "text": "Staggering Impact - The force of your shot staggers the target. They must succeed on a DC 10 Strength save or be pushed 5 feet.",
+      "text": "Distracting Shot - Your shot forces the target to focus on dodging, giving them disadvantage on their next saving throw.",
       "weight": 6,
-      "range": [
-        63,
-        68
-      ],
-      "img": "icons/svg/thrust.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "save",
-          "saveDC": 10,
-          "saveAbility": "str",
-          "failEffect": "Pushed 5 feet"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Rattled Target - Your shot startles the target. They have disadvantage on their next ability check.",
-      "weight": 6,
-      "range": [
-        69,
-        74
-      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": "ability.all",
-          "effectName": "Rattled",
+          "advantageScope": "save.all",
+          "effectName": "Distracted",
           "duration": 0
         }
-      }
+      },
+      "range": [
+        48,
+        53
+      ]
     },
     {
       "type": "text",
-      "text": "Exposed Target - Your shot forces the target to flinch and expose themselves. Attacks against them have advantage until the end of your next turn.",
-      "weight": 5,
+      "text": "Severed Tendon - Your shot severs a tendon in the target's arm, giving them -2 to attack rolls until they receive healing.",
+      "weight": 6,
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -2,
+          "duration": -1
+        }
+      },
       "range": [
-        75,
-        79
-      ],
+        54,
+        59
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Armor Piercing - Your shot finds a seam in the target's armor, imposing -1 AC until they take an action to reset it.",
+      "weight": 5,
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -1,
+          "duration": -1
+        }
+      },
+      "range": [
+        60,
+        64
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Suppressing Shot - A burst of covering fire breaks the target's nerve, giving them disadvantage on attack rolls until the end of their next turn.",
+      "weight": 5,
+      "img": "icons/svg/net.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Suppressed",
+          "duration": 1
+        }
+      },
+      "range": [
+        65,
+        69
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Grit in the Eye - A spray of grit and blood catches the target across the eyes, leaving them blinded until the end of their next turn.",
+      "weight": 5,
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": 0
+        }
+      },
+      "range": [
+        70,
+        74
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Exposed Target - Your shot forces the target to flinch open, granting advantage on attacks against them until the end of your next turn.",
+      "weight": 4,
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -124,16 +175,50 @@
           "effectName": "Exposed Target",
           "duration": 1
         }
-      }
+      },
+      "range": [
+        75,
+        78
+      ]
     },
     {
       "type": "text",
-      "text": "Disarming Shot - Your projectile strikes the target's weapon hand. They have disadvantage on attack rolls until the end of their next turn.",
-      "weight": 5,
+      "text": "Bleeding Wound - Your projectile leaves a deep gash, dealing an extra weapon die of damage.",
+      "weight": 4,
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1W",
+          "damageType": "weapon"
+        }
+      },
       "range": [
-        80,
-        84
-      ],
+        79,
+        82
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Penetrating Shot - The projectile tears clean through muscle, dealing an extra 1d6 piercing damage.",
+      "weight": 4,
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d6",
+          "damageType": "piercing"
+        }
+      },
+      "range": [
+        83,
+        86
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Disarming Shot - Your projectile strikes the target's weapon hand, giving them disadvantage on attack rolls until the end of their next turn.",
+      "weight": 4,
       "img": "icons/svg/sword.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -142,101 +227,71 @@
           "effectName": "Hand Struck",
           "duration": 1
         }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Perfect Aim - Your incredible accuracy impresses allies. You have advantage on your next ranged attack (DM adjudicates).",
-      "weight": 4,
+      },
       "range": [
-        85,
-        88
-      ],
-      "img": "icons/svg/upgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "none"
-        }
-      }
+        87,
+        90
+      ]
     },
     {
       "type": "text",
-      "text": "Distracting Shot - Your shot forces the target to focus on dodging. They have disadvantage on their next saving throw.",
-      "weight": 4,
-      "range": [
-        89,
-        92
-      ],
-      "img": "icons/svg/daze.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "save.all",
-          "effectName": "Distracted",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Armor Piercing - Your shot finds a weak spot in the target's armor. They take -1 to AC until they spend an action to adjust it.",
+      "text": "Kneecapped - Your shot strikes the target's knee, forcing a DC 11 Dexterity save or be knocked prone.",
       "weight": 3,
-      "range": [
-        93,
-        95
-      ],
-      "img": "icons/svg/downgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "penalty",
-          "penaltyType": "ac",
-          "penaltyValue": -1,
-          "duration": -1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Hamstring Shot - Your projectile strikes the target's leg. Their speed is reduced by half until the end of their next turn.",
-      "weight": 2,
-      "range": [
-        96,
-        97
-      ],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "slowed",
-          "duration": 1
+          "effectType": "save",
+          "saveDC": 11,
+          "saveAbility": "dex",
+          "effectCondition": "prone"
         }
-      }
+      },
+      "range": [
+        91,
+        93
+      ]
     },
     {
       "type": "text",
-      "text": "Penetrating Shot - Your projectile tears through, dealing an additional 1d6 damage.",
-      "weight": 2,
-      "range": [
-        98,
-        99
-      ],
-      "img": "icons/svg/explosion.svg",
+      "text": "Staggering Blow - The force of the shot staggers the target, forcing a DC 11 Strength save or take 1d6 bludgeoning damage as they are driven back.",
+      "weight": 3,
+      "img": "icons/svg/thrust.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1W",
-          "damageType": "weapon"
+          "effectType": "save",
+          "saveDC": 11,
+          "saveAbility": "str",
+          "damageFormula": "1d6",
+          "damageType": "bludgeoning"
         }
-      }
+      },
+      "range": [
+        94,
+        96
+      ]
     },
     {
       "type": "text",
-      "text": "Deadly Precision - A masterful shot! Deal maximum weapon damage instead of rolling, and the target is frightened of you until the end of their next turn.",
-      "weight": 1,
+      "text": "Punctured Lung - Your shot punctures a lung, forcing a DC 11 Constitution save or be poisoned while the target struggles to breathe.",
+      "weight": 2,
+      "img": "icons/svg/poison.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 11,
+          "saveAbility": "con",
+          "effectCondition": "poisoned"
+        }
+      },
       "range": [
-        100,
-        100
-      ],
+        97,
+        98
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Deadly Precision - A masterful shot lands with maximum weapon damage and leaves the target frightened of you until the end of their next turn.",
+      "weight": 2,
       "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -244,7 +299,11 @@
           "effectCondition": "frightened",
           "duration": 1
         }
-      }
+      },
+      "range": [
+        99,
+        100
+      ]
     }
   ]
 }

@@ -3,7 +3,7 @@
  * Responsible for applying conditions, damage, and other effects from table results
  */
 
-import { MODULE_ID, EFFECT_TYPES, LOG_PREFIX } from '../constants';
+import { MODULE_ID, EFFECT_TYPES, LOG_PREFIX, STANDARD_CONDITIONS } from '../constants';
 import { RolledResult, TableEffectConfig, AdvantageScope, AdvantageTarget } from '../types';
 import { shouldApplyEffects, shouldShowChatMessages } from '../settings';
 
@@ -48,7 +48,7 @@ export class EffectsManager {
         break;
 
       case EFFECT_TYPES.SAVE:
-        await this.handleSaveEffect(targetToken, effectConfig, sourceActor, resultIcon);
+        await this.handleSaveEffect(targetToken, effectConfig, sourceActor, resultIcon, sourceItem);
         break;
 
       case EFFECT_TYPES.DISARM:
@@ -70,6 +70,12 @@ export class EffectsManager {
           'disadvantage',
           resultIcon
         );
+        break;
+
+      case EFFECT_TYPES.ATTACK_ALLY:
+        // Fumble: the fumbler (passed here as targetToken) is forced to attack
+        // their nearest ally. Solicits a real attack roll from the fumbler.
+        await this.applyAttackAlly(targetToken, sourceActor, sourceItem);
         break;
     }
   }
@@ -127,6 +133,46 @@ export class EffectsManager {
   }
 
   /**
+   * Build Active Effect `duration` data that behaves correctly in combat with
+   * DAE 14 + Times-Up 13 on Foundry v14 / dnd5e 5.3.
+   *
+   * The old code used `duration.turns` + `startTurn`/`startRound`, which anchor
+   * to the CREATING combatant (the attacker). That made target debuffs expire
+   * the instant the attacker clicked "Next". Instead we use DAE's combatant-
+   * relative `duration.expiry`:
+   *   - `targetEnd` fires at the end of the turn of the actor the effect is ON
+   *     (the crit target, or the fumbler for self-debuffs) — so it survives the
+   *     attacker's turn ending and lasts through the holder's next turn.
+   *
+   * Returns the `duration` object AND the `flags.dae.specialDuration` array the
+   * caller must merge into the effect's flags. IMPORTANT (verified in-game on
+   * DAE 14 + Times-Up 13): a bare `duration.expiry` does NOT delete the effect —
+   * it only marks it expired. DAE/Times-Up actually remove turn-scoped effects
+   * by reading `flags.dae.specialDuration` (e.g. `["turnEnd"]`), so we set that.
+   *
+   * @param duration -1 = permanent, 0 = until end of the affected creature's
+   *                  next turn, N = N rounds
+   */
+  private static buildDuration(duration: number): {
+    duration: Record<string, any>;
+    specialDuration: string[];
+  } {
+    if (duration === -1) {
+      // Permanent until manually removed (isTemporary === false)
+      return { duration: {}, specialDuration: [] };
+    }
+    if (duration === 0) {
+      // Until the end of the affected creature's next turn. `turnEnd` is keyed
+      // to the actor the effect is ON (target of a crit, or the fumbler). The
+      // rounds:1 is a hard-cap fallback so it can never linger if the event
+      // somehow doesn't fire.
+      return { duration: { rounds: 1 }, specialDuration: ['turnEnd'] };
+    }
+    // N rounds — Times-Up counts down the numeric round duration.
+    return { duration: { rounds: duration }, specialDuration: [] };
+  }
+
+  /**
    * Apply a condition to a token
    * For standard D&D 5e conditions, toggles the built-in status effect
    * For custom conditions, creates an Active Effect with Times Up integration
@@ -150,20 +196,7 @@ export class EffectsManager {
     }
 
     // For custom conditions, create an Active Effect
-    const durationData: Record<string, any> = {};
-
-    if (duration === -1) {
-      durationData.seconds = null;
-      durationData.rounds = null;
-    } else if (duration === 0) {
-      durationData.turns = 1;
-      durationData.startTurn = game.combat?.turn ?? 0;
-      durationData.startRound = game.combat?.round ?? 0;
-    } else {
-      durationData.rounds = duration;
-      durationData.startRound = game.combat?.round ?? 0;
-      durationData.startTurn = game.combat?.turn ?? 0;
-    }
+    const { duration: durationData, specialDuration } = this.buildDuration(duration);
 
     const icon = resultIcon || this.getConditionIcon(conditionName);
 
@@ -171,15 +204,15 @@ export class EffectsManager {
       name: this.formatConditionName(conditionName),
       icon,
       origin: token.actor.uuid,
+      disabled: false,
+      transfer: false,
       duration: durationData,
       flags: {
         [MODULE_ID]: {
           source: 'crit-fumble-result',
           condition: conditionName
         },
-        'times-up': {
-          isPassive: false
-        }
+        ...(specialDuration.length ? { dae: { specialDuration } } : {})
       }
     };
 
@@ -234,78 +267,72 @@ export class EffectsManager {
    * Check if a condition is a standard D&D5e condition
    */
   private static isStandardCondition(condition: string): boolean {
-    const standardConditions = [
-      'blinded',
-      'charmed',
-      'deafened',
-      'frightened',
-      'grappled',
-      'incapacitated',
-      'invisible',
-      'paralyzed',
-      'petrified',
-      'poisoned',
-      'prone',
-      'restrained',
-      'stunned',
-      'unconscious',
-      'exhaustion'
-    ];
-    return standardConditions.includes(condition.toLowerCase());
+    return (STANDARD_CONDITIONS as readonly string[]).includes(condition.toLowerCase());
   }
 
   /**
-   * Apply damage to a token using MidiQOL's damage application
-   * Respects MidiQOL workflow settings for damage cards
+   * Roll bonus crit/fumble damage and post Foundry's NATIVE dnd5e damage card
+   * so the GM clicks "Apply / ½ / 2×" (no silent auto-apply).
+   *
+   * How the card works (dnd5e 5.3): a chat message whose rolls include a
+   * `CONFIG.Dice.DamageRoll` gets the Apply-Damage tray for the GM. Setting
+   * `flags.dnd5e.targets` pre-fills the tray's "Targeted" tab with this token,
+   * and `flags.dnd5e.roll.type = "damage"` gives it the damage header. Apply
+   * runs `Actor5e.applyDamage`, which honors resistances/vulnerabilities.
    *
    * Supports special formula syntax:
-   * - "1W", "2W", "3W" = 1, 2, or 3 extra weapon dice (e.g., "2W" with longsword = 2d8)
-   * - Standard formulas like "2d6" work as normal
+   * - "1W"/"2W"/"3W" = N dice of the weapon's damage die (e.g. "2W" + longsword = 2d8)
+   * - "1S"/"2S"/"3S" = N dice of the spell's damage die
+   * - Standard formulas like "2d6" work as-is
    *
-   * If damageType is "weapon", extracts the damage type from the source item
+   * Damage type is resolved so it is logical for the event: an explicit type
+   * (fire, force, …) is used as authored; "weapon"/"spell" resolve to the
+   * source item's actual damage type.
    */
   static async applyDamage(
     token: Token,
     config: TableEffectConfig,
     sourceItem?: Item
   ): Promise<void> {
-    if (!config.damageFormula || !token.actor) {
+    const actor = (token as any)?.actor;
+    if (!config.damageFormula || !actor) {
       return;
     }
 
     try {
-      // Resolve the damage formula - check for weapon dice syntax (e.g., "1W", "2W")
+      // Resolve "XW"/"XS" weapon/spell dice syntax against the 5.3 damage schema
       const resolvedFormula = this.resolveWeaponDiceFormula(config.damageFormula, sourceItem);
+      const damageType = this.resolveDamageType(config.damageType, sourceItem);
 
-      const roll = new Roll(resolvedFormula);
-      await roll.evaluate({ async: true });
-
-      // Resolve damage type - use item's damage type if "weapon" or "spell" is specified
-      let damageType = config.damageType || 'bludgeoning';
-      if ((damageType === 'weapon' || damageType === 'spell') && sourceItem) {
-        damageType = this.getWeaponDamageType(sourceItem);
-      } else if (damageType === 'weapon') {
-        // Fallback if no source item available
-        damageType = 'bludgeoning';
-      } else if (damageType === 'spell') {
-        // Fallback if no source item available for spells
-        damageType = 'force';
-      }
-
-      const damageDetail = [{ damage: roll.total, type: damageType }];
+      // Use the dnd5e DamageRoll so the chat card exposes Apply-Damage buttons
+      const DamageRollClass = (globalThis as any).CONFIG?.Dice?.DamageRoll ?? Roll;
+      const rollData = (sourceItem as any)?.getRollData?.() ?? {};
+      const roll = new DamageRollClass(resolvedFormula, rollData, { type: damageType });
+      await roll.evaluate();
 
       await roll.toMessage({
-        speaker: ChatMessage.getSpeaker({ token }),
-        flavor: `Crit/Fumble Bonus Damage (${damageType})`
+        speaker: ChatMessage.getSpeaker({ token: (token as any).document ?? token }),
+        flavor: `Crit/Fumble Bonus Damage (${damageType})`,
+        flags: {
+          dnd5e: {
+            roll: { type: 'damage' },
+            targets: [
+              {
+                uuid: actor.uuid,
+                name: token.name,
+                img: actor.img,
+                ac: actor.system?.attributes?.ac?.value ?? null
+              }
+            ]
+          }
+        }
       });
 
-      await MidiQOL.applyTokenDamage(damageDetail, roll.total, new Set([token]), null, null, {});
-
       console.log(
-        `${LOG_PREFIX} Applied ${roll.total} ${damageType} damage to ${token.name} (${resolvedFormula})`
+        `${LOG_PREFIX} Posted ${roll.total} ${damageType} damage card for ${token.name} (${resolvedFormula}) — GM applies`
       );
     } catch (error) {
-      console.error(`${LOG_PREFIX} Failed to apply damage:`, error);
+      console.error(`${LOG_PREFIX} Failed to roll bonus damage:`, error);
     }
   }
 
@@ -323,6 +350,21 @@ export class EffectsManager {
    * If no source item is available, defaults to d6 for weapons and d8 for spells.
    */
   private static resolveWeaponDiceFormula(formula: string, sourceItem?: Item): string {
+    // "XWB"/"XSB" = X full copies of the weapon's/spell's BASE damage dice
+    // (number AND die size). Use this for "triple/quadruple damage" results:
+    // a crit already rolls 2x the base dice on the attack card, so the bonus
+    // card adds "1WB" for triple, "2WB" for quadruple. Unlike "XW" (which is X
+    // dice of the die size only), "XWB" respects multi-die weapons (greatsword
+    // 2d6 -> "1WB" = 2d6, not 1d6).
+    const weaponBaseMatch = formula.match(/^(\d+)WB$/i);
+    if (weaponBaseMatch) {
+      return this.getFullBaseDice(sourceItem, parseInt(weaponBaseMatch[1], 10), 'weapon');
+    }
+    const spellBaseMatch = formula.match(/^(\d+)SB$/i);
+    if (spellBaseMatch) {
+      return this.getFullBaseDice(sourceItem, parseInt(spellBaseMatch[1], 10), 'spell');
+    }
+
     // Check for weapon dice syntax: "1W", "2W", "3W", etc.
     const weaponDiceMatch = formula.match(/^(\d+)W$/i);
     if (weaponDiceMatch) {
@@ -344,68 +386,111 @@ export class EffectsManager {
   }
 
   /**
-   * Extract the damage die from a spell item (e.g., "d10" from fire bolt)
+   * Get the primary DamageData for an item in dnd5e 5.x.
+   *
+   * dnd5e 5.x REMOVED the old `system.damage.parts` tuple array. Weapons/
+   * consumables now carry `system.damage.base` (a DamageData with
+   * `{ number, denomination, types:Set, formula }`); spells and other
+   * activity-based items carry damage on their damage ACTIVITY
+   * (`activity.damage.parts[0]`, also a DamageData).
+   */
+  private static getPrimaryDamageData(item?: any): any | null {
+    if (!item) {
+      return null;
+    }
+
+    // Weapons / consumables: system.damage.base
+    const base = item.system?.damage?.base;
+    if (base && (base.denomination || base.types)) {
+      return base;
+    }
+
+    // Spells / activity-based items: first damage part of the first damage activity.
+    // `activities` may be a dnd5e Collection (.contents/.values()) or, in some
+    // contexts, a plain object — handle all three (matches findWeaponForAttackType).
+    const activities = item.system?.activities;
+    if (activities) {
+      const list: any[] = Array.isArray(activities.contents)
+        ? activities.contents
+        : typeof activities.values === 'function'
+          ? [...activities.values()]
+          : Object.values(activities);
+      for (const activity of list) {
+        const parts = activity?.damage?.parts;
+        if (parts && parts.length > 0) {
+          return parts[0];
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Build N full copies of an item's BASE damage dice (number × die size).
+   * e.g. greatsword base 2d6, copies=1 -> "2d6"; longsword 1d8, copies=2 -> "2d8".
+   * Falls back to d6 (weapon) / d8 (spell), single die, when unresolved.
+   */
+  private static getFullBaseDice(
+    item: Item | undefined,
+    copies: number,
+    kind: 'weapon' | 'spell'
+  ): string {
+    const data = this.getPrimaryDamageData(item);
+    // Use `||` (not `??`) so a 0 number/denomination falls back rather than
+    // producing an invalid "0dN"/"Nd0" formula that would throw on evaluate.
+    const number = data?.number || 1;
+    const denomination = data?.denomination || (kind === 'spell' ? 8 : 6);
+    return `${number * copies}d${denomination}`;
+  }
+
+  /**
+   * Extract the damage die string (e.g. "d10") from a spell/activity item.
    */
   private static getSpellDamageDie(item?: Item): string {
-    if (!item) {
-      return 'd8'; // Fallback for spells
-    }
-
-    // D&D 5e stores damage parts as [[formula, type], [formula, type], ...]
-    const damageParts = item.system?.damage?.parts;
-    if (damageParts && damageParts.length > 0) {
-      const damageFormula = damageParts[0]?.[0];
-      if (damageFormula) {
-        // Extract the die from the formula (e.g., "1d10" -> "d10", "2d6" -> "d6")
-        const dieMatch = damageFormula.match(/d(\d+)/i);
-        if (dieMatch) {
-          return `d${dieMatch[1]}`;
-        }
-      }
-    }
-    // Fallback to d8 if no damage die found (common spell damage die)
-    return 'd8';
+    const den = this.getPrimaryDamageData(item)?.denomination;
+    return den ? `d${den}` : 'd8'; // common spell die fallback
   }
 
   /**
-   * Extract the damage die from a weapon/spell item (e.g., "d8" from longsword)
+   * Extract the damage die string (e.g. "d8") from a weapon item.
    */
   private static getWeaponDamageDie(item?: Item): string {
-    if (!item) {
-      return 'd6'; // Fallback
-    }
-
-    // D&D 5e stores damage parts as [[formula, type], [formula, type], ...]
-    const damageParts = item.system?.damage?.parts;
-    if (damageParts && damageParts.length > 0) {
-      const damageFormula = damageParts[0]?.[0];
-      if (damageFormula) {
-        // Extract the die from the formula (e.g., "1d8+3" -> "d8", "2d6" -> "d6")
-        const dieMatch = damageFormula.match(/d(\d+)/i);
-        if (dieMatch) {
-          return `d${dieMatch[1]}`;
-        }
-      }
-    }
-    // Fallback to d6 if no damage die found
-    return 'd6';
+    const den = this.getPrimaryDamageData(item)?.denomination;
+    return den ? `d${den}` : 'd6';
   }
 
   /**
-   * Extract the primary damage type from a weapon/spell item
+   * Extract the primary damage type (e.g. "slashing") from a weapon/spell item.
+   * `types` is a Set in 5.x. Returns '' when none is found so the caller can
+   * choose an appropriate fallback.
    */
-  private static getWeaponDamageType(item: Item): string {
-    // D&D 5e stores damage parts as [[formula, type], [formula, type], ...]
-    const damageParts = item.system?.damage?.parts;
-    if (damageParts && damageParts.length > 0) {
-      // Return the damage type from the first damage entry
-      const firstDamageType = damageParts[0]?.[1];
-      if (firstDamageType) {
-        return firstDamageType;
-      }
+  private static getWeaponDamageType(item?: Item): string {
+    const types = this.getPrimaryDamageData(item)?.types;
+    if (!types) {
+      return '';
     }
-    // Fallback to bludgeoning if no damage type found
-    return 'bludgeoning';
+    const arr = types instanceof Set ? [...types] : Array.isArray(types) ? types : [];
+    return arr[0] ?? '';
+  }
+
+  /**
+   * Resolve a configured damage type to a concrete D&D5e type so the damage is
+   * logical for the event that caused it:
+   * - an explicit type (fire, force, slashing, …) is used as authored
+   * - "weapon" -> the source weapon's actual damage type
+   * - "spell"  -> the source spell's actual damage type
+   */
+  private static resolveDamageType(configured: string | undefined, sourceItem?: Item): string {
+    const type = configured || 'weapon';
+    if (type === 'weapon' || type === 'spell') {
+      const resolved = this.getWeaponDamageType(sourceItem);
+      if (resolved) {
+        return resolved;
+      }
+      return type === 'spell' ? 'force' : 'bludgeoning';
+    }
+    return type;
   }
 
   /**
@@ -415,7 +500,8 @@ export class EffectsManager {
     token: Token,
     config: TableEffectConfig,
     _sourceActor?: Actor,
-    resultIcon?: string
+    resultIcon?: string,
+    sourceItem?: Item
   ): Promise<void> {
     if (!config.saveDC || !config.saveAbility || !token.actor) {
       return;
@@ -427,7 +513,9 @@ export class EffectsManager {
       await this.applyCondition(token, config, resultIcon);
     }
     if (config.damageFormula) {
-      await this.applyDamage(token, config);
+      // Pass the source item so weapon/spell dice syntax and "weapon"/"spell"
+      // damage types resolve against the real item (not the d6/bludgeoning fallback).
+      await this.applyDamage(token, config, sourceItem);
     }
   }
 
@@ -459,6 +547,116 @@ export class EffectsManager {
   }
 
   /**
+   * Fumble effect: the fumbler is forced to attack their nearest ally.
+   * Targets the nearest same-disposition token and solicits a real attack roll
+   * from the fumbler using their own weapon (on a hit, the weapon's normal
+   * damage card resolves against the ally).
+   *
+   * @param fumblerToken - the token that fumbled
+   * @param sourceActor - the fumbling actor
+   * @param sourceItem - the weapon used in the fumbled attack
+   */
+  static async applyAttackAlly(
+    fumblerToken: Token,
+    sourceActor?: Actor,
+    sourceItem?: Item
+  ): Promise<void> {
+    const fToken = fumblerToken as any;
+    const actor = (sourceActor as any) ?? fToken?.actor;
+    if (!fToken?.actor || !actor) {
+      return;
+    }
+
+    const ally = this.findNearestAlly(fToken);
+    if (!ally) {
+      ui.notifications?.info(`${actor.name} has no nearby ally to strike.`);
+      console.log(`${LOG_PREFIX} attackAlly: no ally found near ${fToken.name}`);
+      return;
+    }
+
+    // Resolve the weapon to swing (prefer the fumbled weapon, else any weapon)
+    let weapon: any =
+      sourceItem && actor.items?.get
+        ? (actor.items.get((sourceItem as any).id) ?? sourceItem)
+        : null;
+    if (!weapon) {
+      weapon = [...(actor.items?.values?.() ?? [])].find((i: any) => i.type === 'weapon');
+    }
+    if (!weapon?.use) {
+      ui.notifications?.warn(`${actor.name} has no usable weapon to strike ${ally.name}.`);
+      return;
+    }
+
+    // Target the ally so the solicited attack resolves against it
+    try {
+      (game as any).user?.updateTokenTargets?.([ally.id]);
+      ally.setTarget?.(true, { releaseOthers: true });
+    } catch {
+      /* targeting is best-effort */
+    }
+
+    ui.notifications?.warn(
+      `${actor.name} fumbled and lashes out at ${ally.name}! Roll the attack.`
+    );
+    console.log(`${LOG_PREFIX} attackAlly: ${actor.name} → ${ally.name} with ${weapon.name}`);
+
+    // Guard so this solicited attack does not re-trigger crit/fumble handling.
+    // The next AttackRollComplete consumes the flag. A timeout auto-clears it so
+    // it can never leak into an unrelated later attack if this solicited attack
+    // produces no workflow (e.g. the player cancels the use dialog, or the
+    // weapon has no attack roll).
+    const { MidiQolHooks } = await import('./MidiQolHooks');
+    MidiQolHooks.suppressNextWorkflow = true;
+    const guardTimer = setTimeout(() => {
+      MidiQolHooks.suppressNextWorkflow = false;
+    }, 8000);
+    try {
+      await weapon.use();
+    } catch (error) {
+      MidiQolHooks.suppressNextWorkflow = false;
+      clearTimeout(guardTimer);
+      console.error(`${LOG_PREFIX} attackAlly: failed to use weapon:`, error);
+    }
+  }
+
+  /**
+   * Find the nearest living ally (same token disposition) to the given token,
+   * excluding the token itself. Uses center-to-center canvas distance.
+   */
+  private static findNearestAlly(fumblerToken: any): any | null {
+    const placeables: any[] = (canvas as any)?.tokens?.placeables ?? [];
+    const myDisposition = fumblerToken.document?.disposition ?? fumblerToken.disposition;
+    const originX = fumblerToken.center?.x ?? fumblerToken.x;
+    const originY = fumblerToken.center?.y ?? fumblerToken.y;
+
+    let nearest: any = null;
+    let bestDistance = Infinity;
+
+    for (const token of placeables) {
+      if (token.id === fumblerToken.id || !token.actor) {
+        continue;
+      }
+      const disposition = token.document?.disposition ?? token.disposition;
+      if (disposition !== myDisposition) {
+        continue; // allies share disposition (friendly/neutral/hostile)
+      }
+      const hp = token.actor.system?.attributes?.hp?.value;
+      if (hp !== undefined && hp !== null && hp <= 0) {
+        continue; // skip downed/dead allies
+      }
+      const tx = token.center?.x ?? token.x;
+      const ty = token.center?.y ?? token.y;
+      const distance = Math.hypot(tx - originX, ty - originY);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        nearest = token;
+      }
+    }
+
+    return nearest;
+  }
+
+  /**
    * Apply a penalty effect as an Active Effect (for weapon/armor damage)
    */
   static async applyPenalty(
@@ -483,22 +681,15 @@ export class EffectsManager {
       effectName = 'Weapon Damaged';
     }
 
-    const durationData: Record<string, any> = {};
     const duration = config.duration ?? -1;
-
-    if (duration === -1) {
-      durationData.seconds = null;
-      durationData.rounds = null;
-    } else {
-      durationData.rounds = duration;
-      durationData.startRound = game.combat?.round ?? 0;
-      durationData.startTurn = game.combat?.turn ?? 0;
-    }
+    const { duration: durationData, specialDuration } = this.buildDuration(duration);
 
     const effectData = {
       name: effectName,
       icon: resultIcon || 'icons/svg/downgrade.svg',
       origin: token.actor.uuid,
+      disabled: false,
+      transfer: false,
       changes: [
         {
           key: changeKey,
@@ -512,7 +703,8 @@ export class EffectsManager {
           source: 'crit-fumble-result',
           penaltyType: config.penaltyType,
           penaltyValue: config.penaltyValue
-        }
+        },
+        ...(specialDuration.length ? { dae: { specialDuration } } : {})
       }
     };
 
@@ -552,26 +744,15 @@ export class EffectsManager {
 
     const effectName = config.effectName ?? this.generateAdvantageEffectName(type, scopes, target);
 
-    const durationData: Record<string, any> = {};
     const duration = config.duration ?? 1;
-
-    if (duration === -1) {
-      durationData.seconds = null;
-      durationData.rounds = null;
-    } else if (duration === 0) {
-      durationData.turns = 1;
-      durationData.startTurn = game.combat?.turn ?? 0;
-      durationData.startRound = game.combat?.round ?? 0;
-    } else {
-      durationData.rounds = duration;
-      durationData.startRound = game.combat?.round ?? 0;
-      durationData.startTurn = game.combat?.turn ?? 0;
-    }
+    const { duration: durationData, specialDuration } = this.buildDuration(duration);
 
     const effectData = {
       name: effectName,
       icon: resultIcon || this.getAdvantageIcon(type),
       origin: token.actor.uuid,
+      disabled: false,
+      transfer: false,
       changes,
       duration: durationData,
       flags: {
@@ -581,9 +762,7 @@ export class EffectsManager {
           advantageScope: scopes,
           advantageTarget: target
         },
-        'times-up': {
-          isPassive: false
-        }
+        ...(specialDuration.length ? { dae: { specialDuration } } : {})
       }
     };
 
@@ -604,16 +783,20 @@ export class EffectsManager {
     scopes: AdvantageScope[],
     type: 'advantage' | 'disadvantage',
     target: AdvantageTarget
-  ): Array<{ key: string; mode: number; value: string }> {
-    const changes: Array<{ key: string; mode: number; value: string }> = [];
+  ): Array<{ key: string; mode: number; value: string; priority: number }> {
+    const changes: Array<{ key: string; mode: number; value: string; priority: number }> = [];
 
     for (const scope of scopes) {
       const flagKeys = this.scopeToMidiFlags(scope, type, target);
       for (const key of flagKeys) {
+        // Midi-QOL reads the raw change value as a truthy condition and ignores
+        // the mode; OVERRIDE also writes the flag into actor data, so midi's
+        // getProperty fallback works too. value '1' evaluates truthy.
         changes.push({
           key,
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1'
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+          value: '1',
+          priority: 20
         });
       }
     }
@@ -651,47 +834,52 @@ export class EffectsManager {
       case 'attack.rsak':
         keys.push(`${prefix}.attack.rsak`);
         break;
+      // Ability CHECK flags. Midi-QOL 14 path is `<type>.check.<abl>` — there is
+      // NO `.ability.` segment (that was the bug: the effect wrote a key midi
+      // never reads). `ability.all` maps to all ability checks.
       case 'ability.all':
-        keys.push(`${prefix}.ability.check.all`);
+        keys.push(`${prefix}.check.all`);
         break;
       case 'ability.str':
-        keys.push(`${prefix}.ability.check.str`);
+        keys.push(`${prefix}.check.str`);
         break;
       case 'ability.dex':
-        keys.push(`${prefix}.ability.check.dex`);
+        keys.push(`${prefix}.check.dex`);
         break;
       case 'ability.con':
-        keys.push(`${prefix}.ability.check.con`);
+        keys.push(`${prefix}.check.con`);
         break;
       case 'ability.int':
-        keys.push(`${prefix}.ability.check.int`);
+        keys.push(`${prefix}.check.int`);
         break;
       case 'ability.wis':
-        keys.push(`${prefix}.ability.check.wis`);
+        keys.push(`${prefix}.check.wis`);
         break;
       case 'ability.cha':
-        keys.push(`${prefix}.ability.check.cha`);
+        keys.push(`${prefix}.check.cha`);
         break;
+      // Saving THROW flags. Midi-QOL 14 path is `<type>.save.<abl>` (again, no
+      // `.ability.` segment).
       case 'save.all':
-        keys.push(`${prefix}.ability.save.all`);
+        keys.push(`${prefix}.save.all`);
         break;
       case 'save.str':
-        keys.push(`${prefix}.ability.save.str`);
+        keys.push(`${prefix}.save.str`);
         break;
       case 'save.dex':
-        keys.push(`${prefix}.ability.save.dex`);
+        keys.push(`${prefix}.save.dex`);
         break;
       case 'save.con':
-        keys.push(`${prefix}.ability.save.con`);
+        keys.push(`${prefix}.save.con`);
         break;
       case 'save.int':
-        keys.push(`${prefix}.ability.save.int`);
+        keys.push(`${prefix}.save.int`);
         break;
       case 'save.wis':
-        keys.push(`${prefix}.ability.save.wis`);
+        keys.push(`${prefix}.save.wis`);
         break;
       case 'save.cha':
-        keys.push(`${prefix}.ability.save.cha`);
+        keys.push(`${prefix}.save.cha`);
         break;
       case 'concentration':
         keys.push(`${prefix}.concentration`);

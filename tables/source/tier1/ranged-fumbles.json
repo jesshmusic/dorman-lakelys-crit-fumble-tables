@@ -7,8 +7,11 @@
     {
       "type": "text",
       "text": "Nothing Special - Your shot goes wide but you recover your composure with no additional penalty.",
-      "weight": 40,
-      "range": [1, 40],
+      "weight": 25,
+      "range": [
+        1,
+        25
+      ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -18,39 +21,107 @@
     },
     {
       "type": "text",
-      "text": "Dropped Ammo - In your haste, you drop 1d4 pieces of ammunition.",
+      "text": "Watering Eyes - Your eyes water from the effort and you have disadvantage on your next ability check.",
       "weight": 8,
-      "range": [41, 48],
-      "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
+      "range": [
+        26,
+        33
+      ],
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "ammo_dropped",
+          "effectType": "disadvantage",
+          "advantageScope": "ability.all",
+          "advantageTarget": "self",
+          "effectName": "Watering Eyes",
           "duration": 0
         }
       }
     },
     {
       "type": "text",
-      "text": "Off Target - Your aim was completely off. Your next ranged attack has disadvantage.",
+      "text": "Flinch - You flinch at your own misfire and have disadvantage on your next saving throw.",
       "weight": 7,
-      "range": [49, 55],
-      "img": "icons/svg/target.svg",
+      "range": [
+        34,
+        40
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "self",
+          "effectName": "Flinch",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Fouled Aim - Your aim is thrown off and you have disadvantage on your next attack roll.",
+      "weight": 7,
+      "range": [
+        41,
+        47
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Fouled Aim",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Snapped String - Your bowstring snaps taut awkwardly and you have disadvantage on ranged attacks until the end of your next turn.",
+      "weight": 6,
+      "range": [
+        48,
+        53
+      ],
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
           "advantageScope": "attack.rwak",
-          "effectName": "Off Target",
-          "duration": 0
+          "advantageTarget": "self",
+          "effectName": "Snapped String",
+          "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Strained Arm - You overextend and strain your arm. Take 1d4 bludgeoning damage.",
-      "weight": 7,
-      "range": [56, 62],
-      "img": "icons/svg/downgrade.svg",
+      "text": "Overdrawn - You overdraw and wrench your form, taking a -2 penalty to attack rolls until the end of your next turn.",
+      "weight": 6,
+      "range": [
+        54,
+        59
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -2,
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Recoil Strain - The recoil wrenches your arm; take 1d4 bludgeoning damage.",
+      "weight": 5,
+      "range": [
+        60,
+        64
+      ],
+      "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
@@ -61,129 +132,88 @@
     },
     {
       "type": "text",
-      "text": "Exposed Position - Your awkward positioning leaves you vulnerable. Attacks against you have advantage until the start of your next turn.",
-      "weight": 6,
-      "range": [63, 68],
+      "text": "Telegraphed Shot - You telegraph your shot and your target has advantage on its next saving throw against you.",
+      "weight": 5,
+      "range": [
+        65,
+        69
+      ],
+      "img": "icons/svg/target.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "grants",
+          "effectName": "Telegraphed Shot",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Caught Flat - You are caught flat-footed; attacks against you have advantage until the start of your next turn.",
+      "weight": 5,
+      "range": [
+        70,
+        74
+      ],
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "advantage",
           "advantageScope": "attack.all",
           "advantageTarget": "grants",
-          "effectName": "Exposed Position",
+          "effectName": "Caught Flat",
           "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Bowstring Snap - Your bowstring snaps or crossbow mechanism jams. Spend an action to restring or switch weapons.",
-      "weight": 6,
-      "range": [69, 74],
-      "img": "icons/tools/fasteners/rope-coiled-tan.webp",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "weapon_jammed",
-          "duration": -1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Lost Focus - Your concentration breaks. You have disadvantage on Perception checks until the end of your next turn.",
-      "weight": 5,
-      "range": [75, 79],
-      "img": "icons/svg/blind.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "ability.wis",
-          "effectName": "Lost Focus",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Tangled Equipment - Your quiver strap or weapon sling gets tangled. You can't draw or stow weapons until you use a bonus action to untangle.",
-      "weight": 5,
-      "range": [80, 84],
-      "img": "icons/tools/fasteners/rope-coiled-tan.webp",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "tangled",
-          "duration": -1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Hesitation - Your missed shot makes you hesitant. You have disadvantage on your next attack roll.",
+      "text": "Exposed Flank - Your stance falls apart, leaving a -2 penalty to your AC until the end of your next turn.",
       "weight": 4,
-      "range": [85, 88],
-      "img": "icons/svg/hazard.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "attack.all",
-          "effectName": "Hesitation",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Telegraphed Shot - Your target sees your aim and prepares. They have advantage on their next saving throw against you.",
-      "weight": 4,
-      "range": [89, 92],
-      "img": "icons/svg/eye.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "save.all",
-          "advantageTarget": "grants",
-          "effectName": "Telegraphed",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Weapon Nicked - Your weapon takes a minor beating. -1 to attack rolls until you spend a short rest maintaining it.",
-      "weight": 3,
-      "range": [93, 95],
+      "range": [
+        75,
+        78
+      ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "penalty",
-          "penaltyType": "attack",
-          "penaltyValue": -1,
-          "duration": -1
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Ammunition Lost - Your projectile ricochets and is lost. Lose 1 piece of ammunition.",
-      "weight": 2,
-      "range": [96, 97],
-      "img": "icons/weapons/ammunition/arrow-head-war-flight.webp",
+      "text": "Jammed Solid - Your weapon jams solid and you have disadvantage on attack rolls until the end of your next turn.",
+      "weight": 4,
+      "range": [
+        79,
+        82
+      ],
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "ammo_lost",
-          "duration": 0
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Jammed Solid",
+          "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Weapon Dropped - Your ranged weapon slips from your grasp, landing at your feet.",
-      "weight": 2,
-      "range": [98, 99],
-      "img": "icons/svg/falling.svg",
+      "text": "Dropped Weapon - Your ranged weapon slips from your grasp and lands at your feet.",
+      "weight": 4,
+      "range": [
+        83,
+        86
+      ],
+      "img": "icons/svg/net.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disarm"
@@ -192,16 +222,90 @@
     },
     {
       "type": "text",
-      "text": "Friendly Fire Risk - Your shot veers dangerously toward an ally. If there's an ally in the path, roll your attack against their AC.",
-      "weight": 1,
-      "range": [100, 100],
-      "img": "icons/svg/combat.svg",
+      "text": "Off-Balance - You lose your footing; make a DC 11 Dexterity saving throw or fall prone.",
+      "weight": 4,
+      "range": [
+        87,
+        90
+      ],
+      "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 0,
-          "saveAbility": "attack_roll",
-          "failEffect": "Hit ally for weapon damage"
+          "saveDC": 11,
+          "saveAbility": "dex",
+          "effectCondition": "prone",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Winded - The strain knocks the wind from you; make a DC 11 Constitution saving throw or take 1d6 bludgeoning damage.",
+      "weight": 3,
+      "range": [
+        91,
+        93
+      ],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 11,
+          "saveAbility": "con",
+          "damageFormula": "1d6",
+          "damageType": "bludgeoning"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Stinging Rebound - Your shot rebounds and stings you; take 1d6 bludgeoning damage.",
+      "weight": 3,
+      "range": [
+        94,
+        96
+      ],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d6",
+          "damageType": "bludgeoning"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Blinded - Your snapped string lashes across your eyes; you are blinded until the end of your next turn.",
+      "weight": 2,
+      "range": [
+        97,
+        98
+      ],
+      "img": "icons/svg/paralysis.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Self-Impaling Bolt - Your own projectile catches you; take 1d8 bludgeoning damage.",
+      "weight": 2,
+      "range": [
+        99,
+        100
+      ],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d8",
+          "damageType": "bludgeoning"
         }
       }
     }

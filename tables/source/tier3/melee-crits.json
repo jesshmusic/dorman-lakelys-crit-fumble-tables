@@ -7,10 +7,10 @@
     {
       "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
-      "weight": 30,
+      "weight": 12,
       "range": [
         1,
-        30
+        12
       ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
@@ -21,37 +21,72 @@
     },
     {
       "type": "text",
-      "text": "Crushing Blow - Your devastating strike sends the target sprawling. They are prone and stunned until the end of your next turn.",
-      "weight": 9,
+      "text": "Ringing Skull - Your crushing blow leaves the target's ears ringing. They are deafened until they receive healing.",
+      "weight": 8,
       "range": [
-        31,
-        39
+        13,
+        20
       ],
-      "img": "icons/svg/falling.svg",
+      "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "stunned",
+          "effectCondition": "deafened",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Crippled Arm - Your strike wrecks the muscles of the target's weapon arm. They take -2 to attack rolls until they receive healing.",
+      "weight": 7,
+      "range": [
+        21,
+        27
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -2,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Pain Overload - Waves of pain wrack the target's body. They have disadvantage on all attacks until the end of their next turn.",
+      "weight": 7,
+      "range": [
+        28,
+        34
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Pain Overload",
           "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Disorienting Blow - Your devastating hit leaves the target reeling. They have disadvantage on all attacks and saving throws until the end of their next turn.",
-      "weight": 8,
+      "text": "Disorienting Blow - Your devastating hit leaves the target reeling. They have disadvantage on all saving throws until the end of their next turn.",
+      "weight": 7,
       "range": [
-        40,
-        47
+        35,
+        41
       ],
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": [
-            "attack.all",
-            "save.all"
-          ],
+          "advantageScope": "save.all",
+          "advantageTarget": "self",
           "effectName": "Disoriented",
           "duration": 1
         }
@@ -59,11 +94,48 @@
     },
     {
       "type": "text",
-      "text": "Deep Wound - Your strike opens a terrible wound. Target takes 2d6 extra damage.",
-      "weight": 8,
+      "text": "Armor Shattered - Your attack caves in a section of the target's armor. They take -3 AC until it is repaired by a skilled smith.",
+      "weight": 6,
+      "range": [
+        42,
+        47
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -3,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Driving Slam - You drive your full weight into the blow. The target must succeed on a DC 15 Strength save or be knocked prone.",
+      "weight": 6,
       "range": [
         48,
-        55
+        53
+      ],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "str",
+          "effectCondition": "prone",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Deep Wound - Your strike opens a terrible wound. The target takes two extra weapon dice of damage.",
+      "weight": 6,
+      "range": [
+        54,
+        59
       ],
       "img": "icons/svg/blood.svg",
       "flags": {
@@ -76,11 +148,81 @@
     },
     {
       "type": "text",
-      "text": "Exposed Defenses - Your attack exposes critical weaknesses. Attacks against the target have advantage for 3 rounds.",
-      "weight": 7,
+      "text": "Blood in the Eyes - A spray of blood fills the target's eyes. They are blinded until the end of their next turn.",
+      "weight": 5,
       "range": [
-        56,
-        62
+        60,
+        64
+      ],
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Gut Wound - Your blade rips through the target's gut. They must succeed on a DC 15 Constitution save or be poisoned until they receive healing.",
+      "weight": 5,
+      "range": [
+        65,
+        69
+      ],
+      "img": "icons/svg/poison.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "con",
+          "effectCondition": "poisoned",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Pinning Strike - Your weapon hooks the target and holds them fast. They are grappled until the end of their next turn.",
+      "weight": 5,
+      "range": [
+        70,
+        74
+      ],
+      "img": "icons/svg/net.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "grappled",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Hamstrung - Your blade severs a tendon in the target's leg. They are restrained until the end of their next turn.",
+      "weight": 5,
+      "range": [
+        75,
+        79
+      ],
+      "img": "icons/svg/net.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "restrained",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Exposed Defenses - Your attack lays the target's guard wide open. Attacks against them have advantage for 3 rounds.",
+      "weight": 4,
+      "range": [
+        80,
+        83
       ],
       "img": "icons/svg/target.svg",
       "flags": {
@@ -95,72 +237,7 @@
     },
     {
       "type": "text",
-      "text": "Limb Strike - Your blow cripples a limb. Target's speed is halved until healed.",
-      "weight": 6,
-      "range": [
-        63,
-        68
-      ],
-      "img": "icons/svg/hazard.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "slowed",
-          "duration": -1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Combat Mastery - Your perfect strike inspires you. You have advantage on all melee attacks for 3 rounds (DM adjudicates).",
-      "weight": 5,
-      "range": [
-        69,
-        73
-      ],
-      "img": "icons/svg/upgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "none"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Armor Shattered - Your attack shatters their armor. -3 AC until repaired by a skilled smith.",
-      "weight": 5,
-      "range": [
-        74,
-        78
-      ],
-      "img": "icons/svg/downgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "penalty",
-          "penaltyType": "ac",
-          "penaltyValue": -3,
-          "duration": -1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Disarming Strike - Your powerful strike disarms the target, sending their weapon 20 feet away.",
-      "weight": 5,
-      "range": [
-        79,
-        83
-      ],
-      "img": "icons/svg/sword.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disarm"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Terrifying Strike - Your brutal attack terrifies the target. They are frightened of you for 3 rounds.",
+      "text": "Terrorizing Blow - Your savage strike breaks the target's courage. They must succeed on a DC 15 Wisdom save or be frightened of you for 3 rounds.",
       "weight": 4,
       "range": [
         84,
@@ -169,7 +246,9 @@
       "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "wis",
           "effectCondition": "frightened",
           "duration": 3
         }
@@ -177,7 +256,7 @@
     },
     {
       "type": "text",
-      "text": "Disemboweling Strike - Your blade tears through vital organs. Target must make DC 15 Con save or be incapacitated for 1 round.",
+      "text": "Disemboweling Strike - Your blade tears through vital organs. The target must succeed on a DC 15 Constitution save or be incapacitated until the end of their next turn.",
       "weight": 4,
       "range": [
         88,
@@ -189,34 +268,18 @@
           "effectType": "save",
           "saveDC": 15,
           "saveAbility": "con",
-          "failEffect": "Incapacitated for 1 round"
+          "effectCondition": "incapacitated",
+          "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Brutal Devastation - Your mighty strike deals an additional 3d6 damage.",
-      "weight": 4,
-      "range": [
-        92,
-        95
-      ],
-      "img": "icons/svg/explosion.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "3W",
-          "damageType": "weapon"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Overwhelming Force - Your devastating blow deals an additional 4d6 damage and knocks the target prone.",
+      "text": "Brutal Devastation - Your mighty strike hammers home. The target takes three extra weapon dice of damage.",
       "weight": 3,
       "range": [
-        96,
-        98
+        92,
+        94
       ],
       "img": "icons/svg/explosion.svg",
       "flags": {
@@ -229,19 +292,54 @@
     },
     {
       "type": "text",
-      "text": "Near-Fatal Blow - Your strike nearly kills the target. If they have fewer than 30 HP, they must make DC 16 CON save or take 4d10 extra damage.",
+      "text": "Weapon Lodged - Your weapon buries itself and tears free, dealing an extra weapon die of damage.",
+      "weight": 3,
+      "range": [
+        95,
+        97
+      ],
+      "img": "icons/svg/sword.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1W",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Ribcracker - Your blow shatters the target's ribs and drives the breath from them. They must succeed on a DC 15 Constitution save or be stunned until the end of your next turn.",
       "weight": 2,
       "range": [
-        99,
-        100
+        98,
+        99
       ],
-      "img": "icons/svg/skull.svg",
+      "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 16,
+          "saveDC": 15,
           "saveAbility": "con",
-          "failEffect": "Takes 4d10 extra damage",
+          "effectCondition": "stunned",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Near-Fatal Blow - Your strike finds something vital. The target must succeed on a DC 15 Constitution save or take an extra 4d10 damage.",
+      "weight": 1,
+      "range": [
+        100,
+        100
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 15,
+          "saveAbility": "con",
           "damageFormula": "4d10",
           "damageType": "weapon"
         }

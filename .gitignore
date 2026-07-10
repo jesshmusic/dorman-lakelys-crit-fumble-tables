@@ -34,3 +34,6 @@ package-lock.json
 
 # Local npm cache
 .npm_cache/
+
+# Generated table review artifact
+/tables-reference.html
