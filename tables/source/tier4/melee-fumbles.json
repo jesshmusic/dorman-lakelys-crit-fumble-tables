@@ -7,10 +7,10 @@
     {
       "type": "text",
       "text": "Nothing Special - You stumble but recover with no additional penalty.",
-      "weight": 25,
+      "weight": 6,
       "range": [
         1,
-        25
+        6
       ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
@@ -21,85 +21,85 @@
     },
     {
       "type": "text",
-      "text": "Catastrophic Fall - You fall prone and are stunned until end of your next turn.",
-      "weight": 9,
+      "text": "Jarred Wrist - You jar your wrist on the botched swing, taking a -2 penalty to attack rolls until the end of your next turn.",
+      "weight": 8,
       "range": [
-        26,
-        34
+        7,
+        14
       ],
-      "img": "icons/svg/falling.svg",
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "stunned",
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -2,
           "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Utterly Exposed - Your catastrophic failure leaves you completely vulnerable. Attacks against you have advantage for 3 rounds.",
+      "text": "Off Your Feet - You lurch off balance and have disadvantage on your next saving throw.",
       "weight": 8,
       "range": [
-        35,
-        42
+        15,
+        22
       ],
-      "img": "icons/svg/target.svg",
+      "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "attack.all",
-          "advantageTarget": "grants",
-          "effectName": "Utterly Exposed",
-          "duration": 3
+          "effectType": "disadvantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "self",
+          "effectName": "Off Your Feet",
+          "duration": 0
         }
       }
     },
     {
       "type": "text",
-      "text": "Severe Self-Injury - You critically wound yourself. Take 3d6 damage.",
+      "text": "Lost Grip - Your weapon twists in your hand. You have disadvantage on your next melee weapon attack.",
       "weight": 7,
       "range": [
-        43,
-        49
+        23,
+        29
       ],
-      "img": "icons/svg/blood.svg",
+      "img": "icons/svg/sword.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "3d6",
-          "damageType": "weapon"
+          "effectType": "disadvantage",
+          "advantageScope": "attack.mwak",
+          "advantageTarget": "self",
+          "effectName": "Lost Grip",
+          "duration": 0
         }
       }
     },
     {
       "type": "text",
-      "text": "Shattered Confidence - Your failure rattles you to your core. You have disadvantage on all attacks and saving throws for 3 rounds.",
+      "text": "Dropped Guard - You drop your guard, taking a -2 penalty to your AC until the end of your next turn.",
       "weight": 7,
       "range": [
-        50,
-        56
+        30,
+        36
       ],
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": [
-            "attack.all",
-            "save.all"
-          ],
-          "effectName": "Shattered Confidence",
-          "duration": 3
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Weapon Badly Damaged - Your weapon is badly damaged. -3 to attack and damage rolls until repaired.",
+      "text": "Weapon Badly Damaged - Your weapon is badly damaged. You take a -3 penalty to attack rolls until it is repaired.",
       "weight": 6,
       "range": [
-        57,
-        62
+        37,
+        42
       ],
       "img": "icons/svg/hazard.svg",
       "flags": {
@@ -113,11 +113,132 @@
     },
     {
       "type": "text",
-      "text": "Hit Yourself Critically - Your weapon rebounds and strikes you critically. Take 3d8 damage.",
+      "text": "Shaken Confidence - Your failure rattles you to your core. You have disadvantage on attack rolls until the end of your next turn.",
       "weight": 6,
       "range": [
-        63,
-        68
+        43,
+        48
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Shaken Confidence",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Utterly Exposed - Your catastrophic failure leaves you completely vulnerable. Attacks against you have advantage for 3 rounds.",
+      "weight": 6,
+      "range": [
+        49,
+        54
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Utterly Exposed",
+          "duration": 3
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Severe Self-Injury - You critically wound yourself. Take 3d6 damage.",
+      "weight": 5,
+      "range": [
+        55,
+        59
+      ],
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3d6",
+          "damageType": "weapon"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Sprawled - Your wild swing throws you off balance and you fall prone.",
+      "weight": 5,
+      "range": [
+        60,
+        64
+      ],
+      "img": "icons/svg/falling.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "prone",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Ears Ringing - Your own clumsy blow rings your helm like a bell. You are deafened until the end of your next turn.",
+      "weight": 5,
+      "range": [
+        65,
+        69
+      ],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "deafened",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Rattled - Your fumble rattles your nerve. You are frightened until the end of your next turn.",
+      "weight": 5,
+      "range": [
+        70,
+        74
+      ],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "frightened",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Weapon Flung - Your weapon flies from your grasp, landing well out of reach.",
+      "weight": 5,
+      "range": [
+        75,
+        79
+      ],
+      "img": "icons/svg/sword.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disarm"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Hit Yourself Critically - Your weapon rebounds and strikes you critically. Take 3d8 damage.",
+      "weight": 4,
+      "range": [
+        80,
+        83
       ],
       "img": "icons/svg/blood.svg",
       "flags": {
@@ -130,13 +251,30 @@
     },
     {
       "type": "text",
-      "text": "Incapacitated - Your catastrophic failure stuns you completely. You are incapacitated and prone until start of your next turn.",
-      "weight": 5,
+      "text": "Concussed Yourself - You crack your own skull with the pommel. You are stunned until the start of your next turn.",
+      "weight": 4,
       "range": [
-        69,
-        73
+        84,
+        87
       ],
       "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "stunned",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Incapacitated - Your catastrophic failure leaves you reeling. You are incapacitated until the end of your next turn.",
+      "weight": 4,
+      "range": [
+        88,
+        91
+      ],
+      "img": "icons/svg/paralysis.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
@@ -147,81 +285,28 @@
     },
     {
       "type": "text",
-      "text": "Fatigued - The fumble utterly exhausts you. You have disadvantage on attack rolls and ability checks for 3 rounds.",
-      "weight": 5,
+      "text": "Blown Wind - The reckless effort leaves you gasping. You gain one level of exhaustion.",
+      "weight": 3,
       "range": [
-        74,
-        78
+        92,
+        94
       ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": [
-            "attack.all",
-            "ability.all"
-          ],
-          "effectName": "Fatigued",
-          "duration": 3
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Disarmed - Your weapon flies from your grasp, landing 30 feet away in a random direction.",
-      "weight": 5,
-      "range": [
-        79,
-        83
-      ],
-      "img": "icons/skills/melee/strike-sword-slashing-red.webp",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disarm"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Lost Initiative - Your fumble leaves you completely off guard. You can't take reactions and go last in initiative next round.",
-      "weight": 5,
-      "range": [
-        84,
-        88
-      ],
-      "img": "icons/svg/clockwork.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "no_reactions",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Weapon Destroyed - Your legendary weapon shatters catastrophically. It is destroyed beyond repair.",
-      "weight": 4,
-      "range": [
-        89,
-        92
-      ],
-      "img": "icons/svg/hazard.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "weapon_destroyed",
-          "duration": 0
+          "effectCondition": "exhaustion",
+          "duration": -1
         }
       }
     },
     {
       "type": "text",
       "text": "Devastating Self-Wound - Your weapon rebounds catastrophically. Take 4d8 damage.",
-      "weight": 7,
+      "weight": 3,
       "range": [
-        93,
-        99
+        95,
+        97
       ],
       "img": "icons/svg/blood.svg",
       "flags": {
@@ -234,19 +319,36 @@
     },
     {
       "type": "text",
-      "text": "Devastate All Allies - Your wild swing strikes all allies within 10 feet. Roll attack against each; hit deals weapon damage.",
+      "text": "Wild Swing - Your uncontrolled swing hits your nearest ally. Roll an attack against that ally's AC; on a hit, deal weapon damage.",
+      "weight": 2,
+      "range": [
+        98,
+        99
+      ],
+      "img": "icons/svg/combat.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "attackAlly"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Grievous Overswing - You overcommit with legendary force. Make a DC 17 Constitution saving throw or take 4d6 damage and fall prone.",
       "weight": 1,
       "range": [
         100,
         100
       ],
-      "img": "icons/svg/combat.svg",
+      "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 0,
-          "saveAbility": "attack_roll",
-          "failEffect": "Hit all nearby allies"
+          "saveDC": 17,
+          "saveAbility": "con",
+          "effectCondition": "prone",
+          "damageFormula": "4d6",
+          "damageType": "weapon"
         }
       }
     }

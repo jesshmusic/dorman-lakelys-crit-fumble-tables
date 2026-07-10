@@ -7,10 +7,10 @@
     {
       "type": "text",
       "text": "Nothing Special - You stumble slightly but recover quickly with no additional penalty.",
-      "weight": 40,
+      "weight": 25,
       "range": [
         1,
-        40
+        25
       ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
@@ -21,17 +21,73 @@
     },
     {
       "type": "text",
-      "text": "Off Balance - Your wild swing throws you off balance. Your next attack has disadvantage.",
+      "text": "Weapon Notched - Your blade chips against something hard. You take a -1 penalty to attack rolls until the weapon is repaired.",
       "weight": 8,
       "range": [
+        26,
+        33
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -1,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Jarred Wrist - You jar your wrist on the botched swing, taking a -2 penalty to attack rolls until the end of your next turn.",
+      "weight": 7,
+      "range": [
+        34,
+        40
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -2,
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Off Your Feet - You lurch off balance and have disadvantage on your next saving throw.",
+      "weight": 7,
+      "range": [
         41,
-        48
+        47
       ],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "self",
+          "effectName": "Off Your Feet",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Off Balance - Your wild swing throws you off balance, giving you disadvantage on your next attack roll.",
+      "weight": 6,
+      "range": [
+        48,
+        53
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
           "advantageScope": "attack.all",
+          "advantageTarget": "self",
           "effectName": "Off Balance",
           "duration": 0
         }
@@ -39,13 +95,31 @@
     },
     {
       "type": "text",
-      "text": "Overextended - You reach too far and leave yourself open. The target gains advantage on their next attack against you.",
-      "weight": 7,
+      "text": "Dropped Guard - You drop your guard, taking a -2 penalty to your AC until the end of your next turn.",
+      "weight": 6,
       "range": [
-        49,
-        55
+        54,
+        59
       ],
-      "img": "icons/svg/target.svg",
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Overextended - You overreach and leave yourself open. The next attack against you has advantage.",
+      "weight": 5,
+      "range": [
+        60,
+        64
+      ],
+      "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "advantage",
@@ -58,32 +132,18 @@
     },
     {
       "type": "text",
-      "text": "Stumble - You stumble 5 feet in a random direction. The DM determines the direction.",
-      "weight": 7,
+      "text": "Weapon Slipped - Your weapon slips in your grip. You have disadvantage on attack rolls until the end of your next turn.",
+      "weight": 5,
       "range": [
-        56,
-        62
+        65,
+        69
       ],
-      "img": "icons/svg/falling.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "none"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Weapon Slips - Your weapon slips in your grip. You have disadvantage on attack rolls until the end of your next turn.",
-      "weight": 6,
-      "range": [
-        63,
-        68
-      ],
-      "img": "icons/skills/melee/strike-sword-slashing-red.webp",
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
           "advantageScope": "attack.all",
+          "advantageTarget": "self",
           "effectName": "Weapon Slipped",
           "duration": 1
         }
@@ -91,30 +151,13 @@
     },
     {
       "type": "text",
-      "text": "Trip Over Feet - You stumble over your own feet and fall prone.",
-      "weight": 6,
-      "range": [
-        69,
-        74
-      ],
-      "img": "icons/svg/falling.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "prone",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Telegraphed Attack - Your attack was obvious. The target has advantage on their next saving throw against you.",
+      "text": "Telegraphed Attack - Your clumsy swing telegraphs your intent. The target has advantage on its next saving throw against you.",
       "weight": 5,
       "range": [
-        75,
-        79
+        70,
+        74
       ],
-      "img": "icons/svg/eye.svg",
+      "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "advantage",
@@ -127,100 +170,102 @@
     },
     {
       "type": "text",
-      "text": "Lost Momentum - Your swing goes wide and you lose your rhythm. You cannot take reactions until the start of your next turn.",
-      "weight": 5,
+      "text": "Cut Yourself - The blade bites you on the backswing. You take one weapon die of damage to yourself.",
+      "weight": 4,
       "range": [
-        80,
-        84
+        75,
+        78
       ],
-      "img": "icons/svg/clockwork.svg",
+      "img": "icons/svg/blood.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "no_reactions",
-          "duration": 1
+          "effectType": "damage",
+          "damageFormula": "1W",
+          "damageType": "weapon"
         }
       }
     },
     {
       "type": "text",
-      "text": "Twisted Ankle - You twist your ankle awkwardly. Your speed is halved until the end of your next turn.",
+      "text": "Sprawled - You trip over your own feet and fall prone.",
       "weight": 4,
       "range": [
-        85,
-        88
+        79,
+        82
       ],
       "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
-          "effectCondition": "slowed",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Opening Created - Your clumsy attack leaves you exposed. The target may make an opportunity attack against you.",
-      "weight": 4,
-      "range": [
-        89,
-        92
-      ],
-      "img": "icons/svg/combat.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "exposed_to_opportunity",
+          "effectCondition": "prone",
           "duration": 0
         }
       }
     },
     {
       "type": "text",
-      "text": "Weapon Notched - Your weapon hits something hard and is damaged. -1 to attack rolls until repaired.",
-      "weight": 3,
+      "text": "Wrenched Shoulder - You wrench your shoulder on the miss. You have disadvantage on attack rolls until the end of your next turn.",
+      "weight": 4,
       "range": [
-        93,
-        95
+        83,
+        86
       ],
-      "img": "icons/svg/hazard.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "penalty",
-          "penaltyType": "attack",
-          "penaltyValue": -1,
-          "duration": -1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Embarrassing Miss - Your pathetic swing draws mocking laughter. You have disadvantage on Intimidation checks for 1 round.",
-      "weight": 2,
-      "range": [
-        96,
-        97
-      ],
-      "img": "icons/svg/silenced.svg",
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disadvantage",
-          "advantageScope": "ability.cha",
-          "effectName": "Embarrassed",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Wrenched Shoulder",
           "duration": 1
         }
       }
     },
     {
       "type": "text",
-      "text": "Weapon Dropped - Your weapon flies from your grasp, landing 10 feet away in a random direction.",
-      "weight": 2,
+      "text": "Wide Open - Your reckless attack leaves you wide open. Attacks against you have advantage until the start of your next turn.",
+      "weight": 4,
       "range": [
-        98,
-        99
+        87,
+        90
       ],
-      "img": "icons/svg/falling.svg",
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Wide Open",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Rattled - Your fumble rattles your nerve. You are frightened until the end of your next turn.",
+      "weight": 3,
+      "range": [
+        91,
+        93
+      ],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "frightened",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Weapon Dropped - Your weapon flies from your grasp and lands out of reach.",
+      "weight": 3,
+      "range": [
+        94,
+        96
+      ],
+      "img": "icons/svg/sword.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "disarm"
@@ -229,19 +274,38 @@
     },
     {
       "type": "text",
-      "text": "Wild Swing - Your uncontrolled swing hits an ally within 5 feet (DM's choice). Roll attack against ally's AC; on hit, deal normal weapon damage.",
-      "weight": 1,
+      "text": "Tangled - You tangle in your own straps and gear. You are grappled until the end of your next turn.",
+      "weight": 2,
       "range": [
-        100,
+        97,
+        98
+      ],
+      "img": "icons/svg/net.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "grappled",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Wild Overswing - You overcommit disastrously. Make a DC 11 Dexterity saving throw or take 1d6 slashing damage and fall prone.",
+      "weight": 2,
+      "range": [
+        99,
         100
       ],
-      "img": "icons/svg/combat.svg",
+      "img": "icons/svg/falling.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 0,
-          "saveAbility": "attack_roll",
-          "failEffect": "Hit nearby ally for weapon damage"
+          "saveDC": 11,
+          "saveAbility": "dex",
+          "effectCondition": "prone",
+          "damageFormula": "1d6",
+          "damageType": "slashing"
         }
       }
     }

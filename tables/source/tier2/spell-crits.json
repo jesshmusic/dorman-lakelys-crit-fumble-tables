@@ -7,10 +7,10 @@
     {
       "type": "text",
       "text": "Nothing Special - Your critical spell deals damage as normal, but no additional effect occurs.",
-      "weight": 35,
+      "weight": 18,
       "range": [
         1,
-        35
+        18
       ],
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
@@ -21,28 +21,83 @@
     },
     {
       "type": "text",
-      "text": "Arcane Burn - Magical energy sears the target. They take 1d8 force damage at the start of their next turn.",
+      "text": "Ringing Aura - A piercing arcane tone rings in the target's ears, leaving them deafened.",
       "weight": 8,
       "range": [
-        36,
-        43
+        19,
+        26
       ],
-      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1S",
-          "damageType": "spell"
+          "effectType": "condition",
+          "effectCondition": "deafened",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Concentration Shatter - Your spell disrupts focus. If concentrating, they have disadvantage on the save with a -5 penalty.",
+      "weight": 7,
+      "range": [
+        27,
+        33
+      ],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "concentration",
+          "effectName": "Concentration Shatter",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Mind Fog - Your spell clouds the target's mind. They have disadvantage on their next saving throw.",
+      "weight": 7,
+      "range": [
+        34,
+        40
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "save.all",
+          "effectName": "Mind Fog",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Sluggish Mind - The target's thoughts turn to sludge, giving them disadvantage on saving throws until the end of their next turn.",
+      "weight": 6,
+      "range": [
+        41,
+        46
+      ],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "self",
+          "effectName": "Sluggish Mind",
+          "duration": 1
         }
       }
     },
     {
       "type": "text",
       "text": "Magic Disruption - Your spell disrupts their magical abilities. Target has disadvantage on spell attacks for 2 rounds.",
-      "weight": 7,
+      "weight": 6,
       "range": [
-        44,
-        50
+        47,
+        52
       ],
       "img": "icons/svg/silenced.svg",
       "flags": {
@@ -59,11 +114,168 @@
     },
     {
       "type": "text",
-      "text": "Powerful Knockback - The force of your spell sends the target flying. They are pushed 15 feet and fall prone.",
-      "weight": 7,
+      "text": "Hex of Frailty - A hex of frailty erodes the target's defenses, giving them a -2 penalty to AC until removed.",
+      "weight": 6,
       "range": [
-        51,
-        57
+        53,
+        58
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Burn - Magical energy sears the target. They take 1d8 force damage at the start of their next turn.",
+      "weight": 5,
+      "range": [
+        59,
+        63
+      ],
+      "img": "icons/magic/fire/flame-burning-yellow-orange.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1S",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Elemental Surge - Your spell's element flares dramatically. Add 2d6 damage of the spell's type.",
+      "weight": 5,
+      "range": [
+        64,
+        68
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2S",
+          "damageType": "spell"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Mana Burn - Raw magic ignites the target's own reserves, dealing 2d6 force damage.",
+      "weight": 5,
+      "range": [
+        69,
+        73
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d6",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Amplification - Your magical power surges! Deal an additional 2d8 force damage.",
+      "weight": 5,
+      "range": [
+        74,
+        78
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2S",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Withering Curse - A withering hex corrodes the target from within; they must succeed on a DC 13 Constitution save or be poisoned.",
+      "weight": 4,
+      "range": [
+        79,
+        82
+      ],
+      "img": "icons/svg/poison.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 13,
+          "saveAbility": "con",
+          "effectCondition": "poisoned"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Numbing Frost - Creeping frost locks the target's limbs; they must succeed on a DC 13 Strength save or be restrained.",
+      "weight": 4,
+      "range": [
+        83,
+        86
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 13,
+          "saveAbility": "str",
+          "effectCondition": "restrained"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Mind Spike - A lance of psychic force stabs the target's mind; they must succeed on a DC 13 Wisdom save or be frightened of you.",
+      "weight": 4,
+      "range": [
+        87,
+        90
+      ],
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 13,
+          "saveAbility": "wis",
+          "effectCondition": "frightened"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Dazzling Display - Your spell creates a blinding flash. The target is blinded until the end of their next turn.",
+      "weight": 3,
+      "range": [
+        91,
+        93
+      ],
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Powerful Knockback - The force of your spell sends the target flying. They are pushed 15 feet and fall prone.",
+      "weight": 3,
+      "range": [
+        94,
+        96
       ],
       "img": "icons/svg/thrust.svg",
       "flags": {
@@ -77,10 +289,10 @@
     {
       "type": "text",
       "text": "Arcane Vulnerability - Your magic leaves the target exposed. Attacks against them have advantage until the end of your next turn.",
-      "weight": 6,
+      "weight": 2,
       "range": [
-        58,
-        63
+        97,
+        98
       ],
       "img": "icons/svg/target.svg",
       "flags": {
@@ -95,113 +307,11 @@
     },
     {
       "type": "text",
-      "text": "Concentration Shatter - Your spell disrupts focus. If concentrating, they have disadvantage on the save with a -5 penalty.",
-      "weight": 6,
-      "range": [
-        64,
-        69
-      ],
-      "img": "icons/svg/daze.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "concentration",
-          "effectName": "Concentration Shatter",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Arcane Insight - Your magical senses sharpen. You have advantage on your next spell attack (DM adjudicates).",
-      "weight": 5,
-      "range": [
-        70,
-        74
-      ],
-      "img": "icons/svg/upgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "none"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Elemental Surge - Your spell's element flares dramatically. Add 2d6 damage of the spell's type.",
-      "weight": 5,
-      "range": [
-        75,
-        79
-      ],
-      "img": "icons/svg/explosion.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "2S",
-          "damageType": "spell"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Mind Fog - Your spell clouds the target's mind. They have disadvantage on their next saving throw.",
-      "weight": 5,
-      "range": [
-        80,
-        84
-      ],
-      "img": "icons/svg/hazard.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "save.all",
-          "effectName": "Mind Fog",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Dazzling Display - Your spell creates a blinding flash. The target is blinded until the end of their next turn.",
-      "weight": 4,
-      "range": [
-        85,
-        88
-      ],
-      "img": "icons/svg/blind.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "blinded",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Spell Echo - Your spell echoes with power. You may cast the same cantrip again as a bonus action.",
-      "weight": 4,
-      "range": [
-        89,
-        92
-      ],
-      "img": "icons/svg/upgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "spell_echo",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
       "text": "Stunning Spell - The magical energy overwhelms the target. They are stunned until the end of your next turn.",
-      "weight": 3,
+      "weight": 2,
       "range": [
-        93,
-        95
+        99,
+        100
       ],
       "img": "icons/svg/daze.svg",
       "flags": {
@@ -209,40 +319,6 @@
           "effectType": "condition",
           "effectCondition": "stunned",
           "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Arcane Amplification - Your magical power surges! Deal an additional 2d8 force damage.",
-      "weight": 3,
-      "range": [
-        96,
-        98
-      ],
-      "img": "icons/svg/explosion.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "2S",
-          "damageType": "spell"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Perfect Casting - A masterful spell! Deal maximum damage and Regain 1 expended spell slot of 1st level.",
-      "weight": 2,
-      "range": [
-        99,
-        100
-      ],
-      "img": "icons/svg/upgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "spell_slot_recovered",
-          "duration": 0
         }
       }
     }

@@ -6,3 +6,4 @@ export { TableSelector } from './TableSelector';
 export { EffectsManager } from './EffectsManager';
 export { MidiQolHooks } from './MidiQolHooks';
 export { TableImporter } from './TableImporter';
+export { TestHarness } from './TestHarness';

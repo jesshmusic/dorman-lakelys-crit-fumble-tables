@@ -7,10 +7,10 @@
     {
       "type": "text",
       "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
-      "weight": 35,
+      "weight": 18,
       "range": [
         1,
-        35
+        18
       ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
@@ -21,11 +21,232 @@
     },
     {
       "type": "text",
-      "text": "Magical Backlash - The spell's energy rebounds painfully. Take 1d8 force damage.",
+      "text": "Grounded Magic - Your spell earths itself through your body. You have disadvantage on attack rolls until the end of your next turn.",
       "weight": 8,
       "range": [
-        36,
-        43
+        19,
+        26
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Grounded Magic",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Spell Recoil - The spell lashes back as it leaves you. You have disadvantage on your next ranged spell attack.",
+      "weight": 7,
+      "range": [
+        27,
+        33
+      ],
+      "img": "icons/svg/lightning.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.rsak",
+          "advantageTarget": "self",
+          "effectName": "Spell Recoil",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Hiccup - Your magic stutters and misfires. You have disadvantage on spell attacks until the end of your next turn.",
+      "weight": 7,
+      "range": [
+        34,
+        40
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": [
+            "attack.msak",
+            "attack.rsak"
+          ],
+          "advantageTarget": "self",
+          "effectName": "Arcane Hiccup",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Somatic Cramp - Your casting hand cramps violently. You have disadvantage on concentration checks until the end of your next turn.",
+      "weight": 6,
+      "range": [
+        41,
+        46
+      ],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "concentration",
+          "advantageTarget": "self",
+          "effectName": "Somatic Cramp",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Arcane Backlash - Raw magic rebounds into you. Take force damage equal to one of the spell's damage dice.",
+      "weight": 6,
+      "range": [
+        47,
+        52
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1S",
+          "damageType": "force"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Component Combustion - Your material components ignite in your grip. Take 1d6 fire damage.",
+      "weight": 6,
+      "range": [
+        53,
+        58
+      ],
+      "img": "icons/svg/fire.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "1d6",
+          "damageType": "fire"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Telegraphed Magic - Your fumbled casting tips your hand. Enemies have advantage on their next saving throw against your spells.",
+      "weight": 5,
+      "range": [
+        59,
+        63
+      ],
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "save.all",
+          "advantageTarget": "grants",
+          "effectName": "Telegraphed Magic",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Exposed Weave - Your botched weave leaves you unguarded. Attacks against you have advantage until the end of your next turn.",
+      "weight": 5,
+      "range": [
+        64,
+        68
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "advantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "grants",
+          "effectName": "Exposed Weave",
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Warped Focus - The recoil throws off your aim. You take a -2 penalty to attack rolls until the end of your next turn.",
+      "weight": 5,
+      "range": [
+        69,
+        73
+      ],
+      "img": "icons/svg/downgrade.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -2,
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Shattered Wards - The backlash shreds your protective wards. You take a -2 penalty to AC until the end of your next turn.",
+      "weight": 5,
+      "range": [
+        74,
+        78
+      ],
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -2,
+          "duration": 1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Backlash Sprawl - The detonation throws you off your feet. You are knocked prone.",
+      "weight": 4,
+      "range": [
+        79,
+        82
+      ],
+      "img": "icons/svg/combat.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "prone",
+          "duration": 0
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Deafening Boom - The spell erupts with a deafening crack. You are deafened.",
+      "weight": 4,
+      "range": [
+        83,
+        86
+      ],
+      "img": "icons/svg/explosion.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "deafened",
+          "duration": -1
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Magical Backlash - The spell's energy rebounds painfully. Take 1d8 force damage.",
+      "weight": 4,
+      "range": [
+        87,
+        90
       ],
       "img": "icons/svg/lightning.svg",
       "flags": {
@@ -38,158 +259,51 @@
     },
     {
       "type": "text",
-      "text": "Arcane Hiccup - Your magic stutters. You have disadvantage on spell attacks until the end of your next turn.",
-      "weight": 7,
+      "text": "Blinding Feedback - A blinding flash of misfired magic sears your eyes. You are blinded until the end of your next turn.",
+      "weight": 3,
       "range": [
-        44,
-        50
-      ],
-      "img": "icons/svg/hazard.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": [
-            "attack.msak",
-            "attack.rsak"
-          ],
-          "effectName": "Arcane Hiccup",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Arcane Lockout - Your magic stutters badly. You cannot cast spells until the end of your next turn.",
-      "weight": 7,
-      "range": [
-        51,
-        57
-      ],
-      "img": "icons/svg/hazard.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "spell_locked",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Exposed Caster - Your failed casting leaves you vulnerable. Attacks against you have advantage until the start of your next turn.",
-      "weight": 6,
-      "range": [
-        58,
-        63
-      ],
-      "img": "icons/svg/target.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "attack.all",
-          "advantageTarget": "grants",
-          "effectName": "Exposed Caster",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Sensory Overload - The failed spell overwhelms your senses. You are blinded until the end of your next turn.",
-      "weight": 6,
-      "range": [
-        64,
-        69
+        91,
+        93
       ],
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "blinded",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Concentration Shaken - The failure shakes your focus. You have disadvantage on concentration checks for 2 rounds.",
-      "weight": 5,
-      "range": [
-        70,
-        74
-      ],
-      "img": "icons/svg/silenced.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "concentration",
-          "effectName": "Concentration Shaken",
-          "duration": 2
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Telegraphed Magic - Your target sensed your failure. They have advantage on their next saving throw against your spells.",
-      "weight": 5,
-      "range": [
-        75,
-        79
-      ],
-      "img": "icons/svg/eye.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "advantage",
-          "advantageScope": "save.all",
-          "advantageTarget": "grants",
-          "effectName": "Telegraphed",
           "duration": 0
         }
       }
     },
     {
       "type": "text",
-      "text": "Spell Slot Burn - The failed casting burns out a spell slot. Lose an additional spell slot of 1st or 2nd level.",
-      "weight": 5,
+      "text": "Catastrophic Rebound - Your spell collapses inward. Make a DC 13 Constitution saving throw or take 3d6 force damage and be knocked prone.",
+      "weight": 3,
       "range": [
-        80,
-        84
+        94,
+        96
       ],
-      "img": "icons/svg/downgrade.svg",
+      "img": "icons/svg/terror.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "spell_slot_lost",
-          "duration": 0
+          "effectType": "save",
+          "saveDC": 13,
+          "saveAbility": "con",
+          "damageFormula": "3d6",
+          "damageType": "force",
+          "effectCondition": "prone",
+          "failEffect": "Take force damage and be knocked prone"
         }
       }
     },
     {
       "type": "text",
-      "text": "Magical Fatigue - The failed spell exhausts you. You can't take reactions until the start of your next turn.",
-      "weight": 4,
+      "text": "Wild Surge Jolt - Wild magic detonates through your body. Take 2d6 force damage.",
+      "weight": 2,
       "range": [
-        85,
-        88
+        97,
+        98
       ],
-      "img": "icons/svg/clockwork.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "no_reactions",
-          "duration": 1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Spell Rebounds - Your spell affects you instead. Take 2d6 force damage.",
-      "weight": 4,
-      "range": [
-        89,
-        92
-      ],
-      "img": "icons/svg/target.svg",
+      "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
@@ -200,54 +314,16 @@
     },
     {
       "type": "text",
-      "text": "Fatigued - The failed spell drains you. You have disadvantage on attack rolls and ability checks for 2 rounds.",
-      "weight": 3,
-      "range": [
-        93,
-        95
-      ],
-      "img": "icons/svg/downgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": [
-            "attack.all",
-            "ability.all"
-          ],
-          "effectName": "Fatigued",
-          "duration": 2
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Component Destroyed - A valuable material component is destroyed. Lose 25gp worth of components.",
-      "weight": 3,
-      "range": [
-        96,
-        98
-      ],
-      "img": "icons/commodities/gems/gem-fragments-red.webp",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "component_lost",
-          "duration": 0
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Unstable Magic - Uncontrolled magic displaces you. You teleport 10 feet in a random direction.",
+      "text": "Misfired Blast - Your spell veers wildly and misfires at the nearest ally. Make a spell attack against the nearest ally; on a hit, they take the spell's damage.",
       "weight": 2,
       "range": [
         99,
         100
       ],
-      "img": "icons/svg/dice-target.svg",
+      "img": "icons/svg/combat.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "none"
+          "effectType": "attackAlly"
         }
       }
     }

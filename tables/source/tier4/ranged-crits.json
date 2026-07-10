@@ -7,43 +7,59 @@
     {
       "type": "text",
       "text": "Nothing Special - Your critical strike deals damage as normal, but no additional effect occurs.",
-      "weight": 25,
-      "range": [
-        1,
-        25
-      ],
+      "weight": 6,
       "img": "icons/svg/d20-highlight.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "none"
         }
-      }
+      },
+      "range": [
+        1,
+        6
+      ]
     },
     {
       "type": "text",
-      "text": "Devastating Impact - Your shot strikes with tremendous force. Deal an additional 3d6 piercing damage.",
-      "weight": 9,
-      "range": [
-        26,
-        34
-      ],
-      "img": "icons/svg/thrust.svg",
+      "text": "Severed Tendon - Your shot severs a tendon in the target's arm, giving them -2 to attack rolls until they receive healing.",
+      "weight": 8,
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "3W",
-          "damageType": "weapon"
+          "effectType": "penalty",
+          "penaltyType": "attack",
+          "penaltyValue": -2,
+          "duration": -1
         }
-      }
+      },
+      "range": [
+        7,
+        14
+      ]
     },
     {
       "type": "text",
-      "text": "Staggering Shot - Your devastating shot staggers the target completely. They have disadvantage on all attacks and saves until end of their next turn.",
+      "text": "Suppressing Shot - A relentless hail of covering fire pins the target down, giving them disadvantage on attack rolls until the end of their next turn.",
       "weight": 8,
+      "img": "icons/svg/net.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Suppressed",
+          "duration": 1
+        }
+      },
       "range": [
-        35,
-        42
-      ],
+        15,
+        22
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Staggering Shot - Your shot staggers the target completely, giving them disadvantage on attacks and saving throws until the end of their next turn.",
+      "weight": 7,
       "img": "icons/svg/daze.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -55,33 +71,70 @@
           "effectName": "Staggered",
           "duration": 1
         }
-      }
+      },
+      "range": [
+        23,
+        29
+      ]
     },
     {
       "type": "text",
-      "text": "Mortal Wound - Your shot strikes a vital area. Target takes 3d6 damage at the start of each turn. DC 17 Medicine or magical healing stops bleeding.",
+      "text": "Armor Destroyed - Your shot ruins a section of the target's armor, imposing -4 AC until it is replaced or magically repaired.",
       "weight": 7,
-      "range": [
-        43,
-        49
-      ],
-      "img": "icons/svg/blood.svg",
+      "img": "icons/svg/downgrade.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "3W",
-          "damageType": "weapon"
+          "effectType": "penalty",
+          "penaltyType": "ac",
+          "penaltyValue": -4,
+          "duration": -1
         }
-      }
+      },
+      "range": [
+        30,
+        36
+      ]
     },
     {
       "type": "text",
-      "text": "Completely Exposed - Your shot exposes critical weaknesses. Attacks against the target have advantage for 3 rounds.",
-      "weight": 7,
+      "text": "Crippling Devastation - Your shot shatters bone after bone, leaving the target with disadvantage on attacks until magically healed.",
+      "weight": 6,
+      "img": "icons/svg/hazard.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "disadvantage",
+          "advantageScope": "attack.all",
+          "advantageTarget": "self",
+          "effectName": "Crippled",
+          "duration": -1
+        }
+      },
       "range": [
-        50,
-        56
-      ],
+        37,
+        42
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Grit in the Eye - A spray of grit and blood catches the target across the eyes, leaving them blinded until the end of their next turn.",
+      "weight": 6,
+      "img": "icons/svg/blind.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "blinded",
+          "duration": 0
+        }
+      },
+      "range": [
+        43,
+        48
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Completely Exposed - Your shot lays the target's defenses bare, granting advantage on attacks against them for three rounds.",
+      "weight": 6,
       "img": "icons/svg/target.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -91,34 +144,68 @@
           "effectName": "Completely Exposed",
           "duration": 3
         }
-      }
+      },
+      "range": [
+        49,
+        54
+      ]
     },
     {
       "type": "text",
-      "text": "Crippling Devastation - Your shot shatters multiple bones. Target's speed is 0 and they have disadvantage on attacks until magically healed.",
-      "weight": 6,
+      "text": "Bleeder - The wound opens wide and bleeds freely, dealing an extra 2d6 piercing damage.",
+      "weight": 5,
+      "img": "icons/svg/blood.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "2d6",
+          "damageType": "piercing"
+        }
+      },
       "range": [
-        57,
-        62
-      ],
+        55,
+        59
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Devastating Impact - Your shot strikes with tremendous force, dealing an extra three weapon dice of damage.",
+      "weight": 5,
+      "img": "icons/svg/thrust.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "damage",
+          "damageFormula": "3W",
+          "damageType": "weapon"
+        }
+      },
+      "range": [
+        60,
+        64
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Kneecapped - Your shot shatters the target's knee, forcing a DC 17 Dexterity save or be knocked prone.",
+      "weight": 5,
       "img": "icons/svg/hazard.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "disadvantage",
-          "advantageScope": "attack.all",
-          "effectName": "Crippled",
-          "duration": -1
+          "effectType": "save",
+          "saveDC": 17,
+          "saveAbility": "dex",
+          "effectCondition": "prone"
         }
-      }
+      },
+      "range": [
+        65,
+        69
+      ]
     },
     {
       "type": "text",
-      "text": "Blinding Strike - Your shot damages the target's eyes permanently. They are blinded until healed with Regenerate or similar magic.",
-      "weight": 6,
-      "range": [
-        63,
-        68
-      ],
+      "text": "Blinding Strike - Your shot ruins the target's eyes, blinding them until healed by Regenerate or similar magic.",
+      "weight": 5,
       "img": "icons/svg/blind.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -126,100 +213,68 @@
           "effectCondition": "blinded",
           "duration": -1
         }
-      }
+      },
+      "range": [
+        70,
+        74
+      ]
     },
     {
       "type": "text",
-      "text": "Legendary Marksman - Your perfect shot inspires legendary confidence. You have advantage on all ranged attacks for 3 rounds (DM adjudicates).",
+      "text": "Nailed Down - The projectile nails the target to the ground, leaving them restrained until the end of their next turn.",
       "weight": 5,
-      "range": [
-        69,
-        73
-      ],
-      "img": "icons/svg/upgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "none"
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Pinned and Helpless - Your shot pins the target completely. They are restrained until they use an action to pull free (DC 18 Str check).",
-      "weight": 5,
-      "range": [
-        74,
-        78
-      ],
-      "img": "icons/svg/anchor.svg",
+      "img": "icons/svg/net.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "condition",
           "effectCondition": "restrained",
-          "duration": -1
+          "duration": 1
         }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Terror Shot - Your brutal accuracy terrifies the target to their core. They are frightened of you for 3 rounds (DC 18 Wis save ends).",
-      "weight": 5,
+      },
       "range": [
-        79,
-        83
-      ],
-      "img": "icons/svg/terror.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "condition",
-          "effectCondition": "frightened",
-          "duration": 3
-        }
-      }
+        75,
+        79
+      ]
     },
     {
       "type": "text",
-      "text": "Armor Destroyed - Your shot finds the critical weak spot. Target takes -4 to AC until armor is replaced or magically repaired.",
-      "weight": 5,
-      "range": [
-        84,
-        88
-      ],
-      "img": "icons/svg/downgrade.svg",
-      "flags": {
-        "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "penalty",
-          "penaltyType": "ac",
-          "penaltyValue": -4,
-          "duration": -1
-        }
-      }
-    },
-    {
-      "type": "text",
-      "text": "Devastating Shot - Your perfectly placed shot deals an additional 4d6 piercing damage.",
+      "text": "Deep Puncture - Your projectile buries itself deep, dealing an extra maximized weapon die of damage.",
       "weight": 4,
-      "range": [
-        89,
-        92
-      ],
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
-          "damageFormula": "3W",
+          "damageFormula": "1WB",
           "damageType": "weapon"
         }
-      }
+      },
+      "range": [
+        80,
+        83
+      ]
     },
     {
       "type": "text",
-      "text": "Overwhelming Shot - Your legendary shot deals an additional 5d6 piercing damage and knocks the target prone.",
-      "weight": 7,
+      "text": "Sinking Terror - A shot to a vital spot fills the target with dread, forcing a DC 17 Wisdom save or be frightened of you.",
+      "weight": 4,
+      "img": "icons/svg/terror.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 17,
+          "saveAbility": "wis",
+          "effectCondition": "frightened"
+        }
+      },
       "range": [
-        93,
-        99
-      ],
+        84,
+        87
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Overwhelming Shot - Your legendary shot tears through the target, dealing an extra four weapon dice of damage.",
+      "weight": 4,
       "img": "icons/svg/explosion.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
@@ -227,27 +282,83 @@
           "damageFormula": "4W",
           "damageType": "weapon"
         }
-      }
+      },
+      "range": [
+        88,
+        91
+      ]
     },
     {
       "type": "text",
-      "text": "Heart-Piercing Shot - If target has 50 HP or fewer, they must make DC 18 CON save or take 6d10 extra damage.",
-      "weight": 1,
+      "text": "Punctured Lung - Your shot punctures a lung, forcing a DC 17 Constitution save or be poisoned while the target struggles to breathe.",
+      "weight": 3,
+      "img": "icons/svg/poison.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 17,
+          "saveAbility": "con",
+          "effectCondition": "poisoned"
+        }
+      },
       "range": [
-        100,
-        100
-      ],
+        92,
+        94
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Skull Ringer - The impact rattles the target's skull, forcing a DC 17 Constitution save or be stunned until the end of their next turn.",
+      "weight": 3,
+      "img": "icons/svg/daze.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "save",
+          "saveDC": 17,
+          "saveAbility": "con",
+          "effectCondition": "stunned"
+        }
+      },
+      "range": [
+        95,
+        97
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Crippling Volley - A crippling barrage overwhelms the target's body, inflicting one level of exhaustion until they recover.",
+      "weight": 2,
+      "img": "icons/svg/paralysis.svg",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "condition",
+          "effectCondition": "exhaustion",
+          "duration": -1
+        }
+      },
+      "range": [
+        98,
+        99
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Heart-Piercing Shot - Your shot seeks the heart, forcing a DC 17 Constitution save or take an extra 6d10 damage.",
+      "weight": 1,
       "img": "icons/svg/skull.svg",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "save",
-          "saveDC": 18,
+          "saveDC": 17,
           "saveAbility": "con",
-          "failEffect": "Takes 6d10 extra damage",
           "damageFormula": "6d10",
-          "damageType": "weapon"
+          "damageType": "piercing"
         }
-      }
+      },
+      "range": [
+        100,
+        100
+      ]
     }
   ]
 }

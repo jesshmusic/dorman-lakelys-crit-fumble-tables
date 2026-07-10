@@ -41,7 +41,8 @@ export function createMockGame(overrides?: Partial<typeof game>): typeof game {
     },
     user: {
       id: 'test-user-id',
-      isGM: true
+      isGM: true,
+      updateTokenTargets: jest.fn()
     },
     tables: createMockTables(),
     folders: createMockFolders(),
@@ -223,15 +224,25 @@ export function createMockChatMessage(): typeof ChatMessage {
 }
 
 /**
+ * Shared, assertable mock for `Roll#toMessage`. Exported so tests can assert
+ * that the dnd5e damage card was posted (the new applyDamage behavior posts a
+ * DamageRoll chat card instead of calling MidiQOL.applyTokenDamage). Reset in
+ * `resetMocks`.
+ */
+export const rollToMessage = jest.fn<(options?: any) => Promise<any>>().mockResolvedValue({});
+
+/**
  * Mock Roll class
  */
 export function createMockRoll(): typeof Roll {
   return class MockRoll {
     total: number = 10;
     formula: string;
+    options: any;
 
-    constructor(formula: string) {
+    constructor(formula: string, _data?: any, options?: any) {
       this.formula = formula;
+      this.options = options;
       // Parse simple formulas like "2d6" for testing
       const match = formula.match(/(\d+)d(\d+)/);
       if (match) {
@@ -245,8 +256,8 @@ export function createMockRoll(): typeof Roll {
       return this;
     }
 
-    async toMessage(_options?: any): Promise<any> {
-      return {};
+    async toMessage(options?: any): Promise<any> {
+      return rollToMessage(options);
     }
   } as any;
 }
@@ -334,8 +345,11 @@ export function createMockItem(overrides?: any): any {
     type: 'weapon',
     system: {
       actionType: 'mwak',
+      // dnd5e 5.x damage schema: weapons carry `system.damage.base` with
+      // `{ number, denomination, types:Set }` (the old `damage.parts` tuple
+      // array was removed).
       damage: {
-        parts: [['1d8', 'slashing']]
+        base: { number: 1, denomination: 8, types: new Set(['slashing']) }
       }
     },
     ...overrides
@@ -534,5 +548,8 @@ export function setupMocks(): void {
 export function resetMocks(): void {
   jest.clearAllMocks();
   jest.resetModules();
+  // Re-arm the shared Roll#toMessage mock after clearAllMocks wiped its calls.
+  rollToMessage.mockReset();
+  rollToMessage.mockResolvedValue({});
   setupMocks();
 }
