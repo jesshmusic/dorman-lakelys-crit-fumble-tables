@@ -6,6 +6,7 @@
 import { MODULE_ID, EFFECT_TYPES, LOG_PREFIX, STANDARD_CONDITIONS } from '../constants';
 import { RolledResult, TableEffectConfig, AdvantageScope, AdvantageTarget } from '../types';
 import { shouldApplyEffects, shouldShowChatMessages } from '../settings';
+import { SaveManager } from './SaveManager';
 
 /**
  * Service for managing and applying crit/fumble effects
@@ -136,40 +137,20 @@ export class EffectsManager {
    * Build Active Effect `duration` data that behaves correctly in combat with
    * DAE 14 + Times-Up 13 on Foundry v14 / dnd5e 5.3.
    *
-   * The old code used `duration.turns` + `startTurn`/`startRound`, which anchor
-   * to the CREATING combatant (the attacker). That made target debuffs expire
-   * the instant the attacker clicked "Next". Instead we use DAE's combatant-
-   * relative `duration.expiry`:
-   *   - `targetEnd` fires at the end of the turn of the actor the effect is ON
-   *     (the crit target, or the fumbler for self-debuffs) — so it survives the
-   *     attacker's turn ending and lasts through the holder's next turn.
-   *
-   * Returns the `duration` object AND the `flags.dae.specialDuration` array the
-   * caller must merge into the effect's flags. IMPORTANT (verified in-game on
-   * DAE 14 + Times-Up 13): a bare `duration.expiry` does NOT delete the effect —
-   * it only marks it expired. DAE/Times-Up actually remove turn-scoped effects
-   * by reading `flags.dae.specialDuration` (e.g. `["turnEnd"]`), so we set that.
+   * Uses the DAE value/units/expiry schema (verified correct for this stack).
+   * The old `specialDuration`/`rounds` path silently mis-expires self-effects
+   * because Times-Up reads legacy fields absent in v14/dnd5e-5.3. `expiry`
+   * `targetEnd` fires at the end of the turn of the actor the effect is ON (the
+   * crit target, or the fumbler for self-debuffs) — so it survives the
+   * attacker's turn ending and lasts through the holder's next turn.
    *
    * @param duration -1 = permanent, 0 = until end of the affected creature's
    *                  next turn, N = N rounds
    */
-  private static buildDuration(duration: number): {
-    duration: Record<string, any>;
-    specialDuration: string[];
-  } {
-    if (duration === -1) {
-      // Permanent until manually removed (isTemporary === false)
-      return { duration: {}, specialDuration: [] };
-    }
-    if (duration === 0) {
-      // Until the end of the affected creature's next turn. `turnEnd` is keyed
-      // to the actor the effect is ON (target of a crit, or the fumbler). The
-      // rounds:1 is a hard-cap fallback so it can never linger if the event
-      // somehow doesn't fire.
-      return { duration: { rounds: 1 }, specialDuration: ['turnEnd'] };
-    }
-    // N rounds — Times-Up counts down the numeric round duration.
-    return { duration: { rounds: duration }, specialDuration: [] };
+  private static buildDuration(duration: number): Record<string, any> {
+    if (duration === -1) return {}; // permanent
+    if (duration === 0) return { value: 1, units: 'turns', expiry: 'targetEnd' }; // end of holder's NEXT turn (crit target OR fumbler)
+    return { value: duration, units: 'rounds', expiry: 'targetEnd' }; // N rounds
   }
 
   /**
@@ -196,7 +177,7 @@ export class EffectsManager {
     }
 
     // For custom conditions, create an Active Effect
-    const { duration: durationData, specialDuration } = this.buildDuration(duration);
+    const durationData = this.buildDuration(duration);
 
     const icon = resultIcon || this.getConditionIcon(conditionName);
 
@@ -211,8 +192,7 @@ export class EffectsManager {
         [MODULE_ID]: {
           source: 'crit-fumble-result',
           condition: conditionName
-        },
-        ...(specialDuration.length ? { dae: { specialDuration } } : {})
+        }
       }
     };
 
@@ -292,7 +272,8 @@ export class EffectsManager {
   static async applyDamage(
     token: Token,
     config: TableEffectConfig,
-    sourceItem?: Item
+    sourceItem?: Item,
+    options: { half?: boolean } = {}
   ): Promise<void> {
     const actor = (token as any)?.actor;
     if (!config.damageFormula || !actor) {
@@ -310,9 +291,14 @@ export class EffectsManager {
       const roll = new DamageRollClass(resolvedFormula, rollData, { type: damageType });
       await roll.evaluate();
 
+      // On a successful save the target takes HALF damage. We do NOT auto-halve
+      // the roll total — the native dnd5e damage card's ½ button handles it — so
+      // we just flag the card's flavor to tell the GM to click ½.
+      const halfSuffix = options.half ? ' — save succeeded, apply HALF' : '';
+
       await roll.toMessage({
         speaker: ChatMessage.getSpeaker({ token: (token as any).document ?? token }),
-        flavor: `Crit/Fumble Bonus Damage (${damageType})`,
+        flavor: `Crit/Fumble Bonus Damage (${damageType})${halfSuffix}`,
         flags: {
           dnd5e: {
             roll: { type: 'damage' },
@@ -494,7 +480,12 @@ export class EffectsManager {
   }
 
   /**
-   * Handle an effect that requires a saving throw
+   * Handle an effect that requires a saving throw.
+   *
+   * Rolls a real saving throw (player-rolled via Monk's TokenBar when available,
+   * else GM-rolled). On FAILURE the condition is applied and full damage is
+   * posted. On SUCCESS the condition is negated and damage is posted with the
+   * HALF flag (the GM clicks the card's ½ button).
    */
   static async handleSaveEffect(
     token: Token,
@@ -507,15 +498,22 @@ export class EffectsManager {
       return;
     }
 
-    console.log(`${LOG_PREFIX} Save effect triggered - DC ${config.saveDC} ${config.saveAbility}`);
+    const success = await SaveManager.requestSave(token, config.saveAbility, config.saveDC);
 
-    if (config.effectCondition) {
-      await this.applyCondition(token, config, resultIcon);
-    }
-    if (config.damageFormula) {
-      // Pass the source item so weapon/spell dice syntax and "weapon"/"spell"
-      // damage types resolve against the real item (not the d6/bludgeoning fallback).
-      await this.applyDamage(token, config, sourceItem);
+    if (!success) {
+      if (config.effectCondition) {
+        await this.applyCondition(token, config, resultIcon);
+      }
+      if (config.damageFormula) {
+        // Pass the source item so weapon/spell dice syntax and "weapon"/"spell"
+        // damage types resolve against the real item (not the d6/bludgeoning fallback).
+        await this.applyDamage(token, config, sourceItem); // full
+      }
+    } else {
+      // condition negated on success; damage halved
+      if (config.damageFormula) {
+        await this.applyDamage(token, config, sourceItem, { half: true });
+      }
     }
   }
 
@@ -682,7 +680,7 @@ export class EffectsManager {
     }
 
     const duration = config.duration ?? -1;
-    const { duration: durationData, specialDuration } = this.buildDuration(duration);
+    const durationData = this.buildDuration(duration);
 
     const effectData = {
       name: effectName,
@@ -703,8 +701,7 @@ export class EffectsManager {
           source: 'crit-fumble-result',
           penaltyType: config.penaltyType,
           penaltyValue: config.penaltyValue
-        },
-        ...(specialDuration.length ? { dae: { specialDuration } } : {})
+        }
       }
     };
 
@@ -745,7 +742,7 @@ export class EffectsManager {
     const effectName = config.effectName ?? this.generateAdvantageEffectName(type, scopes, target);
 
     const duration = config.duration ?? 1;
-    const { duration: durationData, specialDuration } = this.buildDuration(duration);
+    const durationData = this.buildDuration(duration);
 
     const effectData = {
       name: effectName,
@@ -761,8 +758,7 @@ export class EffectsManager {
           effectType: type,
           advantageScope: scopes,
           advantageTarget: target
-        },
-        ...(specialDuration.length ? { dae: { specialDuration } } : {})
+        }
       }
     };
 

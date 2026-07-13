@@ -110,7 +110,7 @@
     },
     {
       "type": "text",
-      "text": "Arcane Burn - Your spell leaves lingering magical energy. Target takes 1d4 force damage at the start of their next turn.",
+      "text": "Arcane Burn - Your spell leaves lingering magical energy. Target takes extra force damage equal to the spell's damage die at the start of their next turn.",
       "weight": 5,
       "range": [
         60,
@@ -127,7 +127,7 @@
     },
     {
       "type": "text",
-      "text": "Elemental Surge - Your spell's element flares. Add 1d6 damage of the spell's damage type.",
+      "text": "Elemental Surge - Your spell's element flares. Add extra damage equal to the spell's damage die, of the spell's damage type.",
       "weight": 5,
       "range": [
         65,
@@ -162,7 +162,7 @@
     },
     {
       "type": "text",
-      "text": "Arcane Amplification - Your magical power surges! Deal an additional 1d8 force damage.",
+      "text": "Arcane Amplification - Your magical power surges! Deal additional force damage equal to the spell's damage die.",
       "weight": 4,
       "range": [
         75,

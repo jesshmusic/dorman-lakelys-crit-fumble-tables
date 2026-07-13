@@ -293,9 +293,7 @@ describe('EffectsManager', () => {
                 value: '1'
               })
             ]),
-            duration: expect.objectContaining({
-              rounds: 1
-            })
+            duration: { value: 1, units: 'rounds', expiry: 'targetEnd' }
           })
         ])
       );
@@ -399,16 +397,13 @@ describe('EffectsManager', () => {
 
       await EffectsManager.applyResult(result, token);
 
-      // duration 0 -> rounds:1 cap + DAE specialDuration 'turnEnd' (the flag that
-      // actually deletes the effect at the affected creature's next turn end)
+      // duration 0 -> DAE value/units/expiry schema: end of the holder's next
+      // turn (no flags.dae.specialDuration — expiry lives in the duration now)
       expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalledWith(
         'ActiveEffect',
         expect.arrayContaining([
           expect.objectContaining({
-            duration: { rounds: 1 },
-            flags: expect.objectContaining({
-              dae: { specialDuration: ['turnEnd'] }
-            })
+            duration: { value: 1, units: 'turns', expiry: 'targetEnd' }
           })
         ])
       );
@@ -1094,11 +1089,13 @@ describe('EffectsManager', () => {
   });
 
   describe('handleSaveEffect', () => {
-    it('should log save effect and apply condition', async () => {
+    it('should apply the condition on a FAILED save', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { SaveManager } = await import('../../src/services/SaveManager');
+
+      jest.spyOn(SaveManager, 'requestSave').mockResolvedValue(false);
 
       const token = createMockToken();
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
       await EffectsManager.handleSaveEffect(token, {
         effectType: 'save',
@@ -1108,14 +1105,15 @@ describe('EffectsManager', () => {
         duration: 1
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('DC 15 dex'));
+      // Failed save: the (standard) condition is applied via toggleStatusEffect
       expect(token.actor.toggleStatusEffect).toHaveBeenCalledWith('prone', { active: true });
-
-      consoleSpy.mockRestore();
     });
 
-    it('should apply damage from save effect', async () => {
+    it('should apply FULL damage on a FAILED save', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { SaveManager } = await import('../../src/services/SaveManager');
+
+      jest.spyOn(SaveManager, 'requestSave').mockResolvedValue(false);
 
       const token = createMockToken();
 
@@ -1127,7 +1125,52 @@ describe('EffectsManager', () => {
         damageType: 'fire'
       });
 
-      expect(rollToMessage).toHaveBeenCalled();
+      // Full damage card posted, flavor does NOT mention HALF
+      expect(rollToMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ flavor: expect.not.stringContaining('HALF') })
+      );
+    });
+
+    it('should NOT apply the condition on a SUCCESSFUL save', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { SaveManager } = await import('../../src/services/SaveManager');
+
+      jest.spyOn(SaveManager, 'requestSave').mockResolvedValue(true);
+
+      const token = createMockToken();
+
+      await EffectsManager.handleSaveEffect(token, {
+        effectType: 'save',
+        saveDC: 15,
+        saveAbility: 'dex',
+        effectCondition: 'prone',
+        duration: 1
+      });
+
+      // Successful save negates the condition
+      expect(token.actor.toggleStatusEffect).not.toHaveBeenCalled();
+    });
+
+    it('should post HALF damage on a SUCCESSFUL save', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { SaveManager } = await import('../../src/services/SaveManager');
+
+      jest.spyOn(SaveManager, 'requestSave').mockResolvedValue(true);
+
+      const token = createMockToken();
+
+      await EffectsManager.handleSaveEffect(token, {
+        effectType: 'save',
+        saveDC: 15,
+        saveAbility: 'dex',
+        damageFormula: '3d6',
+        damageType: 'fire'
+      });
+
+      // Damage is still posted, flagged HALF so the GM clicks the ½ button
+      expect(rollToMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ flavor: expect.stringContaining('HALF') })
+      );
     });
 
     it('should not apply when missing required config', async () => {
@@ -1302,9 +1345,7 @@ describe('EffectsManager', () => {
                 value: '-1'
               })
             ]),
-            duration: expect.objectContaining({
-              rounds: 5
-            })
+            duration: { value: 5, units: 'rounds', expiry: 'targetEnd' }
           })
         ])
       );

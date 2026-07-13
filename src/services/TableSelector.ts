@@ -104,9 +104,11 @@ export class TableSelector {
 
       const d100Roll = Math.floor(Math.random() * 100) + 1;
 
-      // Parse name and description from result.text (format: "Name - Description")
+      // Parse name and description from the result (format: "Name - Description").
+      // Foundry v13+ migrated TableResult#text -> #description; read #description (and the
+      // legacy _source.text raw value) to avoid the deprecated #text getter.
       // Uses indexOf to split on the FIRST occurrence of " - ", allowing dashes in descriptions
-      const resultText = result.text || '';
+      const resultText = (result.description ?? result._source?.text ?? result.name ?? '') || '';
       const dashIndex = resultText.indexOf(' - ');
       const name =
         dashIndex > 0 ? resultText.substring(0, dashIndex) : resultText || 'Unknown Result';

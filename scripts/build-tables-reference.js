@@ -157,13 +157,11 @@ function describeEffect(result) {
       if (cfg.effectCondition) parts.push(`condition <b>${esc(cfg.effectCondition)}</b>`);
       if (cfg.damageFormula) parts.push(`<b>${esc(cfg.damageFormula)}</b> ${esc(cfg.damageType || '')}`);
       html = `<span class="eff save">Save DC ${esc(dc ?? '?')} ${esc((ab || '?').toUpperCase())}</span>` +
-        (parts.length ? ` → ${parts.join(' + ')}` : '');
+        (parts.length ? ` → on fail: ${parts.join(' + ')}` : '');
       if (!dc || !ab) {
         issues.push('Save effect missing saveDC or saveAbility — handleSaveEffect() returns early, nothing applies.');
       } else if (!cfg.effectCondition && !cfg.damageFormula) {
         issues.push('Save effect has neither a condition nor damage to apply on failure.');
-      } else {
-        issues.push('Save is auto-failed: no actual saving throw is rolled; the effect is applied unconditionally.');
       }
       break;
     }

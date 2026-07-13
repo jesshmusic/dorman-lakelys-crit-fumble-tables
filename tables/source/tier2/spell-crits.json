@@ -132,7 +132,7 @@
     },
     {
       "type": "text",
-      "text": "Arcane Burn - Magical energy sears the target. They take 1d8 force damage at the start of their next turn.",
+      "text": "Arcane Burn - Magical energy sears the target. They take extra force damage equal to the spell's damage die at the start of their next turn.",
       "weight": 5,
       "range": [
         59,
@@ -149,7 +149,7 @@
     },
     {
       "type": "text",
-      "text": "Elemental Surge - Your spell's element flares dramatically. Add 2d6 damage of the spell's type.",
+      "text": "Elemental Surge - Your spell's element flares dramatically. Add extra damage equal to two of the spell's damage dice, of the spell's type.",
       "weight": 5,
       "range": [
         64,
@@ -183,7 +183,7 @@
     },
     {
       "type": "text",
-      "text": "Arcane Amplification - Your magical power surges! Deal an additional 2d8 force damage.",
+      "text": "Arcane Amplification - Your magical power surges! Deal additional force damage equal to two of the spell's damage dice.",
       "weight": 5,
       "range": [
         74,

@@ -132,7 +132,7 @@
     },
     {
       "type": "text",
-      "text": "Arcane Immolation - Magical energy sears the target. They take 2d8 force damage at the start of their next turn.",
+      "text": "Arcane Immolation - Magical energy sears the target. They take extra force damage equal to two of the spell's damage dice at the start of their next turn.",
       "weight": 6,
       "range": [
         54,
@@ -167,7 +167,7 @@
     },
     {
       "type": "text",
-      "text": "Elemental Devastation - Your spell's element overwhelms the target. Add 3d6 damage of the spell's type.",
+      "text": "Elemental Devastation - Your spell's element overwhelms the target. Add extra damage equal to three of the spell's damage dice, of the spell's type.",
       "weight": 5,
       "range": [
         65,
@@ -220,7 +220,7 @@
     },
     {
       "type": "text",
-      "text": "Arcane Amplification - Your magical power surges! Deal an additional 3d8 force damage.",
+      "text": "Arcane Amplification - Your magical power surges! Deal additional force damage equal to three of the spell's damage dice.",
       "weight": 4,
       "range": [
         80,

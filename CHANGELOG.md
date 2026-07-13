@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-07-13
+
+### Added
+
+- Real saving throws for save-gated crit/fumble effects — the affected creature now rolls a save vs the DC; on failure the condition/full damage applies, on success the condition is negated and damage is halved. Player-owned targets are prompted to roll their own save (via Monk's TokenBar when available, otherwise the GM rolls).
+
+### Fixed
+
+- "Until end of next turn" effects (including fumble self-debuffs) now correctly last until the end of the affected creature's next turn instead of vanishing when the turn advances — switched to the DAE value/units/targetEnd duration schema (the previous Times-Up specialDuration path silently mis-expired self-applied effects in this stack).
+- Spell-crit flavor text no longer names a fixed die where the damage scales with the spell's own die.
+
+## [1.3.1] - 2026-07-10
+
+### Fixed
+
+- **Release packaging: bundle the `sounds/` and `icons/` folders.** The CI release workflows built `module.zip` without these folders, so installed releases were missing the crit/fumble sound effects (`sounds/*.mp3`, referenced by the sound settings) and the DM Guru logo (`icons/dmguru-logo.svg`, shown in the Patreon settings dialog). Both are now included in the packaged zip.
+
 ## [1.3.0] - 2026-07-10
 
 ### Fixed

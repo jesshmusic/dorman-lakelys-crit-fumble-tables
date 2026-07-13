@@ -288,15 +288,20 @@ if (typeof globalThis !== 'undefined') {
         return null;
       }
 
+      // Foundry v13+ migrated TableResult#text -> #description; read #description (and the
+      // legacy _source.text raw value) to avoid the deprecated #text getter.
+      const readResultText = (r: any): string => r.description ?? r._source?.text ?? r.name ?? '';
+
       // Find the specific result by name
       const result = table.results.find((r: any) =>
-        r.text?.toLowerCase().includes(resultName.toLowerCase())
+        readResultText(r).toLowerCase().includes(resultName.toLowerCase())
       );
       if (!result) {
         console.error(`${LOG_PREFIX} Result containing "${resultName}" not found in table.`);
         console.log(`${LOG_PREFIX} Available results:`);
         table.results.forEach((r: any) => {
-          const name = r.text?.split(' - ')[0] || r.text?.substring(0, 30);
+          const rt = readResultText(r);
+          const name = rt.split(' - ')[0] || rt.substring(0, 30);
           console.log(`  - ${name}`);
         });
         return null;
@@ -308,7 +313,7 @@ if (typeof globalThis !== 'undefined') {
       };
 
       console.log(
-        `${LOG_PREFIX} [TEST] Applying fumble "${result.text?.split(' - ')[0]}" to ${fumblerName}, target: ${targetName}`
+        `${LOG_PREFIX} [TEST] Applying fumble "${readResultText(result).split(' - ')[0]}" to ${fumblerName}, target: ${targetName}`
       );
 
       const fumbleSound = getFumbleSound();
