@@ -127,7 +127,8 @@ export function createMockTable(name: string): any {
   const mockDraw = jest.fn<() => Promise<any>>().mockResolvedValue({
     results: [
       {
-        text: 'Test Result - A test result description',
+        // Foundry v13+ migrated TableResult#text -> #description
+        description: 'Test Result - A test result description',
         img: 'icons/svg/dice-target.svg',
         flags: {
           'dorman-lakelys-crit-fumble-tables': {

@@ -83,7 +83,9 @@ export class TestHarness {
     flags: any;
     range: [number, number];
   } {
-    const text = doc.text ?? doc.description ?? doc.name ?? '';
+    // Foundry v13+ migrated TableResult#text -> #description. Read #description (and the
+    // legacy _source.text raw value) to avoid the deprecated #text getter.
+    const text = doc.description ?? doc._source?.text ?? doc.name ?? '';
     const img = doc.img ?? doc.icon ?? 'icons/svg/dice-target.svg';
     const flags = doc.flags ?? {};
     const range = (doc.range ?? [0, 0]) as [number, number];

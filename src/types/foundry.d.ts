@@ -209,6 +209,8 @@ declare global {
     description: string;
     img?: string;
     flags?: Record<string, any>;
+    /** Raw source data; read _source.text to get the legacy value without the deprecated getter */
+    _source?: { text?: string; description?: string; name?: string };
   }
 
   interface Scene {
