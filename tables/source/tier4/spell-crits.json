@@ -150,7 +150,7 @@
     },
     {
       "type": "text",
-      "text": "Arcane Annihilation - Magical fire engulfs the target. They take 3d8 fire damage at the start of each turn until Dispel Magic (DC 17) or similar.",
+      "text": "Arcane Annihilation - Magical fire engulfs the target. They take extra fire damage equal to three of the spell's damage dice at the start of each turn until Dispel Magic (DC 17) or similar.",
       "weight": 5,
       "range": [
         55,
@@ -167,7 +167,7 @@
     },
     {
       "type": "text",
-      "text": "Elemental Apocalypse - Your spell's element utterly overwhelms the target. Add 4d6 damage of the spell's type.",
+      "text": "Elemental Apocalypse - Your spell's element utterly overwhelms the target. Add extra damage equal to three of the spell's damage dice, of the spell's type.",
       "weight": 5,
       "range": [
         60,
@@ -184,7 +184,7 @@
     },
     {
       "type": "text",
-      "text": "Apocalyptic Blast - The force sends the target flying 60 feet, prone, stunned for 1 round, and takes 3d6 force damage.",
+      "text": "Apocalyptic Blast - The force sends the target flying 60 feet, prone, stunned for 1 round, and takes extra force damage equal to three of the spell's damage dice.",
       "weight": 5,
       "range": [
         65,
@@ -237,7 +237,7 @@
     },
     {
       "type": "text",
-      "text": "Overwhelming Arcane Power - Your devastating spell deals an additional 5d6 force damage.",
+      "text": "Overwhelming Arcane Power - Your devastating spell deals additional force damage equal to four of the spell's damage dice.",
       "weight": 4,
       "range": [
         80,
