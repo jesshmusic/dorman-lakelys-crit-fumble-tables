@@ -45,6 +45,8 @@ export function createMockGame(overrides?: Partial<typeof game>): typeof game {
       updateTokenTargets: jest.fn()
     },
     tables: createMockTables(),
+    // Only `size` is used, to detect whether a card reached chat.
+    messages: { size: 0 },
     folders: createMockFolders(),
     i18n: {
       localize: jest.fn((key: string) => key),
@@ -208,9 +210,14 @@ export function createMockFoundry(): typeof foundry {
 /**
  * Mock MidiQOL global object
  */
+export const midiExecuteAsGM = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
+
 export function createMockMidiQOL(): typeof MidiQOL {
   return {
-    applyTokenDamage: jest.fn<() => Promise<any>>().mockResolvedValue({})
+    applyTokenDamage: jest.fn<() => Promise<any>>().mockResolvedValue({}),
+    // Midi's socketlib socket, reused to apply effects to actors the current
+    // user does not own.
+    socket: () => ({ executeAsGM: midiExecuteAsGM })
   } as any;
 }
 
@@ -264,6 +271,72 @@ export function createMockRoll(): typeof Roll {
 }
 
 /**
+ * Shared, assertable mock for `Activity#use`. Exported so tests can assert that
+ * bonus damage was posted through a dnd5e damage Activity (the route that makes
+ * the card applicable by PLAYERS via Midi-QOL's tray). Reset in `resetMocks`.
+ */
+export const activityUse = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
+
+/**
+ * Records the item data passed to the mock Item document class, so tests can
+ * inspect the transient damage item EffectsManager builds.
+ */
+export const itemConstructorCalls: any[] = [];
+
+/**
+ * Minimal stand-in for dnd5e's Item document class. Exposes `system.activities`
+ * as an iterable (matching the real Collection) whose entries carry `use`.
+ */
+export function createMockItemDocumentClass(): any {
+  return class MockItem5e {
+    name: string;
+    type: string;
+    img: string;
+    parent: any;
+    system: any;
+
+    constructor(data: any, options: any = {}) {
+      itemConstructorCalls.push({ data, options });
+      this.name = data.name;
+      this.type = data.type;
+      this.img = data.img;
+      this.parent = options.parent;
+      const activities = Object.values(data.system?.activities ?? {}).map((activity: any) => ({
+        ...activity,
+        use: (...args: any[]) => activityUse(...args)
+      }));
+      this.system = { activities };
+    }
+  };
+}
+
+/**
+ * Assertable mocks for the Item Piles API used by the disarm effect.
+ * Item Piles is NOT active by default — tests that want the drop path must
+ * enable it via `enableItemPiles()`.
+ */
+export const itemPilesCreatePile = jest
+  .fn<(...args: any[]) => Promise<any>>()
+  .mockResolvedValue({});
+export const itemPilesRemoveItems = jest
+  .fn<(...args: any[]) => Promise<any>>()
+  .mockResolvedValue({});
+
+/** Make `item-piles` report as an active module and expose its API. */
+export function enableItemPiles(): void {
+  const original = (game.modules as any).get;
+  (game.modules as any).get = jest.fn((id: string) =>
+    id === 'item-piles' ? { active: true, version: '3.3.2' } : original(id)
+  );
+  (game as any).itempiles = {
+    API: { createItemPile: itemPilesCreatePile, removeItems: itemPilesRemoveItems }
+  };
+}
+
+/** Assertable mock for wall collision testing during a disarm throw. */
+export const testCollision = jest.fn<(...args: any[]) => any>().mockReturnValue(null);
+
+/**
  * Mock CONST object
  */
 export function createMockCONST(): typeof CONST {
@@ -301,6 +374,9 @@ export function createMockActor(overrides?: Partial<Actor>): Actor {
     id: 'test-actor-id',
     name: 'Test Actor',
     uuid: 'Actor.test-actor-id',
+    // Owned by default: the common case is a player acting on their own actor.
+    // Tests that need the GM-routing path set this to false.
+    isOwner: true,
     system: {
       details: {
         level: 5
@@ -508,9 +584,25 @@ export function setupMocks(): void {
   (global as any).$ = createMockJQuery();
   (global as any).AudioHelper = createMockAudioHelper();
   (global as any).HTMLElement = class MockHTMLElement {};
+  // `Dice` is intentionally empty so `CONFIG.Dice.DamageRoll` falls back to Roll.
+  (global as any).CONFIG = {
+    Item: { documentClass: createMockItemDocumentClass() },
+    Dice: {},
+    Canvas: { polygonBackends: { move: { testCollision } } }
+  };
   (global as any).canvas = {
     scene: { id: 'test-scene', name: 'Test Scene' },
-    tokens: { placeables: [] }
+    tokens: { placeables: [] },
+    grid: {
+      size: 100,
+      distance: 5,
+      // Mirrors Foundry: the top-left corner of the square containing a point.
+      getTopLeftPoint: (p: { x: number; y: number }) => ({
+        x: Math.floor(p.x / 100) * 100,
+        y: Math.floor(p.y / 100) * 100
+      })
+    },
+    dimensions: { sceneRect: { x: 0, y: 0, width: 4000, height: 4000 } }
   };
 
   // Mock global fetch for loading JSON files
@@ -552,5 +644,16 @@ export function resetMocks(): void {
   // Re-arm the shared Roll#toMessage mock after clearAllMocks wiped its calls.
   rollToMessage.mockReset();
   rollToMessage.mockResolvedValue({});
+  activityUse.mockReset();
+  activityUse.mockResolvedValue({});
+  itemConstructorCalls.length = 0;
+  itemPilesCreatePile.mockReset();
+  itemPilesCreatePile.mockResolvedValue({});
+  itemPilesRemoveItems.mockReset();
+  itemPilesRemoveItems.mockResolvedValue({});
+  testCollision.mockReset();
+  testCollision.mockReturnValue(null);
+  midiExecuteAsGM.mockReset();
+  midiExecuteAsGM.mockResolvedValue({});
   setupMocks();
 }

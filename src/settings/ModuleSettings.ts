@@ -2,7 +2,16 @@
  * Module Settings Registration
  */
 
-import { MODULE_ID, LOG_PREFIX, SETTINGS, DEFAULT_SOUNDS, URLS } from '../constants';
+import {
+  MODULE_ID,
+  LOG_PREFIX,
+  SETTINGS,
+  DEFAULT_SOUNDS,
+  URLS,
+  DAMAGE_CARD_MODES,
+  DamageCardMode,
+  DEFAULT_WILD_MAGIC_TABLE
+} from '../constants';
 import { TableImporter } from '../services/TableImporter';
 
 /**
@@ -16,6 +25,8 @@ const SETTING_DEFAULTS: Record<string, boolean | string> = {
   [SETTINGS.USE_ACTOR_LEVEL]: true,
   [SETTINGS.FIXED_TIER]: '1',
   [SETTINGS.SHOW_CHAT_MESSAGES]: true,
+  [SETTINGS.DAMAGE_CARD_MODE]: DAMAGE_CARD_MODES.AUTO,
+  [SETTINGS.WILD_MAGIC_TABLE]: DEFAULT_WILD_MAGIC_TABLE,
   [SETTINGS.CRIT_SOUND]: DEFAULT_SOUNDS.CRIT,
   [SETTINGS.FUMBLE_SOUND]: DEFAULT_SOUNDS.FUMBLE
 };
@@ -304,6 +315,31 @@ export function registerSettings(): void {
     default: true
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.DAMAGE_CARD_MODE, {
+    name: game.i18n.localize('DLCRITFUMBLE.Settings.DamageCardMode.Name'),
+    hint: game.i18n.localize('DLCRITFUMBLE.Settings.DamageCardMode.Hint'),
+    scope: 'world',
+    config: true,
+    type: String,
+    choices: {
+      [DAMAGE_CARD_MODES.AUTO]: game.i18n.localize('DLCRITFUMBLE.Settings.DamageCardMode.Auto'),
+      [DAMAGE_CARD_MODES.ACTIVITY]: game.i18n.localize(
+        'DLCRITFUMBLE.Settings.DamageCardMode.Activity'
+      ),
+      [DAMAGE_CARD_MODES.ROLL]: game.i18n.localize('DLCRITFUMBLE.Settings.DamageCardMode.Roll')
+    },
+    default: DAMAGE_CARD_MODES.AUTO
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.WILD_MAGIC_TABLE, {
+    name: game.i18n.localize('DLCRITFUMBLE.Settings.WildMagicTable.Name'),
+    hint: game.i18n.localize('DLCRITFUMBLE.Settings.WildMagicTable.Hint'),
+    scope: 'world',
+    config: true,
+    type: String,
+    default: DEFAULT_WILD_MAGIC_TABLE
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.CRIT_SOUND, {
     name: game.i18n.localize('DLCRITFUMBLE.Settings.CritSound.Name'),
     hint: game.i18n.localize('DLCRITFUMBLE.Settings.CritSound.Hint'),
@@ -426,6 +462,23 @@ export function shouldApplyEffects(): boolean {
  */
 export function shouldShowChatMessages(): boolean {
   return getSetting<boolean>(SETTINGS.SHOW_CHAT_MESSAGES);
+}
+
+/**
+ * How bonus crit/fumble damage should be posted to chat.
+ */
+export function getDamageCardMode(): DamageCardMode {
+  const mode = getSetting<string>(SETTINGS.DAMAGE_CARD_MODE);
+  const valid = Object.values(DAMAGE_CARD_MODES) as string[];
+  return (valid.includes(mode) ? mode : DAMAGE_CARD_MODES.AUTO) as DamageCardMode;
+}
+
+/**
+ * The configured wild magic table, as a UUID or a plain table name.
+ * Blank disables wild magic surges entirely.
+ */
+export function getWildMagicTable(): string {
+  return (getSetting<string>(SETTINGS.WILD_MAGIC_TABLE) ?? '').trim();
 }
 
 /**

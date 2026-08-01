@@ -8,7 +8,14 @@ import {
   createMockToken,
   createMockItem,
   createMockActor,
-  rollToMessage
+  rollToMessage,
+  activityUse,
+  itemConstructorCalls,
+  enableItemPiles,
+  itemPilesCreatePile,
+  itemPilesRemoveItems,
+  testCollision,
+  midiExecuteAsGM
 } from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
@@ -52,6 +59,16 @@ describe('EffectsManager', () => {
     attackType: 'melee',
     tier: 1
   });
+
+  /**
+   * Read the damage part off the transient activity that applyDamage built.
+   * Bonus damage now ships as a dnd5e damage Activity, so resolved formula and
+   * damage type land here instead of in the roll card's flavor.
+   */
+  const postedDamagePart = (): any => {
+    const activity = Object.values(itemConstructorCalls[0].data.system.activities)[0] as any;
+    return activity.damage.parts[0];
+  };
 
   describe('applyResult', () => {
     it('should not apply effects when applyEffects setting is false', async () => {
@@ -115,8 +132,8 @@ describe('EffectsManager', () => {
 
       await EffectsManager.applyResult(result, token);
 
-      // Damage now posts a dnd5e DamageRoll chat card (roll.toMessage), not MidiQOL
-      expect(rollToMessage).toHaveBeenCalled();
+      // Damage now posts a dnd5e damage Activity card, not MidiQOL.applyTokenDamage
+      expect(activityUse).toHaveBeenCalled();
       expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
     });
   });
@@ -177,7 +194,20 @@ describe('EffectsManager', () => {
   });
 
   describe('applyDamage', () => {
-    it('should roll damage and post a dnd5e damage card', async () => {
+    /** Point the settings mock at a specific damage card mode. */
+    const setDamageCardMode = (mode?: string): void => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        const defaults: Record<string, any> = {
+          enabled: true,
+          applyEffects: true,
+          showChatMessages: true,
+          damageCardMode: mode
+        };
+        return defaults[key];
+      });
+    };
+
+    it('should post damage through a dnd5e damage Activity when Midi-QOL is active', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
       const token = createMockToken();
@@ -187,7 +217,94 @@ describe('EffectsManager', () => {
         damageType: 'piercing'
       });
 
-      // Damage now posts a native dnd5e damage card via roll.toMessage
+      // The Activity route is what produces a `type: "usage"` message, the only
+      // kind Midi-QOL attaches its player-usable Apply tray to.
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(rollToMessage).not.toHaveBeenCalled();
+
+      const activityData = itemConstructorCalls[0].data;
+      const activity = Object.values(activityData.system.activities)[0] as any;
+      expect(activity.type).toBe('damage');
+      expect(activity.damage.parts[0]).toEqual({
+        custom: { enabled: true, formula: '1d8' },
+        types: ['piercing']
+      });
+    });
+
+    it('should target the damaged token explicitly rather than the user selection', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+
+      await (EffectsManager as any).applyDamage(token, {
+        damageFormula: '2d6',
+        damageType: 'slashing'
+      });
+
+      // Explicit flags keep the tray pointed at the right actor without
+      // hijacking whatever the player currently has targeted.
+      const [, , message] = activityUse.mock.calls[0] as any[];
+      expect(message.data.flags.dnd5e.targets).toEqual([
+        expect.objectContaining({ uuid: token.actor.uuid, name: token.name })
+      ]);
+    });
+
+    it('should never save the transient damage item to the actor', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const item = createMockItem();
+      const token = createMockToken();
+
+      await (EffectsManager as any).applyDamage(
+        token,
+        { damageFormula: '2d6', damageType: 'slashing' },
+        item
+      );
+
+      expect(itemConstructorCalls[0].data.type).toBe('feat');
+      // Built in memory only — nothing is written to the actor's item list.
+      expect(token.actor.createEmbeddedDocuments).not.toHaveBeenCalled();
+      expect(item).toBeDefined();
+    });
+
+    it('should name the card after the result', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(
+        createMockToken(),
+        { damageFormula: '2d6', damageType: 'slashing' },
+        undefined,
+        { label: 'Deep Self-Wound' }
+      );
+
+      expect(itemConstructorCalls[0].data.name).toBe('Deep Self-Wound');
+    });
+
+    it('should mark the card when a successful save halves the damage', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(
+        createMockToken(),
+        { damageFormula: '2d6', damageType: 'slashing' },
+        undefined,
+        { half: true, label: 'Devastating Rebound' }
+      );
+
+      expect(itemConstructorCalls[0].data.name).toContain('half');
+    });
+
+    it('should use the legacy roll card when the GM forces roll mode', async () => {
+      setDamageCardMode('roll');
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+
+      await (EffectsManager as any).applyDamage(token, {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).not.toHaveBeenCalled();
       expect(rollToMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           flavor: expect.stringContaining('piercing'),
@@ -204,6 +321,80 @@ describe('EffectsManager', () => {
       expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
     });
 
+    it('should use the legacy roll card when Midi-QOL is inactive', async () => {
+      (game.modules.get as jest.Mock).mockImplementation((id: string) =>
+        id === 'midi-qol' ? { active: false } : undefined
+      );
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).not.toHaveBeenCalled();
+      expect(rollToMessage).toHaveBeenCalled();
+    });
+
+    it('should still use the Activity when forced, even without Midi-QOL', async () => {
+      setDamageCardMode('activity');
+      (game.modules.get as jest.Mock).mockImplementation((id: string) =>
+        id === 'midi-qol' ? { active: false } : undefined
+      );
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(rollToMessage).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to the roll card rather than drop damage when no Item class exists', async () => {
+      (globalThis as any).CONFIG.Item.documentClass = undefined;
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).not.toHaveBeenCalled();
+      expect(rollToMessage).toHaveBeenCalled();
+    });
+
+    it('should fall back to the roll card when the damage activity throws', async () => {
+      // Midi wraps `use` with flanking/Convenient-Effects work that can throw
+      // for unrelated reasons (e.g. no GM connected). Damage must still land.
+      activityUse.mockRejectedValueOnce(new Error('no GM connected'));
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(rollToMessage).toHaveBeenCalled();
+    });
+
+    it('should not post a duplicate card when the activity throws after posting', async () => {
+      activityUse.mockImplementationOnce(async () => {
+        (game as any).messages.size += 1;
+        throw new Error('failed after the card was created');
+      });
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(rollToMessage).not.toHaveBeenCalled();
+    });
+
     it('should handle missing damage formula gracefully', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
@@ -213,6 +404,7 @@ describe('EffectsManager', () => {
       await (EffectsManager as any).applyDamage(token, {});
 
       expect(rollToMessage).not.toHaveBeenCalled();
+      expect(activityUse).not.toHaveBeenCalled();
     });
   });
 
@@ -831,10 +1023,11 @@ describe('EffectsManager', () => {
           item
         );
 
-        // Damage card posted with the resolved (slashing) type in the flavor
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('slashing') })
-        );
+        // "2W" against a longsword (d8) resolves to 2d8 slashing
+        expect(postedDamagePart()).toEqual({
+          custom: { enabled: true, formula: '2d8' },
+          types: ['slashing']
+        });
       });
 
       it('should use weapon damage type when damageType is weapon', async () => {
@@ -852,9 +1045,7 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('fire') })
-        );
+        expect(postedDamagePart().types).toEqual(['fire']);
       });
 
       it('should use explicit damage type when provided', async () => {
@@ -872,9 +1063,7 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('bludgeoning') })
-        );
+        expect(postedDamagePart().types).toEqual(['bludgeoning']);
       });
     });
 
@@ -961,9 +1150,10 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('fire') })
-        );
+        expect(postedDamagePart()).toEqual({
+          custom: { enabled: true, formula: '2d10' },
+          types: ['fire']
+        });
       });
 
       it('should use force as default when damageType is spell and no item', async () => {
@@ -977,9 +1167,7 @@ describe('EffectsManager', () => {
           undefined
         );
 
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('force') })
-        );
+        expect(postedDamagePart().types).toEqual(['force']);
       });
     });
   });
@@ -1125,10 +1313,9 @@ describe('EffectsManager', () => {
         damageType: 'fire'
       });
 
-      // Full damage card posted, flavor does NOT mention HALF
-      expect(rollToMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ flavor: expect.not.stringContaining('HALF') })
-      );
+      // Full damage card posted, and it is NOT marked as halved
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(itemConstructorCalls[0].data.name).not.toContain('half');
     });
 
     it('should NOT apply the condition on a SUCCESSFUL save', async () => {
@@ -1167,10 +1354,9 @@ describe('EffectsManager', () => {
         damageType: 'fire'
       });
 
-      // Damage is still posted, flagged HALF so the GM clicks the ½ button
-      expect(rollToMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ flavor: expect.stringContaining('HALF') })
-      );
+      // Damage is still posted, but the card is marked as halved
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(itemConstructorCalls[0].data.name).toContain('half');
     });
 
     it('should not apply when missing required config', async () => {
@@ -1210,6 +1396,216 @@ describe('EffectsManager', () => {
       // actor is null, so no status effect should have been applied
       // (the function should bail out early without throwing)
       expect(token.actor).toBeNull();
+    });
+  });
+
+  describe('applying effects to actors the user does not own', () => {
+    /** A token whose actor the current user does NOT own — e.g. an NPC a player crit. */
+    const unownedToken = (): any => {
+      const token = createMockToken();
+      (token.actor as any).isOwner = false;
+      return token;
+    };
+
+    it('should route custom conditions through the GM when the actor is not owned', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyCondition(token, {
+        effectType: 'condition',
+        effectCondition: 'spell_locked',
+        duration: 1
+      });
+
+      // Foundry rejects a direct write, so it must go through Midi's GM socket.
+      expect(token.actor.createEmbeddedDocuments).not.toHaveBeenCalled();
+      expect(midiExecuteAsGM).toHaveBeenCalledWith(
+        'createEffects',
+        expect.objectContaining({
+          actorUuid: token.actor.uuid,
+          effects: expect.arrayContaining([expect.objectContaining({ name: 'Spell_locked' })])
+        })
+      );
+    });
+
+    it('should route standard conditions through the GM when the actor is not owned', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyCondition(token, {
+        effectType: 'condition',
+        effectCondition: 'prone',
+        duration: 0
+      });
+
+      expect(token.actor.toggleStatusEffect).not.toHaveBeenCalled();
+      expect(midiExecuteAsGM).toHaveBeenCalledWith(
+        'toggleStatusEffect',
+        expect.objectContaining({ actorUuid: token.actor.uuid, statusId: 'prone' })
+      );
+    });
+
+    it('should route penalties through the GM when the actor is not owned', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyPenalty(token, {
+        effectType: 'penalty',
+        penaltyType: 'ac',
+        penaltyValue: -2,
+        duration: -1
+      });
+
+      expect(midiExecuteAsGM).toHaveBeenCalledWith('createEffects', expect.anything());
+    });
+
+    it('should route advantage/disadvantage through the GM when the actor is not owned', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyAdvantageDisadvantage(
+        token,
+        { effectType: 'disadvantage', advantageScope: 'attack.all', duration: 1 },
+        'disadvantage'
+      );
+
+      expect(midiExecuteAsGM).toHaveBeenCalledWith('createEffects', expect.anything());
+    });
+
+    it('should write directly when the user DOES own the actor', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = createMockToken();
+
+      await EffectsManager.applyCondition(token, {
+        effectType: 'condition',
+        effectCondition: 'spell_locked',
+        duration: 1
+      });
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+      expect(midiExecuteAsGM).not.toHaveBeenCalled();
+    });
+
+    it('should warn rather than throw when unowned and no GM socket exists', async () => {
+      (globalThis as any).MidiQOL = { applyTokenDamage: jest.fn() };
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyCondition(token, {
+        effectType: 'condition',
+        effectCondition: 'spell_locked',
+        duration: 1
+      });
+
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no GM socket'));
+      warn.mockRestore();
+    });
+  });
+
+  describe('wild magic surge on the fumble card', () => {
+    const surgeResult = (): any => ({
+      table: {
+        name: 'tier1-spell-fumbles',
+        tier: 1,
+        attackType: 'spell',
+        resultType: 'fumble',
+        results: []
+      },
+      result: {
+        name: 'Wild Magic Surge',
+        description: 'Your miscast tears a hole in the weave.',
+        img: 'icons/test.svg',
+        range: [99, 100],
+        flags: {
+          'dorman-lakelys-crit-fumble-tables': {
+            // The surge table decides the outcome, so the result itself carries
+            // no baked-in effect.
+            effectType: 'none',
+            wildMagic: true
+          }
+        }
+      },
+      type: 'fumble',
+      attackType: 'spell',
+      tier: 1,
+      roll: 99
+    });
+
+    it('should roll the surge and embed it in the fumble card', async () => {
+      const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+      jest.spyOn(WildMagicRoller, 'roll').mockResolvedValue({
+        text: 'You turn into a potted plant.',
+        tableName: 'Wild Magic Surge',
+        roll: 66
+      });
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+
+      const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
+      // Surge text is part of the fumble card itself, not a second message.
+      expect(ChatMessage.create).toHaveBeenCalledTimes(1);
+      expect(call.content).toContain('You turn into a potted plant.');
+      expect(call.content).toContain('wild-magic-surge');
+      expect(call.content).toContain('Wild Magic Surge');
+      expect(call.flags['dorman-lakelys-crit-fumble-tables'].wildMagic).toEqual({
+        table: 'Wild Magic Surge',
+        roll: 66
+      });
+    });
+
+    it('should still show the card when no surge could be rolled', async () => {
+      const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+      jest.spyOn(WildMagicRoller, 'roll').mockResolvedValue(null);
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+
+      const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
+      expect(call.content).toContain('Your miscast tears a hole in the weave.');
+      expect(call.content).not.toContain('wild-magic-surge');
+      expect(call.flags['dorman-lakelys-crit-fumble-tables'].wildMagic).toBeUndefined();
+    });
+
+    it('should not roll a surge for results that are not flagged', async () => {
+      const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+      const spy = jest.spyOn(WildMagicRoller, 'roll');
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const plain = surgeResult();
+      delete plain.result.flags['dorman-lakelys-crit-fumble-tables'].wildMagic;
+
+      await EffectsManager.displayResult(plain, 'Caster', 'Caster');
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('should not post any damage of its own — the surge table decides', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.applyResult(surgeResult(), createMockToken());
+
+      // No second card: whether the surge deals damage is up to the table text.
+      expect(activityUse).not.toHaveBeenCalled();
+      expect(rollToMessage).not.toHaveBeenCalled();
+    });
+
+    it('should still surge even though the result effectType is none', async () => {
+      const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+      const spy = jest.spyOn(WildMagicRoller, 'roll').mockResolvedValue({
+        text: 'Reality hiccups.',
+        tableName: 'Wild Magic Surge',
+        roll: 12
+      });
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+
+      // wildMagic is a flag, so an effectType of "none" must not skip the draw.
+      expect(spy).toHaveBeenCalled();
+      const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
+      expect(call.content).toContain('Reality hiccups.');
     });
   });
 
@@ -1290,6 +1686,186 @@ describe('EffectsManager', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cannot disarm non-weapon'));
       consoleSpy.mockRestore();
+    });
+
+    /** A weapon on an actor, with an optional dnd5e weapon type. */
+    const disarmWeapon = (weaponType?: string) => {
+      const weapon: any = {
+        id: 'weapon-id',
+        type: 'weapon',
+        name: 'Longsword',
+        parent: null,
+        system: { quantity: 1, type: { value: weaponType ?? 'martialM' } },
+        update: jest.fn<any>().mockResolvedValue({}),
+        toObject: () => ({ name: 'Longsword', type: 'weapon', system: { quantity: 1 } })
+      };
+      const actor = createMockActor();
+      (actor.items as any) = { get: jest.fn().mockReturnValue(weapon) };
+      weapon.parent = actor;
+      return { weapon, actor };
+    };
+
+    /** A token positioned so landing maths are easy to assert. */
+    const disarmToken = (x = 1000, y = 1000): any => ({ center: { x, y }, name: 'Fumbler' });
+
+    it('should scatter the weapon by rolled direction and distance', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      // Mock Roll is deterministic: 1d8 -> 4 (southeast), 1d10 -> 5 (1 square).
+      expect(weapon.update).toHaveBeenCalledWith({ 'system.equipped': false });
+      expect(ChatMessage.create).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('southeast') })
+      );
+    });
+
+    it('should leave the weapon equipped when the disarm is declined', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      (foundry as any).applications.api.DialogV2.confirm.mockResolvedValueOnce(false);
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      expect(weapon.update).not.toHaveBeenCalled();
+      expect(itemPilesCreatePile).not.toHaveBeenCalled();
+    });
+
+    it('should treat a dismissed dialog as "keep it"', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      (foundry as any).applications.api.DialogV2.confirm.mockResolvedValueOnce(null);
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      expect(weapon.update).not.toHaveBeenCalled();
+    });
+
+    it('should default natural weapons to "keep it"', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon('natural');
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      const config = (foundry as any).applications.api.DialogV2.confirm.mock.calls[0][0];
+      expect(config.no.default).toBe(true);
+      expect(config.yes.default).toBe(false);
+      expect(config.content).toContain('natural weapon');
+    });
+
+    it('should default ordinary weapons to "drop it"', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      const config = (foundry as any).applications.api.DialogV2.confirm.mock.calls[0][0];
+      expect(config.yes.default).toBe(true);
+      expect(config.no.default).toBe(false);
+    });
+
+    it('should drop the weapon into an item pile when Item Piles is active', async () => {
+      enableItemPiles();
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken(1000, 1000));
+
+      expect(itemPilesCreatePile).toHaveBeenCalledTimes(1);
+      const call = itemPilesCreatePile.mock.calls[0][0] as any;
+      // 1d8 -> 4 = southeast (+1,+1), 1 square of 100px from (1000,1000) lands
+      // at 1100,1100; position is the token's TOP-LEFT, snapped to that square.
+      expect(call.position).toEqual({ x: 1100, y: 1100 });
+      expect(call.items).toHaveLength(1);
+      // The weapon really leaves the sheet.
+      expect(itemPilesRemoveItems).toHaveBeenCalledWith(actor, [{ _id: 'weapon-id', quantity: 1 }]);
+    });
+
+    it('should only unequip when Item Piles is not installed', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      expect(weapon.update).toHaveBeenCalledWith({ 'system.equipped': false });
+      expect(itemPilesCreatePile).not.toHaveBeenCalled();
+    });
+
+    it('should stop the weapon at a wall instead of throwing it through', async () => {
+      enableItemPiles();
+      testCollision.mockReturnValue({ x: 1050, y: 1050 });
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken(1000, 1000));
+
+      const call = itemPilesCreatePile.mock.calls[0][0] as any;
+      // Lands short of the unobstructed 1100,1100, pulled back off the wall...
+      expect(call.position.x).toBeLessThan(1100);
+      expect(call.position.y).toBeLessThan(1100);
+      // ...and still sits squarely in a grid square, not on an intersection.
+      expect(call.position.x % 100).toBe(0);
+      expect(call.position.y % 100).toBe(0);
+      expect(ChatMessage.create).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('wall') })
+      );
+    });
+
+    it('should clamp the landing spot to the scene bounds', async () => {
+      enableItemPiles();
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      // Standing at the far corner, thrown south-east — would land off-map.
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken(3980, 3980));
+
+      const call = itemPilesCreatePile.mock.calls[0][0] as any;
+      expect(call.position.x).toBeLessThanOrEqual(4000);
+      expect(call.position.y).toBeLessThanOrEqual(4000);
+      expect(call.position.x % 100).toBe(0);
+      expect(call.position.y % 100).toBe(0);
+    });
+
+    it('should still unequip when there is no token to scatter from', async () => {
+      enableItemPiles();
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, undefined);
+
+      expect(weapon.update).toHaveBeenCalledWith({ 'system.equipped': false });
+      expect(itemPilesCreatePile).not.toHaveBeenCalled();
+    });
+
+    it('should keep the weapon on the sheet if the pile is created but removal fails', async () => {
+      enableItemPiles();
+      itemPilesRemoveItems.mockRejectedValueOnce(new Error('permission denied'));
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      // Loud about the duplicate rather than silently destroying the weapon.
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('exists twice'),
+        expect.anything()
+      );
+      consoleSpy.mockRestore();
+    });
+
+    it('should announce in chat when the item is not a weapon', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const notWeapon = { id: 'item-id', type: 'equipment', name: 'Shield' };
+      const actor = createMockActor();
+      (actor.items as any) = { get: jest.fn().mockReturnValue(notWeapon) };
+
+      await EffectsManager.applyDisarm(actor, notWeapon as any);
+
+      expect(ChatMessage.create).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('not a weapon') })
+      );
     });
   });
 
@@ -1746,7 +2322,7 @@ describe('EffectsManager', () => {
         id: 'weapon-id',
         name: 'Longsword',
         type: 'weapon',
-        use: jest.fn<() => Promise<any>>().mockResolvedValue(undefined)
+        use: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue(undefined)
       };
       const actor: any = {
         name: 'Fumbler',
@@ -1755,9 +2331,26 @@ describe('EffectsManager', () => {
       return { actor, weapon, sourceItem: { id: 'weapon-id' } as any };
     };
 
-    it('should pick the nearer of two same-disposition living allies', async () => {
+    /** A weapon with explicit reach / normal range bands, in feet. */
+    const rangedActor = (reach: number, normal: number) => {
+      const weapon = {
+        id: 'weapon-id',
+        name: 'Javelin',
+        type: 'weapon',
+        system: { range: { reach, value: normal, long: normal * 4 } },
+        use: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue(undefined)
+      };
+      const actor: any = {
+        name: 'Fumbler',
+        items: { get: jest.fn().mockReturnValue(weapon), values: () => [weapon][Symbol.iterator]() }
+      };
+      return { actor, weapon, sourceItem: { id: 'weapon-id' } as any };
+    };
+
+    it('should only consider allies within reach on a melee fumble', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
+      // 100px = 1 square = 5ft. In reach; 500px = 25ft, well outside it.
       const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
       const allyNear = makeToken('ally-near', { disposition: 1, x: 100, y: 0, hp: 10 });
       const allyFar = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
@@ -1765,12 +2358,107 @@ describe('EffectsManager', () => {
 
       const { actor, weapon, sourceItem } = makeSourceActor();
 
-      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
 
       expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-near']);
-      expect(allyNear.setTarget).toHaveBeenCalled();
       expect(allyFar.setTarget).not.toHaveBeenCalled();
       expect(weapon.use).toHaveBeenCalled();
+    });
+
+    it('should reach much further on a ranged fumble than a melee one', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Reach 5ft, normal ranged band 30ft. Ally sits at 500px = 25ft:
+      // outside reach, inside the ranged band.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = rangedActor(5, 30);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'ranged');
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-far']);
+    });
+
+    it('should not reach that ally on a melee fumble with the same weapon', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, weapon, sourceItem } = rangedActor(5, 30);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      expect((game.user as any).updateTokenTargets).not.toHaveBeenCalled();
+      expect(weapon.use).not.toHaveBeenCalled();
+    });
+
+    it('should use the normal range band, not the long one', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // normal 30ft, long 120ft. Ally at 1000px = 50ft: beyond normal only.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-way-out', { disposition: 1, x: 1000, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = rangedActor(5, 30);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'ranged');
+
+      expect((game.user as any).updateTokenTargets).not.toHaveBeenCalled();
+    });
+
+    it('should count a diagonal neighbour as being within 5ft reach', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Diagonally adjacent: euclidean would be 7.07ft and wrongly excluded.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-diag', { disposition: 1, x: 100, y: 100, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-diag']);
+    });
+
+    it('should choose randomly among eligible allies, not always the nearest', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Three allies all inside a 30ft band; the mock d3 returns 2 -> index 1,
+      // which is NOT the nearest, proving selection is not distance-based.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const a1 = makeToken('ally-1', { disposition: 1, x: 100, y: 0, hp: 10 });
+      const a2 = makeToken('ally-2', { disposition: 1, x: 200, y: 0, hp: 10 });
+      const a3 = makeToken('ally-3', { disposition: 1, x: 300, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, a1, a2, a3];
+
+      const { actor, sourceItem } = rangedActor(5, 30);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'ranged');
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-2']);
+    });
+
+    it('should prefer Foundry grid measurement when it is available', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Report everything as 1ft away, so even a distant ally is in reach.
+      (canvas as any).grid.measurePath = jest.fn().mockReturnValue({ distance: 1 });
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-far', { disposition: 1, x: 5000, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      expect((canvas as any).grid.measurePath).toHaveBeenCalled();
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-far']);
     });
 
     it('should exclude tokens of a different disposition', async () => {
@@ -1778,15 +2466,69 @@ describe('EffectsManager', () => {
 
       const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
       const enemyNear = makeToken('enemy-near', { disposition: -1, x: 50, y: 0, hp: 10 });
-      const allyFar = makeToken('ally-far', { disposition: 1, x: 400, y: 0, hp: 10 });
-      (canvas as any).tokens.placeables = [fumbler, enemyNear, allyFar];
+      const allyNear = makeToken('ally-near', { disposition: 1, x: 100, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, enemyNear, allyNear];
 
       const { actor, sourceItem } = makeSourceActor();
 
-      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
 
-      // The nearer enemy is skipped; the farther same-disposition ally is chosen
+      // The nearer enemy is skipped even though it is closer.
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-near']);
+      expect(enemyNear.setTarget).not.toHaveBeenCalled();
+    });
+
+    it('should use the spell range band for a fumbled spell, not melee reach', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // A fumbled Fire Bolt should be able to catch an ally at spell range,
+      // not merely one standing within 5ft.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = rangedActor(5, 120);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'spell');
+
       expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-far']);
+    });
+
+    it('should not let a forced swing be blocked by the reaction economy', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-near', { disposition: 1, x: 100, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, weapon, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      // The module compels this attack, so it must not consume or be gated by
+      // the player's reaction.
+      expect(weapon.use).toHaveBeenCalledWith(
+        expect.objectContaining({
+          midiOptions: { workflowOptions: { notReaction: true } }
+        })
+      );
+    });
+
+    it('should not treat an item pile as an ally to attack', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Our own disarm effect drops weapons as friendly-disposition pile tokens.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const pile = makeToken('dropped-sword', { disposition: 1, x: 50, y: 0 });
+      (pile as any).document.flags = { 'item-piles': { data: { enabled: true } } };
+      const ally = makeToken('ally-real', { disposition: 1, x: 100, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, pile, ally];
+
+      const { actor, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-real']);
     });
 
     it('should exclude downed allies (hp <= 0)', async () => {
@@ -1794,12 +2536,12 @@ describe('EffectsManager', () => {
 
       const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
       const allyDowned = makeToken('ally-downed', { disposition: 1, x: 50, y: 0, hp: 0 });
-      const allyUp = makeToken('ally-up', { disposition: 1, x: 400, y: 0, hp: 10 });
+      const allyUp = makeToken('ally-up', { disposition: 1, x: 100, y: 0, hp: 10 });
       (canvas as any).tokens.placeables = [fumbler, allyDowned, allyUp];
 
       const { actor, sourceItem } = makeSourceActor();
 
-      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
 
       expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-up']);
     });

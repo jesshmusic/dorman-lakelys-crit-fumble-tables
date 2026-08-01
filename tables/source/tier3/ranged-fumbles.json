@@ -207,7 +207,7 @@
     },
     {
       "type": "text",
-      "text": "Dropped Weapon - Your ranged weapon flies from your hands, landing 25 feet away.",
+      "text": "Dropped Weapon - Your ranged weapon is torn from your hands and goes tumbling away. Roll to see where it lands.",
       "weight": 5,
       "range": [
         75,
@@ -328,7 +328,7 @@
     },
     {
       "type": "text",
-      "text": "Wild Ricochet - Your shot ricochets wildly toward the nearest ally; roll an attack against their AC.",
+      "text": "Wild Ricochet - Your shot goes wide and ricochets toward a nearby ally; roll an attack against their AC.",
       "weight": 1,
       "range": [
         100,

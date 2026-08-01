@@ -12,7 +12,9 @@ import {
   EFFECT_TYPES,
   getTableName,
   getTierFromLevel,
-  getTierFromCR
+  getTierFromCR,
+  DISARM_DIRECTIONS,
+  disarmSquaresFromRoll
 } from '../src/constants';
 
 describe('Constants', () => {
@@ -192,5 +194,50 @@ describe('getTierFromCR', () => {
 
   it('should return tier 4 for CR 30 (max CR)', () => {
     expect(getTierFromCR(30)).toBe(4);
+  });
+});
+
+describe('disarmSquaresFromRoll', () => {
+  it('should give 1 square for rolls 1-8', () => {
+    for (let roll = 1; roll <= 8; roll++) {
+      expect(disarmSquaresFromRoll(roll)).toBe(1);
+    }
+  });
+
+  it('should give 2 squares for a 9', () => {
+    expect(disarmSquaresFromRoll(9)).toBe(2);
+  });
+
+  it('should give 3 squares for a 10', () => {
+    expect(disarmSquaresFromRoll(10)).toBe(3);
+  });
+});
+
+describe('DISARM_DIRECTIONS', () => {
+  it('should cover all eight compass points', () => {
+    expect(DISARM_DIRECTIONS).toHaveLength(8);
+    expect(DISARM_DIRECTIONS.map(d => d.label)).toEqual([
+      'north',
+      'northeast',
+      'east',
+      'southeast',
+      'south',
+      'southwest',
+      'west',
+      'northwest'
+    ]);
+  });
+
+  it('should point north as negative y, since canvas y grows downward', () => {
+    expect(DISARM_DIRECTIONS[0]).toMatchObject({ label: 'north', dx: 0, dy: -1 });
+    expect(DISARM_DIRECTIONS[4]).toMatchObject({ label: 'south', dx: 0, dy: 1 });
+  });
+
+  it('should use unit steps so a diagonal is one square, not root two', () => {
+    for (const dir of DISARM_DIRECTIONS) {
+      expect(Math.abs(dir.dx)).toBeLessThanOrEqual(1);
+      expect(Math.abs(dir.dy)).toBeLessThanOrEqual(1);
+      expect(Math.abs(dir.dx) + Math.abs(dir.dy)).toBeGreaterThan(0);
+    }
   });
 });

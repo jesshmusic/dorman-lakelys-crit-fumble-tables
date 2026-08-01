@@ -124,11 +124,91 @@ export const SETTINGS = {
   USE_ACTOR_LEVEL: 'useActorLevel',
   FIXED_TIER: 'fixedTier',
   SHOW_CHAT_MESSAGES: 'showChatMessages',
+  DAMAGE_CARD_MODE: 'damageCardMode',
+  WILD_MAGIC_TABLE: 'wildMagicTable',
   CRIT_SOUND: 'critSound',
   FUMBLE_SOUND: 'fumbleSound',
   TABLES_IMPORTED: 'tablesImported',
   TABLES_VERSION: 'tablesVersion'
 } as const;
+
+/**
+ * How bonus crit/fumble damage is delivered to chat.
+ *
+ * ACTIVITY posts the damage through a transient dnd5e damage Activity, which
+ * produces a `type: "usage"` message. Midi-QOL only attaches its player-usable
+ * `<midi-damage-application>` tray to those, so PLAYERS get an Apply button.
+ *
+ * ROLL is the legacy path: a bare `Roll#toMessage` card. dnd5e attaches its own
+ * `<damage-application>` tray to that, but GM-ONLY — players see a dead card.
+ *
+ * AUTO picks ACTIVITY when Midi-QOL is active and ROLL otherwise.
+ */
+export const DAMAGE_CARD_MODES = {
+  AUTO: 'auto',
+  ACTIVITY: 'activity',
+  ROLL: 'roll'
+} as const;
+
+export type DamageCardMode = (typeof DAMAGE_CARD_MODES)[keyof typeof DAMAGE_CARD_MODES];
+
+/**
+ * Fixed id for the transient damage activity built by EffectsManager. dnd5e
+ * requires activity ids to be exactly 16 characters.
+ */
+export const BONUS_DAMAGE_ACTIVITY_ID = 'dlcfbonusdamage0';
+
+/**
+ * The eight compass directions a disarmed weapon can fly, indexed by a 1d8 roll.
+ *
+ * `dy` is negative for north because canvas y grows downward. The vectors are
+ * deliberately NOT normalised: on a square grid one diagonal step is one square,
+ * matching how 5e counts diagonal movement.
+ */
+export const DISARM_DIRECTIONS = [
+  { label: 'north', dx: 0, dy: -1 },
+  { label: 'northeast', dx: 1, dy: -1 },
+  { label: 'east', dx: 1, dy: 0 },
+  { label: 'southeast', dx: 1, dy: 1 },
+  { label: 'south', dx: 0, dy: 1 },
+  { label: 'southwest', dx: -1, dy: 1 },
+  { label: 'west', dx: -1, dy: 0 },
+  { label: 'northwest', dx: -1, dy: -1 }
+] as const;
+
+export type DisarmDirection = (typeof DISARM_DIRECTIONS)[number];
+
+/** Dice used to scatter a disarmed weapon. */
+export const DISARM_DIRECTION_DIE = '1d8';
+export const DISARM_DISTANCE_DIE = '1d10';
+
+/**
+ * Convert a {@link DISARM_DISTANCE_DIE} roll into a distance in GRID SQUARES.
+ * 1-8 -> 1 square, 9 -> 2 squares, 10 -> 3 squares.
+ */
+export function disarmSquaresFromRoll(roll: number): number {
+  if (roll >= 10) return 3;
+  if (roll === 9) return 2;
+  return 1;
+}
+
+/**
+ * Default wild magic table: the PHB 2024 "Wild Magic Surge" table.
+ *
+ * Stored as a UUID, but the setting also accepts a plain table NAME so GMs
+ * without the premium PHB module can point at Tasha's, the SRD, or a homebrew
+ * world table. Resolution falls back to a name search, and a missing table
+ * simply means no surge is rolled.
+ */
+export const DEFAULT_WILD_MAGIC_TABLE =
+  'Compendium.dnd-players-handbook.tables.RollTable.phbWildMagicSurg';
+
+/**
+ * Fallback reach/range in feet when a weapon declares none, used to pick which
+ * allies a fumbled attack could hit.
+ */
+export const DEFAULT_MELEE_REACH_FEET = 5;
+export const DEFAULT_RANGED_RANGE_FEET = 30;
 
 /**
  * Default sound paths

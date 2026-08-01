@@ -7,10 +7,10 @@
     {
       "type": "text",
       "text": "Nothing Special - Your spell fizzles harmlessly with no additional penalty.",
-      "weight": 25,
+      "weight": 23,
       "range": [
         1,
-        25
+        23
       ],
       "img": "icons/svg/d20-grey.svg",
       "flags": {
@@ -24,8 +24,8 @@
       "text": "Grounded Magic - Your spell earths itself through your body. You have disadvantage on attack rolls until the end of your next turn.",
       "weight": 8,
       "range": [
-        26,
-        33
+        24,
+        31
       ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
@@ -43,8 +43,8 @@
       "text": "Magical Feedback - The spell's energy rebounds slightly. Take 1d4 force damage.",
       "weight": 7,
       "range": [
-        34,
-        40
+        32,
+        38
       ],
       "img": "icons/svg/lightning.svg",
       "flags": {
@@ -60,8 +60,8 @@
       "text": "Spell Recoil - The spell lashes back as it leaves you. You have disadvantage on your next ranged spell attack.",
       "weight": 7,
       "range": [
-        41,
-        47
+        39,
+        45
       ],
       "img": "icons/svg/lightning.svg",
       "flags": {
@@ -79,8 +79,8 @@
       "text": "Arcane Hiccup - Your magic stutters and misfires. You have disadvantage on spell attacks until the end of your next turn.",
       "weight": 6,
       "range": [
-        48,
-        53
+        46,
+        51
       ],
       "img": "icons/svg/hazard.svg",
       "flags": {
@@ -101,8 +101,8 @@
       "text": "Somatic Cramp - Your casting hand cramps violently. You have disadvantage on concentration checks until the end of your next turn.",
       "weight": 6,
       "range": [
-        54,
-        59
+        52,
+        57
       ],
       "img": "icons/svg/daze.svg",
       "flags": {
@@ -120,8 +120,8 @@
       "text": "Arcane Backlash - Raw magic rebounds into you. Take force damage equal to one of the spell's damage dice.",
       "weight": 5,
       "range": [
-        60,
-        64
+        58,
+        62
       ],
       "img": "icons/svg/explosion.svg",
       "flags": {
@@ -137,8 +137,8 @@
       "text": "Component Combustion - Your material components ignite in your grip. Take 1d6 fire damage.",
       "weight": 5,
       "range": [
-        65,
-        69
+        63,
+        67
       ],
       "img": "icons/svg/fire.svg",
       "flags": {
@@ -154,8 +154,8 @@
       "text": "Arcane Spark - Loose magic crackles across your skin. Take 1d6 force damage.",
       "weight": 5,
       "range": [
-        70,
-        74
+        68,
+        72
       ],
       "img": "icons/svg/explosion.svg",
       "flags": {
@@ -171,8 +171,8 @@
       "text": "Telegraphed Magic - Your fumbled casting tips your hand. Enemies have advantage on their next saving throw against your spells.",
       "weight": 4,
       "range": [
-        75,
-        78
+        73,
+        76
       ],
       "img": "icons/svg/daze.svg",
       "flags": {
@@ -190,8 +190,8 @@
       "text": "Exposed Weave - Your botched weave leaves you unguarded. Attacks against you have advantage until the end of your next turn.",
       "weight": 4,
       "range": [
-        79,
-        82
+        77,
+        80
       ],
       "img": "icons/svg/hazard.svg",
       "flags": {
@@ -209,8 +209,8 @@
       "text": "Warped Focus - The recoil throws off your aim. You take a -2 penalty to attack rolls until the end of your next turn.",
       "weight": 4,
       "range": [
-        83,
-        86
+        81,
+        84
       ],
       "img": "icons/svg/downgrade.svg",
       "flags": {
@@ -227,8 +227,8 @@
       "text": "Shattered Wards - The backlash shreds your protective wards. You take a -2 penalty to AC until the end of your next turn.",
       "weight": 4,
       "range": [
-        87,
-        90
+        85,
+        88
       ],
       "img": "icons/svg/hazard.svg",
       "flags": {
@@ -245,8 +245,8 @@
       "text": "Backlash Sprawl - The detonation throws you off your feet. You are knocked prone.",
       "weight": 3,
       "range": [
-        91,
-        93
+        89,
+        91
       ],
       "img": "icons/svg/combat.svg",
       "flags": {
@@ -262,8 +262,8 @@
       "text": "Deafening Boom - The spell erupts with a deafening crack. You are deafened.",
       "weight": 3,
       "range": [
-        94,
-        96
+        92,
+        94
       ],
       "img": "icons/svg/explosion.svg",
       "flags": {
@@ -279,8 +279,8 @@
       "text": "Blinding Feedback - A blinding flash of misfired magic sears your eyes. You are blinded until the end of your next turn.",
       "weight": 2,
       "range": [
-        97,
-        98
+        95,
+        96
       ],
       "img": "icons/svg/blind.svg",
       "flags": {
@@ -296,8 +296,8 @@
       "text": "Catastrophic Rebound - Your spell collapses inward. Make a DC 11 Constitution saving throw or take 2d6 force damage and be knocked prone.",
       "weight": 2,
       "range": [
-        99,
-        100
+        97,
+        98
       ],
       "img": "icons/svg/terror.svg",
       "flags": {
@@ -309,6 +309,22 @@
           "damageType": "force",
           "effectCondition": "prone",
           "failEffect": "Take force damage and be knocked prone"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "Wild Magic Surge - Your miscast tears a hole in the weave and raw chaos pours through. Resolve the wild magic surge below.",
+      "weight": 2,
+      "range": [
+        99,
+        100
+      ],
+      "img": "icons/magic/lightning/orb-ball-purple.webp",
+      "flags": {
+        "dorman-lakelys-crit-fumble-tables": {
+          "effectType": "none",
+          "wildMagic": true
         }
       }
     }

@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-08-01
+
+### Fixed
+
+- **Players can now apply crit/fumble bonus damage.** The bonus damage card was posted as a bare `Roll#toMessage`, which produces a `type: "base"` chat message. dnd5e attaches its `<damage-application>` tray to those for GMs only, so players saw a damage card with no buttons at all — the reported "the damage cards pop up but we can't click them". Bonus damage now posts through a transient dnd5e damage Activity, producing the `type: "usage"` message that Midi-QOL attaches its own `<midi-damage-application>` tray to. That tray has no GM check (it only tests `isOwner`), so the owning player gets a working **Apply / ½ / 2×** tray. Verified on a live player client: the tray renders with the correct target and damage total.
+- Bonus damage is no longer silently dropped when Midi-QOL's workflow throws (for example `SocketlibNoGMConnectedError` when no GM is connected). The damage now falls back to the legacy roll card — and deliberately does not, if a card already reached chat, so a failure can never produce two damage cards.
+
+### Changed
+
+- **Disarm results now scatter the weapon instead of just unequipping it.** A disarm rolls 1d8 for a compass direction and 1d10 for distance (1-8 = 1 square, 9 = 2 squares, 10 = 3 squares), and the weapon lands squarely in that grid square. The throw stops at the first wall it would cross and is clamped to the scene, so weapons never end up inside stone or off the map. With **Item Piles** installed the weapon genuinely leaves the character sheet and lands as a pile that must be picked up (a single copy, so stacks like javelins keep the remainder); without it the weapon is only unequipped, as before.
+- A confirmation dialog now runs before a disarm, so the GM can veto it for claws, bites and other weapons that cannot be dropped. It pre-selects "keep it" for natural weapons (`system.type.value === "natural"`) and "drop it" for everything else, so the common cases are one click.
+- All eight disarm table results were reworded; they no longer promise fixed distances ("20 feet away", "landing well out of reach") that the roll would contradict. **Existing worlds will be prompted to re-import their tables.**
+- **Fumbles that catch an ally now pick a RANDOM ally in range, not the nearest one**, so the same fumble no longer always hits the same unlucky friend. Which allies are eligible is now limited by how far the fumbled attack could actually reach: a melee fumble only catches allies within the weapon's reach, while ranged and spell fumbles use the item's normal range band (not its long band, which on most weapons would cover the whole map). Whether to use reach or range is taken from the table the result was rolled on rather than the weapon, because dnd5e classifies a thrown weapon such as a javelin as `melee` even when hurled.
+- All nine "catch an ally" results (Wild Swing / Wild Ricochet / Misfired Blast, tiers 2-4) were reworded: they no longer say "your nearest ally", and now read as the accident they are rather than an intentional attack on a friend.
+
+### Fixed
+
+- Disarms that cannot happen now say so in chat instead of only the console. A natural 1 on an unarmed or improvised attack previously announced a disarm that silently never occurred.
+- **Fumbled spell attacks that catch an ally now use the spell's range**, instead of only being able to catch someone within 5 feet.
+- A forced swing at an ally is no longer blocked by, and no longer consumes, the fumbler's reaction. The module compels that attack, so Midi-QOL's reaction economy should not gate it — previously a fumble on someone else's turn (an opportunity attack, say) prompted "You have used your reaction this round".
+- Item Piles on the canvas — including weapons dropped by this module's own disarm effect — are no longer treated as allies that a fumble could swing at.
+- **Crit effects rolled by a player now actually apply to the target.** The module runs on whichever client rolled, so when a PLAYER crit an NPC every effect was rejected by Foundry ("User X lacks permission to create ActiveEffect in parent ActorDelta") — conditions, penalties, advantage and disadvantage all silently failed while the chat card still announced them. Effects are now applied through a connected GM's client using the socket Midi-QOL already provides, so no player needs elevated permissions. The same fix covers the two "grants" fumble results, which target enemies. Effects on actors the user already owns are still written directly.
+
+### Added
+
+- **Wild magic surges on spell fumbles.** The "Wild Surge Jolt" result in tiers 2-4 became **Wild Magic Surge**, and tier 1 gained one at 99-100 — a 2% chance on any spell fumble at every tier. When it comes up the module rolls on a wild magic table **behind the scenes** — the player is never asked to roll and the table posts no card of its own — and the surge is shown inside the fumble card itself. The result deliberately carries no damage or effect of its own: whatever the surge does is entirely up to the table result, including whether there is any damage at all.
+- **Wild Magic Table** setting (`wildMagicTable`), defaulting to the PHB 2024 "Wild Magic Surge" table. Accepts a table UUID **or** a plain table name, resolving world tables before compendiums, so GMs without the premium PHB can point it at Tasha's, the SRD or a homebrew table. Leave it blank to disable surges; a missing table logs one warning and simply produces no surge.
+- **Bonus Damage Card Style** setting (`damageCardMode`). `Automatic` (default) uses the damage Activity when Midi-QOL is active and the plain roll card otherwise; `Damage Activity` always uses the Activity; `Plain Roll Card` restores the previous GM-only behaviour as an escape hatch.
+- Bonus damage cards are now named after the result that caused them (e.g. "Deep Self-Wound") instead of a generic damage card.
+
 ## [1.4.0] - 2026-07-13
 
 ### Added

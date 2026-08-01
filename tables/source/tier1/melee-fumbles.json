@@ -259,7 +259,7 @@
     },
     {
       "type": "text",
-      "text": "Weapon Dropped - Your weapon flies from your grasp and lands out of reach.",
+      "text": "Weapon Flung - Your weapon is wrenched from your grasp and goes spinning away. Roll to see where it lands.",
       "weight": 3,
       "range": [
         94,
