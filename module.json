@@ -44,6 +44,11 @@
         "id": "monks-tokenbar",
         "type": "module",
         "reason": "Prompts players to roll their own saving throws for crit/fumble save effects"
+      },
+      {
+        "id": "item-piles",
+        "type": "module",
+        "reason": "Disarmed weapons are dropped on the ground as item piles that must be picked up"
       }
     ]
   },

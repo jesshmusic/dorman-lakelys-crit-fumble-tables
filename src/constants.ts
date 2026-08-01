@@ -158,6 +158,40 @@ export type DamageCardMode = (typeof DAMAGE_CARD_MODES)[keyof typeof DAMAGE_CARD
 export const BONUS_DAMAGE_ACTIVITY_ID = 'dlcfbonusdamage0';
 
 /**
+ * The eight compass directions a disarmed weapon can fly, indexed by a 1d8 roll.
+ *
+ * `dy` is negative for north because canvas y grows downward. The vectors are
+ * deliberately NOT normalised: on a square grid one diagonal step is one square,
+ * matching how 5e counts diagonal movement.
+ */
+export const DISARM_DIRECTIONS = [
+  { label: 'north', dx: 0, dy: -1 },
+  { label: 'northeast', dx: 1, dy: -1 },
+  { label: 'east', dx: 1, dy: 0 },
+  { label: 'southeast', dx: 1, dy: 1 },
+  { label: 'south', dx: 0, dy: 1 },
+  { label: 'southwest', dx: -1, dy: 1 },
+  { label: 'west', dx: -1, dy: 0 },
+  { label: 'northwest', dx: -1, dy: -1 }
+] as const;
+
+export type DisarmDirection = (typeof DISARM_DIRECTIONS)[number];
+
+/** Dice used to scatter a disarmed weapon. */
+export const DISARM_DIRECTION_DIE = '1d8';
+export const DISARM_DISTANCE_DIE = '1d10';
+
+/**
+ * Convert a {@link DISARM_DISTANCE_DIE} roll into a distance in GRID SQUARES.
+ * 1-8 -> 1 square, 9 -> 2 squares, 10 -> 3 squares.
+ */
+export function disarmSquaresFromRoll(roll: number): number {
+  if (roll >= 10) return 3;
+  if (roll === 9) return 2;
+  return 1;
+}
+
+/**
  * Default sound paths
  */
 export const DEFAULT_SOUNDS = {

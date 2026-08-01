@@ -306,6 +306,32 @@ export function createMockItemDocumentClass(): any {
 }
 
 /**
+ * Assertable mocks for the Item Piles API used by the disarm effect.
+ * Item Piles is NOT active by default — tests that want the drop path must
+ * enable it via `enableItemPiles()`.
+ */
+export const itemPilesCreatePile = jest
+  .fn<(...args: any[]) => Promise<any>>()
+  .mockResolvedValue({});
+export const itemPilesRemoveItems = jest
+  .fn<(...args: any[]) => Promise<any>>()
+  .mockResolvedValue({});
+
+/** Make `item-piles` report as an active module and expose its API. */
+export function enableItemPiles(): void {
+  const original = (game.modules as any).get;
+  (game.modules as any).get = jest.fn((id: string) =>
+    id === 'item-piles' ? { active: true, version: '3.3.2' } : original(id)
+  );
+  (game as any).itempiles = {
+    API: { createItemPile: itemPilesCreatePile, removeItems: itemPilesRemoveItems }
+  };
+}
+
+/** Assertable mock for wall collision testing during a disarm throw. */
+export const testCollision = jest.fn<(...args: any[]) => any>().mockReturnValue(null);
+
+/**
  * Mock CONST object
  */
 export function createMockCONST(): typeof CONST {
@@ -553,11 +579,22 @@ export function setupMocks(): void {
   // `Dice` is intentionally empty so `CONFIG.Dice.DamageRoll` falls back to Roll.
   (global as any).CONFIG = {
     Item: { documentClass: createMockItemDocumentClass() },
-    Dice: {}
+    Dice: {},
+    Canvas: { polygonBackends: { move: { testCollision } } }
   };
   (global as any).canvas = {
     scene: { id: 'test-scene', name: 'Test Scene' },
-    tokens: { placeables: [] }
+    tokens: { placeables: [] },
+    grid: {
+      size: 100,
+      distance: 5,
+      // Mirrors Foundry: the top-left corner of the square containing a point.
+      getTopLeftPoint: (p: { x: number; y: number }) => ({
+        x: Math.floor(p.x / 100) * 100,
+        y: Math.floor(p.y / 100) * 100
+      })
+    },
+    dimensions: { sceneRect: { x: 0, y: 0, width: 4000, height: 4000 } }
   };
 
   // Mock global fetch for loading JSON files
@@ -602,5 +639,11 @@ export function resetMocks(): void {
   activityUse.mockReset();
   activityUse.mockResolvedValue({});
   itemConstructorCalls.length = 0;
+  itemPilesCreatePile.mockReset();
+  itemPilesCreatePile.mockResolvedValue({});
+  itemPilesRemoveItems.mockReset();
+  itemPilesRemoveItems.mockResolvedValue({});
+  testCollision.mockReset();
+  testCollision.mockReturnValue(null);
   setupMocks();
 }

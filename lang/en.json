@@ -131,6 +131,11 @@
       "TablesImported": "Imported {count} crit/fumble tables!",
       "ReimportingTables": "Re-importing crit/fumble tables...",
       "UpdateSkipped": "Table update skipped. You can update later via Module Settings > Re-import Tables."
+    },
+    "Disarm": {
+      "ConfirmTitle": "Weapon Knocked Loose",
+      "Drop": "Drop it",
+      "Keep": "Keep it"
     }
   }
 }

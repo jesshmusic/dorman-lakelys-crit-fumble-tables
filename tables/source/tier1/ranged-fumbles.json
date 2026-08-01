@@ -207,7 +207,7 @@
     },
     {
       "type": "text",
-      "text": "Dropped Weapon - Your ranged weapon slips from your grasp and lands at your feet.",
+      "text": "Dropped Weapon - Your ranged weapon is torn from your hands and goes tumbling away. Roll to see where it lands.",
       "weight": 4,
       "range": [
         83,

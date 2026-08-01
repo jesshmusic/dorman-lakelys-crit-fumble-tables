@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Players can now apply crit/fumble bonus damage.** The bonus damage card was posted as a bare `Roll#toMessage`, which produces a `type: "base"` chat message. dnd5e attaches its `<damage-application>` tray to those for GMs only, so players saw a damage card with no buttons at all — the reported "the damage cards pop up but we can't click them". Bonus damage now posts through a transient dnd5e damage Activity, producing the `type: "usage"` message that Midi-QOL attaches its own `<midi-damage-application>` tray to. That tray has no GM check (it only tests `isOwner`), so the owning player gets a working **Apply / ½ / 2×** tray. Verified on a live player client: the tray renders with the correct target and damage total.
 - Bonus damage is no longer silently dropped when Midi-QOL's workflow throws (for example `SocketlibNoGMConnectedError` when no GM is connected). The damage now falls back to the legacy roll card — and deliberately does not, if a card already reached chat, so a failure can never produce two damage cards.
 
+### Changed
+
+- **Disarm results now scatter the weapon instead of just unequipping it.** A disarm rolls 1d8 for a compass direction and 1d10 for distance (1-8 = 1 square, 9 = 2 squares, 10 = 3 squares), and the weapon lands squarely in that grid square. The throw stops at the first wall it would cross and is clamped to the scene, so weapons never end up inside stone or off the map. With **Item Piles** installed the weapon genuinely leaves the character sheet and lands as a pile that must be picked up (a single copy, so stacks like javelins keep the remainder); without it the weapon is only unequipped, as before.
+- A confirmation dialog now runs before a disarm, so the GM can veto it for claws, bites and other weapons that cannot be dropped. It pre-selects "keep it" for natural weapons (`system.type.value === "natural"`) and "drop it" for everything else, so the common cases are one click.
+- All eight disarm table results were reworded; they no longer promise fixed distances ("20 feet away", "landing well out of reach") that the roll would contradict. **Existing worlds will be prompted to re-import their tables.**
+
+### Fixed
+
+- Disarms that cannot happen now say so in chat instead of only the console. A natural 1 on an unarmed or improvised attack previously announced a disarm that silently never occurred.
+
 ### Added
 
 - **Bonus Damage Card Style** setting (`damageCardMode`). `Automatic` (default) uses the damage Activity when Midi-QOL is active and the plain roll card otherwise; `Damage Activity` always uses the Activity; `Plain Roll Card` restores the previous GM-only behaviour as an escape hatch.

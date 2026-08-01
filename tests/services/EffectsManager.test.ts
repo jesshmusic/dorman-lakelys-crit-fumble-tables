@@ -10,7 +10,11 @@ import {
   createMockActor,
   rollToMessage,
   activityUse,
-  itemConstructorCalls
+  itemConstructorCalls,
+  enableItemPiles,
+  itemPilesCreatePile,
+  itemPilesRemoveItems,
+  testCollision
 } from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
@@ -1471,6 +1475,186 @@ describe('EffectsManager', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cannot disarm non-weapon'));
       consoleSpy.mockRestore();
+    });
+
+    /** A weapon on an actor, with an optional dnd5e weapon type. */
+    const disarmWeapon = (weaponType?: string) => {
+      const weapon: any = {
+        id: 'weapon-id',
+        type: 'weapon',
+        name: 'Longsword',
+        parent: null,
+        system: { quantity: 1, type: { value: weaponType ?? 'martialM' } },
+        update: jest.fn<any>().mockResolvedValue({}),
+        toObject: () => ({ name: 'Longsword', type: 'weapon', system: { quantity: 1 } })
+      };
+      const actor = createMockActor();
+      (actor.items as any) = { get: jest.fn().mockReturnValue(weapon) };
+      weapon.parent = actor;
+      return { weapon, actor };
+    };
+
+    /** A token positioned so landing maths are easy to assert. */
+    const disarmToken = (x = 1000, y = 1000): any => ({ center: { x, y }, name: 'Fumbler' });
+
+    it('should scatter the weapon by rolled direction and distance', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      // Mock Roll is deterministic: 1d8 -> 4 (southeast), 1d10 -> 5 (1 square).
+      expect(weapon.update).toHaveBeenCalledWith({ 'system.equipped': false });
+      expect(ChatMessage.create).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('southeast') })
+      );
+    });
+
+    it('should leave the weapon equipped when the disarm is declined', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      (foundry as any).applications.api.DialogV2.confirm.mockResolvedValueOnce(false);
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      expect(weapon.update).not.toHaveBeenCalled();
+      expect(itemPilesCreatePile).not.toHaveBeenCalled();
+    });
+
+    it('should treat a dismissed dialog as "keep it"', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      (foundry as any).applications.api.DialogV2.confirm.mockResolvedValueOnce(null);
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      expect(weapon.update).not.toHaveBeenCalled();
+    });
+
+    it('should default natural weapons to "keep it"', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon('natural');
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      const config = (foundry as any).applications.api.DialogV2.confirm.mock.calls[0][0];
+      expect(config.no.default).toBe(true);
+      expect(config.yes.default).toBe(false);
+      expect(config.content).toContain('natural weapon');
+    });
+
+    it('should default ordinary weapons to "drop it"', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      const config = (foundry as any).applications.api.DialogV2.confirm.mock.calls[0][0];
+      expect(config.yes.default).toBe(true);
+      expect(config.no.default).toBe(false);
+    });
+
+    it('should drop the weapon into an item pile when Item Piles is active', async () => {
+      enableItemPiles();
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken(1000, 1000));
+
+      expect(itemPilesCreatePile).toHaveBeenCalledTimes(1);
+      const call = itemPilesCreatePile.mock.calls[0][0] as any;
+      // 1d8 -> 4 = southeast (+1,+1), 1 square of 100px from (1000,1000) lands
+      // at 1100,1100; position is the token's TOP-LEFT, snapped to that square.
+      expect(call.position).toEqual({ x: 1100, y: 1100 });
+      expect(call.items).toHaveLength(1);
+      // The weapon really leaves the sheet.
+      expect(itemPilesRemoveItems).toHaveBeenCalledWith(actor, [{ _id: 'weapon-id', quantity: 1 }]);
+    });
+
+    it('should only unequip when Item Piles is not installed', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      expect(weapon.update).toHaveBeenCalledWith({ 'system.equipped': false });
+      expect(itemPilesCreatePile).not.toHaveBeenCalled();
+    });
+
+    it('should stop the weapon at a wall instead of throwing it through', async () => {
+      enableItemPiles();
+      testCollision.mockReturnValue({ x: 1050, y: 1050 });
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken(1000, 1000));
+
+      const call = itemPilesCreatePile.mock.calls[0][0] as any;
+      // Lands short of the unobstructed 1100,1100, pulled back off the wall...
+      expect(call.position.x).toBeLessThan(1100);
+      expect(call.position.y).toBeLessThan(1100);
+      // ...and still sits squarely in a grid square, not on an intersection.
+      expect(call.position.x % 100).toBe(0);
+      expect(call.position.y % 100).toBe(0);
+      expect(ChatMessage.create).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('wall') })
+      );
+    });
+
+    it('should clamp the landing spot to the scene bounds', async () => {
+      enableItemPiles();
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      // Standing at the far corner, thrown south-east — would land off-map.
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken(3980, 3980));
+
+      const call = itemPilesCreatePile.mock.calls[0][0] as any;
+      expect(call.position.x).toBeLessThanOrEqual(4000);
+      expect(call.position.y).toBeLessThanOrEqual(4000);
+      expect(call.position.x % 100).toBe(0);
+      expect(call.position.y % 100).toBe(0);
+    });
+
+    it('should still unequip when there is no token to scatter from', async () => {
+      enableItemPiles();
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, undefined);
+
+      expect(weapon.update).toHaveBeenCalledWith({ 'system.equipped': false });
+      expect(itemPilesCreatePile).not.toHaveBeenCalled();
+    });
+
+    it('should keep the weapon on the sheet if the pile is created but removal fails', async () => {
+      enableItemPiles();
+      itemPilesRemoveItems.mockRejectedValueOnce(new Error('permission denied'));
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const { weapon, actor } = disarmWeapon();
+
+      await EffectsManager.applyDisarm(actor, weapon, disarmToken());
+
+      // Loud about the duplicate rather than silently destroying the weapon.
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('exists twice'),
+        expect.anything()
+      );
+      consoleSpy.mockRestore();
+    });
+
+    it('should announce in chat when the item is not a weapon', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const notWeapon = { id: 'item-id', type: 'equipment', name: 'Shield' };
+      const actor = createMockActor();
+      (actor.items as any) = { get: jest.fn().mockReturnValue(notWeapon) };
+
+      await EffectsManager.applyDisarm(actor, notWeapon as any);
+
+      expect(ChatMessage.create).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('not a weapon') })
+      );
     });
   });
 

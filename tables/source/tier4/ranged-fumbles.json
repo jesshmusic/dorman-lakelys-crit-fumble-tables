@@ -207,7 +207,7 @@
     },
     {
       "type": "text",
-      "text": "Dropped Weapon - Your ranged weapon flies from your hands, landing 30 feet away.",
+      "text": "Dropped Weapon - Your ranged weapon is torn from your hands and goes tumbling away. Roll to see where it lands.",
       "weight": 5,
       "range": [
         70,

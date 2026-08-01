@@ -9,7 +9,12 @@ import {
   LOG_PREFIX,
   STANDARD_CONDITIONS,
   DAMAGE_CARD_MODES,
-  BONUS_DAMAGE_ACTIVITY_ID
+  BONUS_DAMAGE_ACTIVITY_ID,
+  DISARM_DIRECTIONS,
+  DISARM_DIRECTION_DIE,
+  DISARM_DISTANCE_DIE,
+  DisarmDirection,
+  disarmSquaresFromRoll
 } from '../constants';
 import { RolledResult, TableEffectConfig, AdvantageScope, AdvantageTarget } from '../types';
 import { shouldApplyEffects, shouldShowChatMessages, getDamageCardMode } from '../settings';
@@ -70,7 +75,8 @@ export class EffectsManager {
         break;
 
       case EFFECT_TYPES.DISARM:
-        await this.applyDisarm(sourceActor, sourceItem);
+        // For fumbles `targetToken` is the fumbler, which is who drops the weapon.
+        await this.applyDisarm(sourceActor, sourceItem, targetToken);
         break;
 
       case EFFECT_TYPES.PENALTY:
@@ -692,29 +698,314 @@ export class EffectsManager {
   }
 
   /**
-   * Apply a disarm effect - unequips the source actor's weapon
+   * Apply a disarm effect: the weapon flies off in a random direction.
+   *
+   * Direction is 1d8 (compass points) and distance is 1d10 read as grid squares
+   * (see {@link disarmSquaresFromRoll}). The flight stops at the first wall it
+   * would cross and is clamped to the scene, so weapons never end up inside
+   * stone or off the map.
+   *
+   * A confirmation dialog runs first, because there is no reliable way to tell
+   * a greatsword from a claw in every case — the GM makes the call. The dialog
+   * pre-selects "keep it" for natural weapons (`system.type.value === 'natural'`)
+   * so monster fumbles are one click.
+   *
+   * With Item Piles installed the weapon genuinely leaves the actor's inventory
+   * and lands as a pile that has to be picked up; without it the weapon is
+   * merely unequipped, as before.
    */
-  static async applyDisarm(sourceActor?: Actor, sourceItem?: Item): Promise<void> {
+  static async applyDisarm(
+    sourceActor?: Actor,
+    sourceItem?: Item,
+    fumblerToken?: Token
+  ): Promise<void> {
     if (!sourceActor || !sourceItem) {
       console.warn(`${LOG_PREFIX} Cannot apply disarm - missing actor or item`);
+      await this.postDisarmNotice('No weapon could be identified, so nothing was dropped.');
       return;
     }
 
     try {
-      const itemDoc = sourceActor.items.get(sourceItem.id);
+      const itemDoc: any = (sourceActor as any).items?.get((sourceItem as any).id);
       if (!itemDoc) {
-        console.warn(`${LOG_PREFIX} Cannot find item ${sourceItem.id} on actor`);
+        console.warn(`${LOG_PREFIX} Cannot find item ${(sourceItem as any).id} on actor`);
+        await this.postDisarmNotice('The weapon could not be found, so nothing was dropped.');
         return;
       }
 
-      if (itemDoc.type === 'weapon') {
-        await itemDoc.update({ 'system.equipped': false });
-        console.log(`${LOG_PREFIX} Disarmed ${sourceActor.name}'s ${itemDoc.name}`);
-      } else {
+      if (itemDoc.type !== 'weapon') {
         console.log(`${LOG_PREFIX} Cannot disarm non-weapon item: ${itemDoc.name}`);
+        await this.postDisarmNotice(
+          `<strong>${itemDoc.name}</strong> is not a weapon, so nothing was dropped.`
+        );
+        return;
       }
+
+      const scatter = await this.rollDisarmScatter();
+
+      const confirmed = await this.confirmDisarm(itemDoc, scatter);
+      if (!confirmed) {
+        console.log(`${LOG_PREFIX} Disarm declined for ${itemDoc.name}`);
+        await this.postDisarmNotice(
+          `<strong>${itemDoc.name}</strong> cannot be dropped — it stays with its owner.`
+        );
+        return;
+      }
+
+      await itemDoc.update({ 'system.equipped': false });
+
+      const landing = this.computeDisarmLanding(fumblerToken, scatter);
+      const dropped = landing ? await this.dropWeaponIntoPile(itemDoc, landing) : false;
+
+      console.log(
+        `${LOG_PREFIX} Disarmed ${sourceActor.name}'s ${itemDoc.name} — ` +
+          `${scatter.squares} square(s) ${scatter.direction.label}` +
+          `${scatter.blocked ? ' (blocked by a wall)' : ''}${dropped ? ', dropped as an item pile' : ''}`
+      );
+
+      await this.postDisarmResult(itemDoc, scatter, dropped);
     } catch (error) {
       console.error(`${LOG_PREFIX} Failed to apply disarm:`, error);
+    }
+  }
+
+  /**
+   * Roll where a disarmed weapon lands: 1d8 for direction, 1d10 for distance.
+   */
+  private static async rollDisarmScatter(): Promise<{
+    direction: DisarmDirection;
+    directionRoll: number;
+    distanceRoll: number;
+    squares: number;
+    feet: number;
+    blocked: boolean;
+  }> {
+    const directionRoll = await this.rollDie(DISARM_DIRECTION_DIE, DISARM_DIRECTIONS.length);
+    const distanceRoll = await this.rollDie(DISARM_DISTANCE_DIE, 10);
+    const squares = disarmSquaresFromRoll(distanceRoll);
+    const gridDistance = (canvas as any)?.grid?.distance ?? 5;
+
+    return {
+      direction: DISARM_DIRECTIONS[directionRoll - 1] ?? DISARM_DIRECTIONS[0],
+      directionRoll,
+      distanceRoll,
+      squares,
+      feet: squares * gridDistance,
+      blocked: false
+    };
+  }
+
+  /**
+   * Evaluate a die, clamped into range so a missing/odd Roll implementation can
+   * never index outside the direction table.
+   */
+  private static async rollDie(formula: string, faces: number): Promise<number> {
+    try {
+      const roll: any = new Roll(formula);
+      await roll.evaluate();
+      const total = Number(roll.total);
+      if (!Number.isFinite(total)) return 1;
+      return Math.min(Math.max(Math.round(total), 1), faces);
+    } catch (error) {
+      console.warn(`${LOG_PREFIX} Could not roll ${formula}:`, error);
+      return 1;
+    }
+  }
+
+  /**
+   * Ask whether this weapon can actually be thrown clear. Natural weapons
+   * (claws, bites) default to "no"; anything else defaults to "yes".
+   */
+  private static async confirmDisarm(itemDoc: any, scatter: { squares: number }): Promise<boolean> {
+    const DialogV2 = (foundry as any)?.applications?.api?.DialogV2;
+    if (!DialogV2?.confirm) {
+      // No dialog available (headless/test): fall back to the safe default.
+      return itemDoc.system?.type?.value !== 'natural';
+    }
+
+    const isNatural = itemDoc.system?.type?.value === 'natural';
+    const naturalWarning = isNatural
+      ? `<p><em>This looks like a natural weapon — it probably cannot be dropped.</em></p>`
+      : '';
+
+    try {
+      const result = await DialogV2.confirm({
+        window: { title: game.i18n.localize('DLCRITFUMBLE.Disarm.ConfirmTitle') },
+        content:
+          `<p><strong>${itemDoc.name}</strong> is knocked loose and would fly ` +
+          `<strong>${scatter.squares} ${scatter.squares === 1 ? 'square' : 'squares'}</strong> ` +
+          `away.</p>${naturalWarning}<p>Drop it?</p>`,
+        yes: { label: game.i18n.localize('DLCRITFUMBLE.Disarm.Drop'), default: !isNatural },
+        no: { label: game.i18n.localize('DLCRITFUMBLE.Disarm.Keep'), default: isNatural },
+        rejectClose: false
+      });
+      // Dismissing the dialog returns null — treat that as "leave it alone".
+      return result === true;
+    } catch (error) {
+      console.warn(`${LOG_PREFIX} Disarm dialog failed:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Where the weapon comes to rest, in canvas pixels. Stops at the first wall
+   * crossed and stays inside the scene rectangle. Returns null when there is no
+   * canvas position to work from (then the weapon is only unequipped).
+   */
+  private static computeDisarmLanding(
+    token: Token | undefined,
+    scatter: { direction: DisarmDirection; squares: number; blocked: boolean }
+  ): { x: number; y: number } | null {
+    const grid = (canvas as any)?.grid;
+    const origin = (token as any)?.center;
+    if (!grid?.size || !origin || !Number.isFinite(origin.x)) {
+      return null;
+    }
+
+    const reach = scatter.squares * grid.size;
+    let destination = {
+      x: origin.x + scatter.direction.dx * reach,
+      y: origin.y + scatter.direction.dy * reach
+    };
+
+    // Stop at the first wall the weapon would pass through.
+    try {
+      const backend = (globalThis as any).CONFIG?.Canvas?.polygonBackends?.move;
+      const hit = backend?.testCollision?.(origin, destination, { type: 'move', mode: 'closest' });
+      if (hit && Number.isFinite(hit.x)) {
+        // Pull back a little so the pile does not sit inside the wall itself.
+        const dx = hit.x - origin.x;
+        const dy = hit.y - origin.y;
+        const length = Math.hypot(dx, dy) || 1;
+        const pullback = Math.min(grid.size / 4, length / 2);
+        destination = {
+          x: hit.x - (dx / length) * pullback,
+          y: hit.y - (dy / length) * pullback
+        };
+        scatter.blocked = true;
+      }
+    } catch (error) {
+      console.warn(`${LOG_PREFIX} Wall check failed for disarm:`, error);
+    }
+
+    const rect = (canvas as any)?.dimensions?.sceneRect;
+    if (rect) {
+      destination.x = Math.min(Math.max(destination.x, rect.x), rect.x + rect.width);
+      destination.y = Math.min(Math.max(destination.y, rect.y), rect.y + rect.height);
+    }
+
+    return destination;
+  }
+
+  /**
+   * Convert a landing point into the TOP-LEFT corner of the grid square that
+   * contains it, which is what token placement expects.
+   *
+   * Item Piles positions a token by its top-left corner, so passing the landing
+   * point straight through would centre the pile on a grid intersection —
+   * straddling four squares. Snapping also matters after a wall stops the
+   * throw, since the pull-back point is arbitrary rather than grid-aligned.
+   * Every dropped weapon therefore sits squarely in one square.
+   */
+  private static snapToSquare(point: { x: number; y: number }): { x: number; y: number } {
+    const grid = (canvas as any)?.grid;
+
+    const snapped = grid?.getTopLeftPoint?.(point);
+    if (snapped && Number.isFinite(snapped.x)) {
+      return { x: snapped.x, y: snapped.y };
+    }
+
+    // Older/absent grid API: floor to the nearest square manually.
+    const size = grid?.size;
+    if (!size) {
+      return point;
+    }
+    return { x: Math.floor(point.x / size) * size, y: Math.floor(point.y / size) * size };
+  }
+
+  /**
+   * Move one copy of the weapon out of the actor and onto the ground as an Item
+   * Pile. No-op (returning false) when Item Piles is not installed, in which
+   * case the weapon is simply left unequipped.
+   *
+   * The pile is created BEFORE the item is removed: if the second step fails a
+   * duplicate is visible and easy to delete, whereas the reverse order could
+   * destroy the only copy of a magic weapon.
+   */
+  private static async dropWeaponIntoPile(
+    itemDoc: any,
+    position: { x: number; y: number }
+  ): Promise<boolean> {
+    const active = (game as any).modules?.get('item-piles')?.active === true;
+    const api = (game as any).itempiles?.API;
+    if (!active || typeof api?.createItemPile !== 'function') {
+      return false;
+    }
+
+    try {
+      const itemData = itemDoc.toObject();
+      // Drop a single copy; any remaining stack (e.g. javelins) stays carried.
+      if (itemData.system?.quantity !== undefined) {
+        itemData.system.quantity = 1;
+      }
+
+      await api.createItemPile({ position: this.snapToSquare(position), items: [itemData] });
+
+      try {
+        await api.removeItems(itemDoc.parent, [{ _id: itemDoc.id, quantity: 1 }]);
+      } catch (removeError) {
+        console.error(
+          `${LOG_PREFIX} Dropped ${itemDoc.name} as a pile but could not remove it from ` +
+            `${itemDoc.parent?.name} — the weapon now exists twice, delete one:`,
+          removeError
+        );
+      }
+
+      return true;
+    } catch (error) {
+      console.error(`${LOG_PREFIX} Could not drop ${itemDoc.name} into an item pile:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Announce where the weapon landed.
+   */
+  private static async postDisarmResult(
+    itemDoc: any,
+    scatter: { direction: DisarmDirection; squares: number; feet: number; blocked: boolean },
+    dropped: boolean
+  ): Promise<void> {
+    const squareLabel = scatter.squares === 1 ? 'square' : 'squares';
+    const blocked = scatter.blocked ? ' It clatters off a wall and stops short.' : '';
+    const fate = dropped
+      ? ' It lies on the ground and must be picked up.'
+      : ' It is no longer equipped.';
+
+    await this.postDisarmNotice(
+      `<strong>${itemDoc.name}</strong> spins away — ` +
+        `<strong>${scatter.squares} ${squareLabel}</strong> (${scatter.feet} ft) ` +
+        `<strong>${scatter.direction.label}</strong>.${blocked}${fate}`
+    );
+  }
+
+  /**
+   * Post a small disarm notice to chat, honouring the chat-messages setting.
+   */
+  private static async postDisarmNotice(html: string): Promise<void> {
+    if (!shouldShowChatMessages()) {
+      return;
+    }
+
+    try {
+      await ChatMessage.create({
+        content: `<div class="crit-fumble-result fumble"><div class="result-description">${html}</div></div>`,
+        speaker: ChatMessage.getSpeaker(),
+        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+        flags: { [MODULE_ID]: { disarm: true } }
+      });
+    } catch (error) {
+      console.warn(`${LOG_PREFIX} Could not post disarm notice:`, error);
     }
   }
 
