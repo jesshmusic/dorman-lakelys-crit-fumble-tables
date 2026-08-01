@@ -11,6 +11,7 @@ export {
   areFumblesEnabled,
   shouldApplyEffects,
   shouldShowChatMessages,
+  getDamageCardMode,
   getConfiguredTier,
   useActorLevel,
   getCritSound,

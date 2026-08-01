@@ -2,7 +2,6 @@
   "DLCRITFUMBLE": {
     "ModuleName": "Dorman Lakely's Critical Hit & Fumble Tables",
     "ModuleDescription": "Tier-based critical hit and fumble tables for D&D 5e",
-
     "Settings": {
       "Enabled": {
         "Name": "Enable Module",
@@ -31,6 +30,13 @@
       "ShowChatMessages": {
         "Name": "Show Chat Messages",
         "Hint": "Display crit/fumble results in chat"
+      },
+      "DamageCardMode": {
+        "Name": "Bonus Damage Card Style",
+        "Hint": "How crit/fumble bonus damage is posted. \"Automatic\" uses a damage Activity when Midi-QOL is active so PLAYERS get an Apply button, and the plain roll card otherwise. \"Damage Activity\" always uses the Activity. \"Plain Roll Card\" uses the legacy card, which only the GM can apply.",
+        "Auto": "Automatic (recommended)",
+        "Activity": "Damage Activity (players can apply)",
+        "Roll": "Plain Roll Card (GM applies)"
       },
       "CritSound": {
         "Name": "Critical Hit Sound",
@@ -75,20 +81,17 @@
         "PlayError": "Failed to play sound"
       }
     },
-
     "Tiers": {
       "Tier1": "Tier 1 (Levels 1-4) - Novice",
       "Tier2": "Tier 2 (Levels 5-8) - Competent",
       "Tier3": "Tier 3 (Levels 9-12) - Experienced",
       "Tier4": "Tier 4 (Levels 13-20) - Legendary"
     },
-
     "AttackTypes": {
       "Melee": "Melee",
       "Ranged": "Ranged",
       "Spell": "Spell"
     },
-
     "Chat": {
       "CriticalHit": "CRITICAL HIT!",
       "Fumble": "FUMBLE!",
@@ -99,7 +102,6 @@
       "NothingSpecialDesc": "Your critical strike deals damage as normal, but no additional effect occurs.",
       "NothingSpecialFumbleDesc": "You fumble, but recover quickly with no additional penalty."
     },
-
     "Effects": {
       "AppliedCondition": "Applied condition: {condition}",
       "AppliedDamage": "Applied {damage} {type} damage",
@@ -108,7 +110,6 @@
       "SaveSuccess": "Save successful - effect avoided!",
       "SaveFailure": "Save failed - effect applied!"
     },
-
     "Dialogs": {
       "UpdateTables": {
         "Title": "Update Crit/Fumble Tables",
@@ -116,7 +117,6 @@
         "Warning": "Note: Updating will replace your current tables. Any custom modifications will be lost."
       }
     },
-
     "Errors": {
       "MidiQolRequired": "Dorman Lakely's Critical Hit & Fumble Tables requires Midi-QOL to be enabled.",
       "TableNotFound": "Table '{tableName}' not found. Please import the compendium tables.",
@@ -124,7 +124,6 @@
       "NoTargetToken": "No target token found for effect application.",
       "GMRequired": "This action requires GM permissions."
     },
-
     "Notifications": {
       "ModuleReady": "Dorman Lakely's Critical Hit & Fumble Tables is ready!",
       "HooksRegistered": "Midi-QOL hooks registered successfully.",

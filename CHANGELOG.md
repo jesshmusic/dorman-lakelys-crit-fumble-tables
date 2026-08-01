@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-08-01
+
+### Fixed
+
+- **Players can now apply crit/fumble bonus damage.** The bonus damage card was posted as a bare `Roll#toMessage`, which produces a `type: "base"` chat message. dnd5e attaches its `<damage-application>` tray to those for GMs only, so players saw a damage card with no buttons at all — the reported "the damage cards pop up but we can't click them". Bonus damage now posts through a transient dnd5e damage Activity, producing the `type: "usage"` message that Midi-QOL attaches its own `<midi-damage-application>` tray to. That tray has no GM check (it only tests `isOwner`), so the owning player gets a working **Apply / ½ / 2×** tray. Verified on a live player client: the tray renders with the correct target and damage total.
+- Bonus damage is no longer silently dropped when Midi-QOL's workflow throws (for example `SocketlibNoGMConnectedError` when no GM is connected). The damage now falls back to the legacy roll card — and deliberately does not, if a card already reached chat, so a failure can never produce two damage cards.
+
+### Added
+
+- **Bonus Damage Card Style** setting (`damageCardMode`). `Automatic` (default) uses the damage Activity when Midi-QOL is active and the plain roll card otherwise; `Damage Activity` always uses the Activity; `Plain Roll Card` restores the previous GM-only behaviour as an escape hatch.
+- Bonus damage cards are now named after the result that caused them (e.g. "Deep Self-Wound") instead of a generic damage card.
+
 ## [1.4.0] - 2026-07-13
 
 ### Added

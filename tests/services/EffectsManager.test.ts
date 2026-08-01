@@ -8,7 +8,9 @@ import {
   createMockToken,
   createMockItem,
   createMockActor,
-  rollToMessage
+  rollToMessage,
+  activityUse,
+  itemConstructorCalls
 } from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
@@ -52,6 +54,16 @@ describe('EffectsManager', () => {
     attackType: 'melee',
     tier: 1
   });
+
+  /**
+   * Read the damage part off the transient activity that applyDamage built.
+   * Bonus damage now ships as a dnd5e damage Activity, so resolved formula and
+   * damage type land here instead of in the roll card's flavor.
+   */
+  const postedDamagePart = (): any => {
+    const activity = Object.values(itemConstructorCalls[0].data.system.activities)[0] as any;
+    return activity.damage.parts[0];
+  };
 
   describe('applyResult', () => {
     it('should not apply effects when applyEffects setting is false', async () => {
@@ -115,8 +127,8 @@ describe('EffectsManager', () => {
 
       await EffectsManager.applyResult(result, token);
 
-      // Damage now posts a dnd5e DamageRoll chat card (roll.toMessage), not MidiQOL
-      expect(rollToMessage).toHaveBeenCalled();
+      // Damage now posts a dnd5e damage Activity card, not MidiQOL.applyTokenDamage
+      expect(activityUse).toHaveBeenCalled();
       expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
     });
   });
@@ -177,7 +189,20 @@ describe('EffectsManager', () => {
   });
 
   describe('applyDamage', () => {
-    it('should roll damage and post a dnd5e damage card', async () => {
+    /** Point the settings mock at a specific damage card mode. */
+    const setDamageCardMode = (mode?: string): void => {
+      (game.settings.get as jest.Mock).mockImplementation((_module: string, key: string) => {
+        const defaults: Record<string, any> = {
+          enabled: true,
+          applyEffects: true,
+          showChatMessages: true,
+          damageCardMode: mode
+        };
+        return defaults[key];
+      });
+    };
+
+    it('should post damage through a dnd5e damage Activity when Midi-QOL is active', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
       const token = createMockToken();
@@ -187,7 +212,94 @@ describe('EffectsManager', () => {
         damageType: 'piercing'
       });
 
-      // Damage now posts a native dnd5e damage card via roll.toMessage
+      // The Activity route is what produces a `type: "usage"` message, the only
+      // kind Midi-QOL attaches its player-usable Apply tray to.
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(rollToMessage).not.toHaveBeenCalled();
+
+      const activityData = itemConstructorCalls[0].data;
+      const activity = Object.values(activityData.system.activities)[0] as any;
+      expect(activity.type).toBe('damage');
+      expect(activity.damage.parts[0]).toEqual({
+        custom: { enabled: true, formula: '1d8' },
+        types: ['piercing']
+      });
+    });
+
+    it('should target the damaged token explicitly rather than the user selection', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+
+      await (EffectsManager as any).applyDamage(token, {
+        damageFormula: '2d6',
+        damageType: 'slashing'
+      });
+
+      // Explicit flags keep the tray pointed at the right actor without
+      // hijacking whatever the player currently has targeted.
+      const [, , message] = activityUse.mock.calls[0] as any[];
+      expect(message.data.flags.dnd5e.targets).toEqual([
+        expect.objectContaining({ uuid: token.actor.uuid, name: token.name })
+      ]);
+    });
+
+    it('should never save the transient damage item to the actor', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const item = createMockItem();
+      const token = createMockToken();
+
+      await (EffectsManager as any).applyDamage(
+        token,
+        { damageFormula: '2d6', damageType: 'slashing' },
+        item
+      );
+
+      expect(itemConstructorCalls[0].data.type).toBe('feat');
+      // Built in memory only — nothing is written to the actor's item list.
+      expect(token.actor.createEmbeddedDocuments).not.toHaveBeenCalled();
+      expect(item).toBeDefined();
+    });
+
+    it('should name the card after the result', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(
+        createMockToken(),
+        { damageFormula: '2d6', damageType: 'slashing' },
+        undefined,
+        { label: 'Deep Self-Wound' }
+      );
+
+      expect(itemConstructorCalls[0].data.name).toBe('Deep Self-Wound');
+    });
+
+    it('should mark the card when a successful save halves the damage', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(
+        createMockToken(),
+        { damageFormula: '2d6', damageType: 'slashing' },
+        undefined,
+        { half: true, label: 'Devastating Rebound' }
+      );
+
+      expect(itemConstructorCalls[0].data.name).toContain('half');
+    });
+
+    it('should use the legacy roll card when the GM forces roll mode', async () => {
+      setDamageCardMode('roll');
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+
+      await (EffectsManager as any).applyDamage(token, {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).not.toHaveBeenCalled();
       expect(rollToMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           flavor: expect.stringContaining('piercing'),
@@ -204,6 +316,80 @@ describe('EffectsManager', () => {
       expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
     });
 
+    it('should use the legacy roll card when Midi-QOL is inactive', async () => {
+      (game.modules.get as jest.Mock).mockImplementation((id: string) =>
+        id === 'midi-qol' ? { active: false } : undefined
+      );
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).not.toHaveBeenCalled();
+      expect(rollToMessage).toHaveBeenCalled();
+    });
+
+    it('should still use the Activity when forced, even without Midi-QOL', async () => {
+      setDamageCardMode('activity');
+      (game.modules.get as jest.Mock).mockImplementation((id: string) =>
+        id === 'midi-qol' ? { active: false } : undefined
+      );
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(rollToMessage).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to the roll card rather than drop damage when no Item class exists', async () => {
+      (globalThis as any).CONFIG.Item.documentClass = undefined;
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).not.toHaveBeenCalled();
+      expect(rollToMessage).toHaveBeenCalled();
+    });
+
+    it('should fall back to the roll card when the damage activity throws', async () => {
+      // Midi wraps `use` with flanking/Convenient-Effects work that can throw
+      // for unrelated reasons (e.g. no GM connected). Damage must still land.
+      activityUse.mockRejectedValueOnce(new Error('no GM connected'));
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(rollToMessage).toHaveBeenCalled();
+    });
+
+    it('should not post a duplicate card when the activity throws after posting', async () => {
+      activityUse.mockImplementationOnce(async () => {
+        (game as any).messages.size += 1;
+        throw new Error('failed after the card was created');
+      });
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await (EffectsManager as any).applyDamage(createMockToken(), {
+        damageFormula: '1d8',
+        damageType: 'piercing'
+      });
+
+      expect(rollToMessage).not.toHaveBeenCalled();
+    });
+
     it('should handle missing damage formula gracefully', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
@@ -213,6 +399,7 @@ describe('EffectsManager', () => {
       await (EffectsManager as any).applyDamage(token, {});
 
       expect(rollToMessage).not.toHaveBeenCalled();
+      expect(activityUse).not.toHaveBeenCalled();
     });
   });
 
@@ -831,10 +1018,11 @@ describe('EffectsManager', () => {
           item
         );
 
-        // Damage card posted with the resolved (slashing) type in the flavor
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('slashing') })
-        );
+        // "2W" against a longsword (d8) resolves to 2d8 slashing
+        expect(postedDamagePart()).toEqual({
+          custom: { enabled: true, formula: '2d8' },
+          types: ['slashing']
+        });
       });
 
       it('should use weapon damage type when damageType is weapon', async () => {
@@ -852,9 +1040,7 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('fire') })
-        );
+        expect(postedDamagePart().types).toEqual(['fire']);
       });
 
       it('should use explicit damage type when provided', async () => {
@@ -872,9 +1058,7 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('bludgeoning') })
-        );
+        expect(postedDamagePart().types).toEqual(['bludgeoning']);
       });
     });
 
@@ -961,9 +1145,10 @@ describe('EffectsManager', () => {
           item
         );
 
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('fire') })
-        );
+        expect(postedDamagePart()).toEqual({
+          custom: { enabled: true, formula: '2d10' },
+          types: ['fire']
+        });
       });
 
       it('should use force as default when damageType is spell and no item', async () => {
@@ -977,9 +1162,7 @@ describe('EffectsManager', () => {
           undefined
         );
 
-        expect(rollToMessage).toHaveBeenCalledWith(
-          expect.objectContaining({ flavor: expect.stringContaining('force') })
-        );
+        expect(postedDamagePart().types).toEqual(['force']);
       });
     });
   });
@@ -1125,10 +1308,9 @@ describe('EffectsManager', () => {
         damageType: 'fire'
       });
 
-      // Full damage card posted, flavor does NOT mention HALF
-      expect(rollToMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ flavor: expect.not.stringContaining('HALF') })
-      );
+      // Full damage card posted, and it is NOT marked as halved
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(itemConstructorCalls[0].data.name).not.toContain('half');
     });
 
     it('should NOT apply the condition on a SUCCESSFUL save', async () => {
@@ -1167,10 +1349,9 @@ describe('EffectsManager', () => {
         damageType: 'fire'
       });
 
-      // Damage is still posted, flagged HALF so the GM clicks the ½ button
-      expect(rollToMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ flavor: expect.stringContaining('HALF') })
-      );
+      // Damage is still posted, but the card is marked as halved
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(itemConstructorCalls[0].data.name).toContain('half');
     });
 
     it('should not apply when missing required config', async () => {

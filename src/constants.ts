@@ -124,11 +124,38 @@ export const SETTINGS = {
   USE_ACTOR_LEVEL: 'useActorLevel',
   FIXED_TIER: 'fixedTier',
   SHOW_CHAT_MESSAGES: 'showChatMessages',
+  DAMAGE_CARD_MODE: 'damageCardMode',
   CRIT_SOUND: 'critSound',
   FUMBLE_SOUND: 'fumbleSound',
   TABLES_IMPORTED: 'tablesImported',
   TABLES_VERSION: 'tablesVersion'
 } as const;
+
+/**
+ * How bonus crit/fumble damage is delivered to chat.
+ *
+ * ACTIVITY posts the damage through a transient dnd5e damage Activity, which
+ * produces a `type: "usage"` message. Midi-QOL only attaches its player-usable
+ * `<midi-damage-application>` tray to those, so PLAYERS get an Apply button.
+ *
+ * ROLL is the legacy path: a bare `Roll#toMessage` card. dnd5e attaches its own
+ * `<damage-application>` tray to that, but GM-ONLY — players see a dead card.
+ *
+ * AUTO picks ACTIVITY when Midi-QOL is active and ROLL otherwise.
+ */
+export const DAMAGE_CARD_MODES = {
+  AUTO: 'auto',
+  ACTIVITY: 'activity',
+  ROLL: 'roll'
+} as const;
+
+export type DamageCardMode = (typeof DAMAGE_CARD_MODES)[keyof typeof DAMAGE_CARD_MODES];
+
+/**
+ * Fixed id for the transient damage activity built by EffectsManager. dnd5e
+ * requires activity ids to be exactly 16 characters.
+ */
+export const BONUS_DAMAGE_ACTIVITY_ID = 'dlcfbonusdamage0';
 
 /**
  * Default sound paths

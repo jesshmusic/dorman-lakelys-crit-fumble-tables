@@ -45,6 +45,8 @@ export function createMockGame(overrides?: Partial<typeof game>): typeof game {
       updateTokenTargets: jest.fn()
     },
     tables: createMockTables(),
+    // Only `size` is used, to detect whether a card reached chat.
+    messages: { size: 0 },
     folders: createMockFolders(),
     i18n: {
       localize: jest.fn((key: string) => key),
@@ -261,6 +263,46 @@ export function createMockRoll(): typeof Roll {
       return rollToMessage(options);
     }
   } as any;
+}
+
+/**
+ * Shared, assertable mock for `Activity#use`. Exported so tests can assert that
+ * bonus damage was posted through a dnd5e damage Activity (the route that makes
+ * the card applicable by PLAYERS via Midi-QOL's tray). Reset in `resetMocks`.
+ */
+export const activityUse = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
+
+/**
+ * Records the item data passed to the mock Item document class, so tests can
+ * inspect the transient damage item EffectsManager builds.
+ */
+export const itemConstructorCalls: any[] = [];
+
+/**
+ * Minimal stand-in for dnd5e's Item document class. Exposes `system.activities`
+ * as an iterable (matching the real Collection) whose entries carry `use`.
+ */
+export function createMockItemDocumentClass(): any {
+  return class MockItem5e {
+    name: string;
+    type: string;
+    img: string;
+    parent: any;
+    system: any;
+
+    constructor(data: any, options: any = {}) {
+      itemConstructorCalls.push({ data, options });
+      this.name = data.name;
+      this.type = data.type;
+      this.img = data.img;
+      this.parent = options.parent;
+      const activities = Object.values(data.system?.activities ?? {}).map((activity: any) => ({
+        ...activity,
+        use: (...args: any[]) => activityUse(...args)
+      }));
+      this.system = { activities };
+    }
+  };
 }
 
 /**
@@ -508,6 +550,11 @@ export function setupMocks(): void {
   (global as any).$ = createMockJQuery();
   (global as any).AudioHelper = createMockAudioHelper();
   (global as any).HTMLElement = class MockHTMLElement {};
+  // `Dice` is intentionally empty so `CONFIG.Dice.DamageRoll` falls back to Roll.
+  (global as any).CONFIG = {
+    Item: { documentClass: createMockItemDocumentClass() },
+    Dice: {}
+  };
   (global as any).canvas = {
     scene: { id: 'test-scene', name: 'Test Scene' },
     tokens: { placeables: [] }
@@ -552,5 +599,8 @@ export function resetMocks(): void {
   // Re-arm the shared Roll#toMessage mock after clearAllMocks wiped its calls.
   rollToMessage.mockReset();
   rollToMessage.mockResolvedValue({});
+  activityUse.mockReset();
+  activityUse.mockResolvedValue({});
+  itemConstructorCalls.length = 0;
   setupMocks();
 }

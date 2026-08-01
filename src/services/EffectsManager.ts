@@ -3,9 +3,16 @@
  * Responsible for applying conditions, damage, and other effects from table results
  */
 
-import { MODULE_ID, EFFECT_TYPES, LOG_PREFIX, STANDARD_CONDITIONS } from '../constants';
+import {
+  MODULE_ID,
+  EFFECT_TYPES,
+  LOG_PREFIX,
+  STANDARD_CONDITIONS,
+  DAMAGE_CARD_MODES,
+  BONUS_DAMAGE_ACTIVITY_ID
+} from '../constants';
 import { RolledResult, TableEffectConfig, AdvantageScope, AdvantageTarget } from '../types';
-import { shouldApplyEffects, shouldShowChatMessages } from '../settings';
+import { shouldApplyEffects, shouldShowChatMessages, getDamageCardMode } from '../settings';
 import { SaveManager } from './SaveManager';
 
 /**
@@ -45,11 +52,21 @@ export class EffectsManager {
         break;
 
       case EFFECT_TYPES.DAMAGE:
-        await this.applyDamage(targetToken, effectConfig, sourceItem);
+        await this.applyDamage(targetToken, effectConfig, sourceItem, {
+          label: result.result.name,
+          img: resultIcon
+        });
         break;
 
       case EFFECT_TYPES.SAVE:
-        await this.handleSaveEffect(targetToken, effectConfig, sourceActor, resultIcon, sourceItem);
+        await this.handleSaveEffect(
+          targetToken,
+          effectConfig,
+          sourceActor,
+          resultIcon,
+          sourceItem,
+          result.result.name
+        );
         break;
 
       case EFFECT_TYPES.DISARM:
@@ -251,14 +268,7 @@ export class EffectsManager {
   }
 
   /**
-   * Roll bonus crit/fumble damage and post Foundry's NATIVE dnd5e damage card
-   * so the GM clicks "Apply / ½ / 2×" (no silent auto-apply).
-   *
-   * How the card works (dnd5e 5.3): a chat message whose rolls include a
-   * `CONFIG.Dice.DamageRoll` gets the Apply-Damage tray for the GM. Setting
-   * `flags.dnd5e.targets` pre-fills the tray's "Targeted" tab with this token,
-   * and `flags.dnd5e.roll.type = "damage"` gives it the damage header. Apply
-   * runs `Actor5e.applyDamage`, which honors resistances/vulnerabilities.
+   * Post bonus crit/fumble damage to chat as a card that can be applied.
    *
    * Supports special formula syntax:
    * - "1W"/"2W"/"3W" = N dice of the weapon's damage die (e.g. "2W" + longsword = 2d8)
@@ -268,12 +278,15 @@ export class EffectsManager {
    * Damage type is resolved so it is logical for the event: an explicit type
    * (fire, force, …) is used as authored; "weapon"/"spell" resolve to the
    * source item's actual damage type.
+   *
+   * Delivery is chosen by {@link getDamageCardMode}. See
+   * {@link postDamageActivityCard} for why the Activity route exists.
    */
   static async applyDamage(
     token: Token,
     config: TableEffectConfig,
     sourceItem?: Item,
-    options: { half?: boolean } = {}
+    options: { half?: boolean; label?: string; img?: string } = {}
   ): Promise<void> {
     const actor = (token as any)?.actor;
     if (!config.damageFormula || !actor) {
@@ -285,41 +298,201 @@ export class EffectsManager {
       const resolvedFormula = this.resolveWeaponDiceFormula(config.damageFormula, sourceItem);
       const damageType = this.resolveDamageType(config.damageType, sourceItem);
 
-      // Use the dnd5e DamageRoll so the chat card exposes Apply-Damage buttons
-      const DamageRollClass = (globalThis as any).CONFIG?.Dice?.DamageRoll ?? Roll;
-      const rollData = (sourceItem as any)?.getRollData?.() ?? {};
-      const roll = new DamageRollClass(resolvedFormula, rollData, { type: damageType });
-      await roll.evaluate();
-
-      // On a successful save the target takes HALF damage. We do NOT auto-halve
-      // the roll total — the native dnd5e damage card's ½ button handles it — so
-      // we just flag the card's flavor to tell the GM to click ½.
-      const halfSuffix = options.half ? ' — save succeeded, apply HALF' : '';
-
-      await roll.toMessage({
-        speaker: ChatMessage.getSpeaker({ token: (token as any).document ?? token }),
-        flavor: `Crit/Fumble Bonus Damage (${damageType})${halfSuffix}`,
-        flags: {
-          dnd5e: {
-            roll: { type: 'damage' },
-            targets: [
-              {
-                uuid: actor.uuid,
-                name: token.name,
-                img: actor.img,
-                ac: actor.system?.attributes?.ac?.value ?? null
-              }
-            ]
-          }
+      if (this.shouldUseDamageActivity()) {
+        const posted = await this.postDamageActivityCard(
+          token,
+          resolvedFormula,
+          damageType,
+          sourceItem,
+          options
+        );
+        if (posted) {
+          return;
         }
-      });
+        // The Activity route is unavailable (older dnd5e, no document class,
+        // malformed item). Fall through so damage is never silently dropped.
+        console.warn(`${LOG_PREFIX} Damage activity unavailable — posting legacy roll card`);
+      }
 
-      console.log(
-        `${LOG_PREFIX} Posted ${roll.total} ${damageType} damage card for ${token.name} (${resolvedFormula}) — GM applies`
-      );
+      await this.postDamageRollCard(token, resolvedFormula, damageType, sourceItem, options);
     } catch (error) {
       console.error(`${LOG_PREFIX} Failed to roll bonus damage:`, error);
     }
+  }
+
+  /**
+   * Decide how the bonus damage card should be posted.
+   *
+   * The Activity route only pays off when Midi-QOL is present, because Midi is
+   * what attaches the player-usable tray. Without Midi, dnd5e's own tray is
+   * GM-only either way, so the cheaper legacy roll card is equivalent.
+   */
+  private static shouldUseDamageActivity(): boolean {
+    const mode = getDamageCardMode();
+    if (mode === DAMAGE_CARD_MODES.ROLL) {
+      return false;
+    }
+    if (mode === DAMAGE_CARD_MODES.ACTIVITY) {
+      return true;
+    }
+    return (game as any).modules?.get('midi-qol')?.active === true;
+  }
+
+  /**
+   * Post the bonus damage through a transient dnd5e damage Activity.
+   *
+   * WHY: a bare `Roll#toMessage` produces a `type: "base"` message. dnd5e
+   * attaches its `<damage-application>` tray to those for GMs ONLY, so players
+   * get a damage card with no buttons at all. Midi-QOL's own tray
+   * (`<midi-damage-application>`) has no GM check — it only checks `isOwner` —
+   * but Midi attaches it exclusively to `type: "usage"` messages carrying
+   * `flags.dnd5e.activity`. Using an Activity is what produces such a message,
+   * which is why this path exists.
+   *
+   * The item is constructed in memory and never saved to the actor.
+   *
+   * Targeting is passed EXPLICITLY via `flags.dnd5e.targets` rather than by
+   * changing the user's targets. That keeps the tray pointed at the correct
+   * token (the fumbler for fumbles, the victim for crits) without disturbing
+   * whatever the player currently has targeted mid-combat.
+   *
+   * @returns true when the card was posted, false when this route is unusable.
+   */
+  private static async postDamageActivityCard(
+    token: Token,
+    formula: string,
+    damageType: string,
+    sourceItem?: Item,
+    options: { half?: boolean; label?: string; img?: string } = {}
+  ): Promise<boolean> {
+    const ItemClass = (globalThis as any).CONFIG?.Item?.documentClass;
+    if (typeof ItemClass !== 'function') {
+      return false;
+    }
+
+    const actor = (token as any).actor;
+    // The card is spoken by whoever produced the result (attacker or fumbler),
+    // falling back to the damaged actor when there is no source item.
+    const owner = (sourceItem as any)?.parent ?? actor;
+    if (!owner) {
+      return false;
+    }
+
+    const label = options.label || 'Crit/Fumble Bonus Damage';
+    const name = options.half ? `${label} (save succeeded — half)` : label;
+
+    const itemData = {
+      name,
+      type: 'feat',
+      img: options.img || 'icons/svg/explosion.svg',
+      system: {
+        activities: {
+          [BONUS_DAMAGE_ACTIVITY_ID]: {
+            _id: BONUS_DAMAGE_ACTIVITY_ID,
+            type: 'damage',
+            name: label,
+            damage: {
+              parts: [{ custom: { enabled: true, formula }, types: [damageType] }]
+            }
+          }
+        }
+      }
+    };
+
+    let activity: any;
+    try {
+      const tempItem = new ItemClass(itemData, { parent: owner });
+      const activities = (tempItem as any).system?.activities;
+      activity = activities ? [...activities][0] : null;
+    } catch (error) {
+      console.warn(`${LOG_PREFIX} Could not build damage activity:`, error);
+      return false;
+    }
+
+    if (typeof activity?.use !== 'function') {
+      return false;
+    }
+
+    // Midi-QOL wraps `use` with its own workflow (flanking cleanup, Convenient
+    // Effects sockets, …), any part of which can throw for reasons unrelated to
+    // our damage — e.g. no GM connected. Handle that here so the caller can
+    // fall back instead of dropping the damage entirely.
+    const messagesBefore = (game as any).messages?.size ?? 0;
+    try {
+      await activity.use(
+        {},
+        { configure: false },
+        { data: { flags: { dnd5e: { targets: [this.buildTargetDescriptor(token)] } } } }
+      );
+    } catch (error) {
+      console.error(`${LOG_PREFIX} Damage activity failed:`, error);
+      // Report success anyway if a card already reached chat, so the caller's
+      // fallback cannot post a duplicate damage card.
+      return ((game as any).messages?.size ?? 0) > messagesBefore;
+    }
+
+    console.log(
+      `${LOG_PREFIX} Posted ${formula} ${damageType} damage activity for ${token.name}` +
+        `${options.half ? ' (half — save succeeded)' : ''}`
+    );
+    return true;
+  }
+
+  /**
+   * Legacy delivery: a bare dnd5e DamageRoll chat card.
+   *
+   * Used when Midi-QOL is absent or the GM has forced "roll" mode. The
+   * Apply/½/2× tray on this card is GM-only in dnd5e 5.x.
+   */
+  private static async postDamageRollCard(
+    token: Token,
+    formula: string,
+    damageType: string,
+    sourceItem?: Item,
+    options: { half?: boolean } = {}
+  ): Promise<void> {
+    const DamageRollClass = (globalThis as any).CONFIG?.Dice?.DamageRoll ?? Roll;
+    const rollData = (sourceItem as any)?.getRollData?.() ?? {};
+    const roll = new DamageRollClass(formula, rollData, { type: damageType });
+    await roll.evaluate();
+
+    // On a successful save the target takes HALF damage. We do NOT auto-halve
+    // the roll total — the native dnd5e damage card's ½ button handles it — so
+    // we just flag the card's flavor to tell the GM to click ½.
+    const halfSuffix = options.half ? ' — save succeeded, apply HALF' : '';
+
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ token: (token as any).document ?? token }),
+      flavor: `Crit/Fumble Bonus Damage (${damageType})${halfSuffix}`,
+      flags: {
+        dnd5e: {
+          roll: { type: 'damage' },
+          targets: [this.buildTargetDescriptor(token)]
+        }
+      }
+    });
+
+    console.log(
+      `${LOG_PREFIX} Posted ${roll.total} ${damageType} damage card for ${token.name} (${formula}) — GM applies`
+    );
+  }
+
+  /**
+   * Build the `flags.dnd5e.targets` entry that points a damage tray at a token.
+   */
+  private static buildTargetDescriptor(token: Token): {
+    uuid: string;
+    name: string;
+    img: string;
+    ac: number | null;
+  } {
+    const actor = (token as any).actor;
+    return {
+      uuid: actor.uuid,
+      name: token.name,
+      img: actor.img,
+      ac: actor.system?.attributes?.ac?.value ?? null
+    };
   }
 
   /**
@@ -492,7 +665,8 @@ export class EffectsManager {
     config: TableEffectConfig,
     _sourceActor?: Actor,
     resultIcon?: string,
-    sourceItem?: Item
+    sourceItem?: Item,
+    label?: string
   ): Promise<void> {
     if (!config.saveDC || !config.saveAbility || !token.actor) {
       return;
@@ -507,12 +681,12 @@ export class EffectsManager {
       if (config.damageFormula) {
         // Pass the source item so weapon/spell dice syntax and "weapon"/"spell"
         // damage types resolve against the real item (not the d6/bludgeoning fallback).
-        await this.applyDamage(token, config, sourceItem); // full
+        await this.applyDamage(token, config, sourceItem, { label, img: resultIcon }); // full
       }
     } else {
       // condition negated on success; damage halved
       if (config.damageFormula) {
-        await this.applyDamage(token, config, sourceItem, { half: true });
+        await this.applyDamage(token, config, sourceItem, { half: true, label, img: resultIcon });
       }
     }
   }
