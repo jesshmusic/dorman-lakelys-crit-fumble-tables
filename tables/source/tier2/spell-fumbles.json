@@ -314,7 +314,7 @@
     },
     {
       "type": "text",
-      "text": "Misfired Blast - Your spell veers wildly and misfires at the nearest ally. Make a spell attack against the nearest ally; on a hit, they take the spell's damage.",
+      "text": "Misfired Blast - Your spell veers off and misfires toward a nearby ally. Make a spell attack against them; on a hit, they take the spell's damage.",
       "weight": 2,
       "range": [
         99,

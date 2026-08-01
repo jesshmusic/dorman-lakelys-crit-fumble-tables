@@ -192,6 +192,13 @@ export function disarmSquaresFromRoll(roll: number): number {
 }
 
 /**
+ * Fallback reach/range in feet when a weapon declares none, used to pick which
+ * allies a fumbled attack could hit.
+ */
+export const DEFAULT_MELEE_REACH_FEET = 5;
+export const DEFAULT_RANGED_RANGE_FEET = 30;
+
+/**
  * Default sound paths
  */
 export const DEFAULT_SOUNDS = {

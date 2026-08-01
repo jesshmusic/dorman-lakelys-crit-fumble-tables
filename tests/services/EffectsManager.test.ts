@@ -2111,7 +2111,7 @@ describe('EffectsManager', () => {
         id: 'weapon-id',
         name: 'Longsword',
         type: 'weapon',
-        use: jest.fn<() => Promise<any>>().mockResolvedValue(undefined)
+        use: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue(undefined)
       };
       const actor: any = {
         name: 'Fumbler',
@@ -2120,9 +2120,26 @@ describe('EffectsManager', () => {
       return { actor, weapon, sourceItem: { id: 'weapon-id' } as any };
     };
 
-    it('should pick the nearer of two same-disposition living allies', async () => {
+    /** A weapon with explicit reach / normal range bands, in feet. */
+    const rangedActor = (reach: number, normal: number) => {
+      const weapon = {
+        id: 'weapon-id',
+        name: 'Javelin',
+        type: 'weapon',
+        system: { range: { reach, value: normal, long: normal * 4 } },
+        use: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue(undefined)
+      };
+      const actor: any = {
+        name: 'Fumbler',
+        items: { get: jest.fn().mockReturnValue(weapon), values: () => [weapon][Symbol.iterator]() }
+      };
+      return { actor, weapon, sourceItem: { id: 'weapon-id' } as any };
+    };
+
+    it('should only consider allies within reach on a melee fumble', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
+      // 100px = 1 square = 5ft. In reach; 500px = 25ft, well outside it.
       const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
       const allyNear = makeToken('ally-near', { disposition: 1, x: 100, y: 0, hp: 10 });
       const allyFar = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
@@ -2130,12 +2147,107 @@ describe('EffectsManager', () => {
 
       const { actor, weapon, sourceItem } = makeSourceActor();
 
-      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
 
       expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-near']);
-      expect(allyNear.setTarget).toHaveBeenCalled();
       expect(allyFar.setTarget).not.toHaveBeenCalled();
       expect(weapon.use).toHaveBeenCalled();
+    });
+
+    it('should reach much further on a ranged fumble than a melee one', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Reach 5ft, normal ranged band 30ft. Ally sits at 500px = 25ft:
+      // outside reach, inside the ranged band.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = rangedActor(5, 30);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'ranged');
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-far']);
+    });
+
+    it('should not reach that ally on a melee fumble with the same weapon', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, weapon, sourceItem } = rangedActor(5, 30);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      expect((game.user as any).updateTokenTargets).not.toHaveBeenCalled();
+      expect(weapon.use).not.toHaveBeenCalled();
+    });
+
+    it('should use the normal range band, not the long one', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // normal 30ft, long 120ft. Ally at 1000px = 50ft: beyond normal only.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-way-out', { disposition: 1, x: 1000, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = rangedActor(5, 30);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'ranged');
+
+      expect((game.user as any).updateTokenTargets).not.toHaveBeenCalled();
+    });
+
+    it('should count a diagonal neighbour as being within 5ft reach', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Diagonally adjacent: euclidean would be 7.07ft and wrongly excluded.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-diag', { disposition: 1, x: 100, y: 100, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-diag']);
+    });
+
+    it('should choose randomly among eligible allies, not always the nearest', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Three allies all inside a 30ft band; the mock d3 returns 2 -> index 1,
+      // which is NOT the nearest, proving selection is not distance-based.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const a1 = makeToken('ally-1', { disposition: 1, x: 100, y: 0, hp: 10 });
+      const a2 = makeToken('ally-2', { disposition: 1, x: 200, y: 0, hp: 10 });
+      const a3 = makeToken('ally-3', { disposition: 1, x: 300, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, a1, a2, a3];
+
+      const { actor, sourceItem } = rangedActor(5, 30);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'ranged');
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-2']);
+    });
+
+    it('should prefer Foundry grid measurement when it is available', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Report everything as 1ft away, so even a distant ally is in reach.
+      (canvas as any).grid.measurePath = jest.fn().mockReturnValue({ distance: 1 });
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-far', { disposition: 1, x: 5000, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      expect((canvas as any).grid.measurePath).toHaveBeenCalled();
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-far']);
     });
 
     it('should exclude tokens of a different disposition', async () => {
@@ -2143,15 +2255,69 @@ describe('EffectsManager', () => {
 
       const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
       const enemyNear = makeToken('enemy-near', { disposition: -1, x: 50, y: 0, hp: 10 });
-      const allyFar = makeToken('ally-far', { disposition: 1, x: 400, y: 0, hp: 10 });
-      (canvas as any).tokens.placeables = [fumbler, enemyNear, allyFar];
+      const allyNear = makeToken('ally-near', { disposition: 1, x: 100, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, enemyNear, allyNear];
 
       const { actor, sourceItem } = makeSourceActor();
 
-      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
 
-      // The nearer enemy is skipped; the farther same-disposition ally is chosen
+      // The nearer enemy is skipped even though it is closer.
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-near']);
+      expect(enemyNear.setTarget).not.toHaveBeenCalled();
+    });
+
+    it('should use the spell range band for a fumbled spell, not melee reach', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // A fumbled Fire Bolt should be able to catch an ally at spell range,
+      // not merely one standing within 5ft.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-far', { disposition: 1, x: 500, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, sourceItem } = rangedActor(5, 120);
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'spell');
+
       expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-far']);
+    });
+
+    it('should not let a forced swing be blocked by the reaction economy', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const ally = makeToken('ally-near', { disposition: 1, x: 100, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, ally];
+
+      const { actor, weapon, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      // The module compels this attack, so it must not consume or be gated by
+      // the player's reaction.
+      expect(weapon.use).toHaveBeenCalledWith(
+        expect.objectContaining({
+          midiOptions: { workflowOptions: { notReaction: true } }
+        })
+      );
+    });
+
+    it('should not treat an item pile as an ally to attack', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Our own disarm effect drops weapons as friendly-disposition pile tokens.
+      const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
+      const pile = makeToken('dropped-sword', { disposition: 1, x: 50, y: 0 });
+      (pile as any).document.flags = { 'item-piles': { data: { enabled: true } } };
+      const ally = makeToken('ally-real', { disposition: 1, x: 100, y: 0, hp: 10 });
+      (canvas as any).tokens.placeables = [fumbler, pile, ally];
+
+      const { actor, sourceItem } = makeSourceActor();
+
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
+
+      expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-real']);
     });
 
     it('should exclude downed allies (hp <= 0)', async () => {
@@ -2159,12 +2325,12 @@ describe('EffectsManager', () => {
 
       const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
       const allyDowned = makeToken('ally-downed', { disposition: 1, x: 50, y: 0, hp: 0 });
-      const allyUp = makeToken('ally-up', { disposition: 1, x: 400, y: 0, hp: 10 });
+      const allyUp = makeToken('ally-up', { disposition: 1, x: 100, y: 0, hp: 10 });
       (canvas as any).tokens.placeables = [fumbler, allyDowned, allyUp];
 
       const { actor, sourceItem } = makeSourceActor();
 
-      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
+      await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
 
       expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-up']);
     });

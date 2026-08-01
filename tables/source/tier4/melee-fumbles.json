@@ -319,7 +319,7 @@
     },
     {
       "type": "text",
-      "text": "Wild Swing - Your uncontrolled swing hits your nearest ally. Roll an attack against that ally's AC; on a hit, deal weapon damage.",
+      "text": "Wild Swing - Your swing goes wide and catches a nearby ally. Roll an attack against that ally's AC; on a hit, deal weapon damage.",
       "weight": 2,
       "range": [
         98,

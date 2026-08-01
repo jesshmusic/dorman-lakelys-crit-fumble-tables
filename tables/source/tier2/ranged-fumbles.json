@@ -311,7 +311,7 @@
     },
     {
       "type": "text",
-      "text": "Wild Ricochet - Your shot ricochets wildly toward the nearest ally; roll an attack against their AC.",
+      "text": "Wild Ricochet - Your shot goes wide and ricochets toward a nearby ally; roll an attack against their AC.",
       "weight": 2,
       "range": [
         99,

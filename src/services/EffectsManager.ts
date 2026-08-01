@@ -13,6 +13,8 @@ import {
   DISARM_DIRECTIONS,
   DISARM_DIRECTION_DIE,
   DISARM_DISTANCE_DIE,
+  DEFAULT_MELEE_REACH_FEET,
+  DEFAULT_RANGED_RANGE_FEET,
   DisarmDirection,
   disarmSquaresFromRoll
 } from '../constants';
@@ -97,9 +99,11 @@ export class EffectsManager {
         break;
 
       case EFFECT_TYPES.ATTACK_ALLY:
-        // Fumble: the fumbler (passed here as targetToken) is forced to attack
-        // their nearest ally. Solicits a real attack roll from the fumbler.
-        await this.applyAttackAlly(targetToken, sourceActor, sourceItem);
+        // Fumble: the fumbler (passed here as targetToken) accidentally catches
+        // a random ally in range. Solicits a real attack roll from the fumbler.
+        // attackType comes from the rolled result: a thrown weapon is classified
+        // melee by dnd5e even when hurled, so the item cannot say which band applies.
+        await this.applyAttackAlly(targetToken, sourceActor, sourceItem, result.attackType);
         break;
     }
   }
@@ -1010,30 +1014,35 @@ export class EffectsManager {
   }
 
   /**
-   * Fumble effect: the fumbler is forced to attack their nearest ally.
-   * Targets the nearest same-disposition token and solicits a real attack roll
-   * from the fumbler using their own weapon (on a hit, the weapon's normal
-   * damage card resolves against the ally).
+   * Fumble effect: the fumbler is forced to attack one of their own allies.
+   *
+   * A RANDOM eligible ally is chosen rather than the nearest, so the same
+   * fumble does not always hit the same unlucky friend. Eligibility is limited
+   * by how far the fumbled attack could actually reach: a melee fumble can only
+   * catch allies within the weapon's reach, while a ranged fumble can catch any
+   * ally inside its normal range band.
+   *
+   * `attackType` comes from the table the result was rolled on, not from the
+   * weapon: a thrown weapon like a javelin is classified `melee` by dnd5e even
+   * when hurled, so the item alone cannot say which band applies.
+   *
+   * The fumbler is then prompted to roll a real attack against that ally; on a
+   * hit the weapon's normal damage card resolves against them.
    *
    * @param fumblerToken - the token that fumbled
    * @param sourceActor - the fumbling actor
    * @param sourceItem - the weapon used in the fumbled attack
+   * @param attackType - 'melee' or 'ranged', from the rolled result
    */
   static async applyAttackAlly(
     fumblerToken: Token,
     sourceActor?: Actor,
-    sourceItem?: Item
+    sourceItem?: Item,
+    attackType?: string
   ): Promise<void> {
     const fToken = fumblerToken as any;
     const actor = (sourceActor as any) ?? fToken?.actor;
     if (!fToken?.actor || !actor) {
-      return;
-    }
-
-    const ally = this.findNearestAlly(fToken);
-    if (!ally) {
-      ui.notifications?.info(`${actor.name} has no nearby ally to strike.`);
-      console.log(`${LOG_PREFIX} attackAlly: no ally found near ${fToken.name}`);
       return;
     }
 
@@ -1045,6 +1054,19 @@ export class EffectsManager {
     if (!weapon) {
       weapon = [...(actor.items?.values?.() ?? [])].find((i: any) => i.type === 'weapon');
     }
+
+    const reachFeet = this.getAttackReachFeet(weapon, attackType);
+    const candidates = this.findAlliesInRange(fToken, reachFeet);
+
+    if (candidates.length === 0) {
+      const how = attackType === 'ranged' ? 'in range' : 'within reach';
+      ui.notifications?.info(`${actor.name} has no ally ${how} to strike.`);
+      console.log(`${LOG_PREFIX} attackAlly: no ally ${how} of ${fToken.name} (${reachFeet} ft)`);
+      return;
+    }
+
+    const ally = await this.pickRandom(candidates);
+
     if (!weapon?.use) {
       ui.notifications?.warn(`${actor.name} has no usable weapon to strike ${ally.name}.`);
       return;
@@ -1058,9 +1080,10 @@ export class EffectsManager {
       /* targeting is best-effort */
     }
 
-    ui.notifications?.warn(
-      `${actor.name} fumbled and lashes out at ${ally.name}! Roll the attack.`
-    );
+    // Wording matters: this is an accident, not an intentional attack on a
+    // friend. The fumbler's swing goes wide / their shot goes astray.
+    const mishap = attackType === 'ranged' ? 'shot goes wide' : 'swing goes wide';
+    ui.notifications?.warn(`${actor.name}'s ${mishap} and catches ${ally.name}! Roll the attack.`);
     console.log(`${LOG_PREFIX} attackAlly: ${actor.name} → ${ally.name} with ${weapon.name}`);
 
     // Guard so this solicited attack does not re-trigger crit/fumble handling.
@@ -1074,7 +1097,11 @@ export class EffectsManager {
       MidiQolHooks.suppressNextWorkflow = false;
     }, 8000);
     try {
-      await weapon.use();
+      // The module is COMPELLING this swing as a fumble consequence, so it must
+      // not be gated by — or consume — the player's reaction economy. Without
+      // this, a fumble on someone else's turn (e.g. an opportunity attack)
+      // prompts "You have used your reaction this round" and can be blocked.
+      await weapon.use({ midiOptions: { workflowOptions: { notReaction: true } } });
     } catch (error) {
       MidiQolHooks.suppressNextWorkflow = false;
       clearTimeout(guardTimer);
@@ -1083,40 +1110,96 @@ export class EffectsManager {
   }
 
   /**
-   * Find the nearest living ally (same token disposition) to the given token,
-   * excluding the token itself. Uses center-to-center canvas distance.
+   * How far the fumbled attack could reach, in feet.
+   *
+   * Melee uses the weapon's reach. Ranged AND spell attacks use the item's
+   * NORMAL range band rather than the long band, since a long range (a heavy
+   * crossbow's 400 ft) covers most maps entirely and would make the filter
+   * meaningless. Spells are included here because a fumbled Fire Bolt should be
+   * able to catch an ally at the spell's range, not merely within 5 ft — and a
+   * touch spell's own range value already reports as 5.
    */
-  private static findNearestAlly(fumblerToken: any): any | null {
+  private static getAttackReachFeet(weapon: any, attackType?: string): number {
+    const range = weapon?.system?.range ?? {};
+
+    if (attackType === 'melee') {
+      const reach = Number(range.reach);
+      return Number.isFinite(reach) && reach > 0 ? reach : DEFAULT_MELEE_REACH_FEET;
+    }
+
+    const normal = Number(range.value);
+    if (Number.isFinite(normal) && normal > 0) {
+      return normal;
+    }
+    // No usable range band: fall back to reach for a melee-ish item, else the
+    // generic ranged default.
+    const reach = Number(range.reach);
+    return Number.isFinite(reach) && reach > 0 ? reach : DEFAULT_RANGED_RANGE_FEET;
+  }
+
+  /**
+   * Every living ally (same token disposition) within `maxFeet` of the fumbler,
+   * excluding the fumbler itself.
+   */
+  private static findAlliesInRange(fumblerToken: any, maxFeet: number): any[] {
     const placeables: any[] = (canvas as any)?.tokens?.placeables ?? [];
     const myDisposition = fumblerToken.document?.disposition ?? fumblerToken.disposition;
-    const originX = fumblerToken.center?.x ?? fumblerToken.x;
-    const originY = fumblerToken.center?.y ?? fumblerToken.y;
 
-    let nearest: any = null;
-    let bestDistance = Infinity;
-
-    for (const token of placeables) {
+    return placeables.filter(token => {
       if (token.id === fumblerToken.id || !token.actor) {
-        continue;
+        return false;
       }
       const disposition = token.document?.disposition ?? token.disposition;
       if (disposition !== myDisposition) {
-        continue; // allies share disposition (friendly/neutral/hostile)
+        return false; // allies share disposition (friendly/neutral/hostile)
+      }
+      // Item Piles (including weapons dropped by our own disarm effect) sit on
+      // the canvas as friendly tokens. They are loot, not allies.
+      if (token.document?.flags?.['item-piles']) {
+        return false;
       }
       const hp = token.actor.system?.attributes?.hp?.value;
       if (hp !== undefined && hp !== null && hp <= 0) {
-        continue; // skip downed/dead allies
+        return false; // skip downed/dead allies
       }
-      const tx = token.center?.x ?? token.x;
-      const ty = token.center?.y ?? token.y;
-      const distance = Math.hypot(tx - originX, ty - originY);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        nearest = token;
-      }
+      return this.tokenDistanceFeet(fumblerToken, token) <= maxFeet;
+    });
+  }
+
+  /**
+   * Distance between two tokens in feet.
+   *
+   * Prefers Foundry's own measurement so the scene's diagonal rule applies.
+   * The fallback is Chebyshev (5e's 5-5-5 diagonals) and deliberately NOT
+   * euclidean: a diagonally adjacent ally is 5 ft away, and measuring 7.07 ft
+   * would wrongly put them outside a 5 ft reach.
+   */
+  private static tokenDistanceFeet(from: any, to: any): number {
+    const grid = (canvas as any)?.grid;
+    const a = { x: from.center?.x ?? from.x, y: from.center?.y ?? from.y };
+    const b = { x: to.center?.x ?? to.x, y: to.center?.y ?? to.y };
+
+    const measured = grid?.measurePath?.([a, b]);
+    if (Number.isFinite(measured?.distance)) {
+      return measured.distance;
     }
 
-    return nearest;
+    const size = grid?.size || 100;
+    const perSquare = grid?.distance ?? 5;
+    const squares = Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y)) / size;
+    return squares * perSquare;
+  }
+
+  /**
+   * Pick one entry at random, using a real die roll so the choice is visible
+   * (and deterministic under test).
+   */
+  private static async pickRandom<T>(items: T[]): Promise<T> {
+    if (items.length <= 1) {
+      return items[0];
+    }
+    const roll = await this.rollDie(`1d${items.length}`, items.length);
+    return items[roll - 1] ?? items[0];
   }
 
   /**

@@ -17,10 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Disarm results now scatter the weapon instead of just unequipping it.** A disarm rolls 1d8 for a compass direction and 1d10 for distance (1-8 = 1 square, 9 = 2 squares, 10 = 3 squares), and the weapon lands squarely in that grid square. The throw stops at the first wall it would cross and is clamped to the scene, so weapons never end up inside stone or off the map. With **Item Piles** installed the weapon genuinely leaves the character sheet and lands as a pile that must be picked up (a single copy, so stacks like javelins keep the remainder); without it the weapon is only unequipped, as before.
 - A confirmation dialog now runs before a disarm, so the GM can veto it for claws, bites and other weapons that cannot be dropped. It pre-selects "keep it" for natural weapons (`system.type.value === "natural"`) and "drop it" for everything else, so the common cases are one click.
 - All eight disarm table results were reworded; they no longer promise fixed distances ("20 feet away", "landing well out of reach") that the roll would contradict. **Existing worlds will be prompted to re-import their tables.**
+- **Fumbles that catch an ally now pick a RANDOM ally in range, not the nearest one**, so the same fumble no longer always hits the same unlucky friend. Which allies are eligible is now limited by how far the fumbled attack could actually reach: a melee fumble only catches allies within the weapon's reach, while ranged and spell fumbles use the item's normal range band (not its long band, which on most weapons would cover the whole map). Whether to use reach or range is taken from the table the result was rolled on rather than the weapon, because dnd5e classifies a thrown weapon such as a javelin as `melee` even when hurled.
+- All nine "catch an ally" results (Wild Swing / Wild Ricochet / Misfired Blast, tiers 2-4) were reworded: they no longer say "your nearest ally", and now read as the accident they are rather than an intentional attack on a friend.
 
 ### Fixed
 
 - Disarms that cannot happen now say so in chat instead of only the console. A natural 1 on an unarmed or improvised attack previously announced a disarm that silently never occurred.
+- **Fumbled spell attacks that catch an ally now use the spell's range**, instead of only being able to catch someone within 5 feet.
+- A forced swing at an ally is no longer blocked by, and no longer consumes, the fumbler's reaction. The module compels that attack, so Midi-QOL's reaction economy should not gate it — previously a fumble on someone else's turn (an opportunity attack, say) prompted "You have used your reaction this round".
+- Item Piles on the canvas — including weapons dropped by this module's own disarm effect — are no longer treated as allies that a fumble could swing at.
 
 ### Added
 
