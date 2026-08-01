@@ -314,7 +314,7 @@
     },
     {
       "type": "text",
-      "text": "Wild Magic Surge - Your miscast tears a hole in the weave and raw chaos pours through. Take the jolt of force damage, then resolve the wild magic surge below.",
+      "text": "Wild Magic Surge - Your miscast tears a hole in the weave and raw chaos pours through. Resolve the wild magic surge below.",
       "weight": 2,
       "range": [
         99,
@@ -323,9 +323,7 @@
       "img": "icons/magic/lightning/orb-ball-purple.webp",
       "flags": {
         "dorman-lakelys-crit-fumble-tables": {
-          "effectType": "damage",
-          "damageFormula": "1d6",
-          "damageType": "force",
+          "effectType": "none",
           "wildMagic": true
         }
       }

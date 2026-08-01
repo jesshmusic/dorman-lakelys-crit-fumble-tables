@@ -1519,9 +1519,9 @@ describe('EffectsManager', () => {
         range: [99, 100],
         flags: {
           'dorman-lakelys-crit-fumble-tables': {
-            effectType: 'damage',
-            damageFormula: '1d6',
-            damageType: 'force',
+            // The surge table decides the outcome, so the result itself carries
+            // no baked-in effect.
+            effectType: 'none',
             wildMagic: true
           }
         }
@@ -1581,13 +1581,31 @@ describe('EffectsManager', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    it('should still apply the result own effects alongside the surge', async () => {
+    it('should not post any damage of its own — the surge table decides', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-      // wildMagic is a flag, not an effectType, so the jolt damage still lands.
       await EffectsManager.applyResult(surgeResult(), createMockToken());
 
-      expect(activityUse).toHaveBeenCalled();
+      // No second card: whether the surge deals damage is up to the table text.
+      expect(activityUse).not.toHaveBeenCalled();
+      expect(rollToMessage).not.toHaveBeenCalled();
+    });
+
+    it('should still surge even though the result effectType is none', async () => {
+      const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+      const spy = jest.spyOn(WildMagicRoller, 'roll').mockResolvedValue({
+        text: 'Reality hiccups.',
+        tableName: 'Wild Magic Surge',
+        roll: 12
+      });
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+
+      // wildMagic is a flag, so an effectType of "none" must not skip the draw.
+      expect(spy).toHaveBeenCalled();
+      const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
+      expect(call.content).toContain('Reality hiccups.');
     });
   });
 
