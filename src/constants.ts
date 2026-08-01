@@ -125,6 +125,7 @@ export const SETTINGS = {
   FIXED_TIER: 'fixedTier',
   SHOW_CHAT_MESSAGES: 'showChatMessages',
   DAMAGE_CARD_MODE: 'damageCardMode',
+  WILD_MAGIC_TABLE: 'wildMagicTable',
   CRIT_SOUND: 'critSound',
   FUMBLE_SOUND: 'fumbleSound',
   TABLES_IMPORTED: 'tablesImported',
@@ -190,6 +191,17 @@ export function disarmSquaresFromRoll(roll: number): number {
   if (roll === 9) return 2;
   return 1;
 }
+
+/**
+ * Default wild magic table: the PHB 2024 "Wild Magic Surge" table.
+ *
+ * Stored as a UUID, but the setting also accepts a plain table NAME so GMs
+ * without the premium PHB module can point at Tasha's, the SRD, or a homebrew
+ * world table. Resolution falls back to a name search, and a missing table
+ * simply means no surge is rolled.
+ */
+export const DEFAULT_WILD_MAGIC_TABLE =
+  'Compendium.dnd-players-handbook.tables.RollTable.phbWildMagicSurg';
 
 /**
  * Fallback reach/range in feet when a weapon declares none, used to pick which

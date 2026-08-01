@@ -314,7 +314,7 @@
     },
     {
       "type": "text",
-      "text": "Wild Surge Jolt - Wild magic detonates through your body. Take 2d6 force damage.",
+      "text": "Wild Magic Surge - Your miscast tears a hole in the weave and raw chaos pours through. Take the jolt of force damage, then resolve the wild magic surge below.",
       "weight": 2,
       "range": [
         98,
@@ -325,7 +325,8 @@
         "dorman-lakelys-crit-fumble-tables": {
           "effectType": "damage",
           "damageFormula": "2d6",
-          "damageType": "force"
+          "damageType": "force",
+          "wildMagic": true
         }
       }
     },

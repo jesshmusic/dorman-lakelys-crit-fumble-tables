@@ -93,6 +93,13 @@ export interface TableEffectConfig {
   advantageTarget?: AdvantageTarget;
   /** Custom effect name for advantage/disadvantage effects */
   effectName?: string;
+  /**
+   * When true, a wild magic surge is rolled behind the scenes and shown on the
+   * fumble card. This is a FLAG rather than an `effectType` so a result can
+   * both surge and carry its own effect (e.g. the Wild Magic Surge result also
+   * deals its jolt damage).
+   */
+  wildMagic?: boolean;
 }
 
 /**

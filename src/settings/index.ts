@@ -12,6 +12,7 @@ export {
   shouldApplyEffects,
   shouldShowChatMessages,
   getDamageCardMode,
+  getWildMagicTable,
   getConfiguredTier,
   useActorLevel,
   getCritSound,

@@ -21,6 +21,7 @@ import {
 import { RolledResult, TableEffectConfig, AdvantageScope, AdvantageTarget } from '../types';
 import { shouldApplyEffects, shouldShowChatMessages, getDamageCardMode } from '../settings';
 import { SaveManager } from './SaveManager';
+import { WildMagicRoller, WildMagicSurge } from './WildMagicRoller';
 
 /**
  * Service for managing and applying crit/fumble effects
@@ -161,6 +162,89 @@ export class EffectsManager {
   }
 
   /**
+   * Create Active Effects on an actor, routing through a GM when the current
+   * user does not own it.
+   *
+   * WHY: this module runs on the client that rolled. When a PLAYER crits an
+   * NPC, every effect lands on a token the player does not own, and Foundry
+   * rejects the write ("User X lacks permission to create ActiveEffect in
+   * parent ActorDelta"). The failure was only logged, so the chat card still
+   * announced an effect that never applied.
+   *
+   * Midi-QOL is a hard dependency and already exposes a GM-side `createEffects`
+   * handler over socketlib, so we reuse it rather than registering our own
+   * socket. Applying silently (rather than prompting the GM) keeps a crit
+   * behaving the same way regardless of who rolled it.
+   */
+  private static async createEffectsOn(
+    actor: any,
+    effects: Record<string, any>[],
+    options: Record<string, any> = {}
+  ): Promise<void> {
+    if (!actor) {
+      return;
+    }
+
+    if (actor.isOwner) {
+      // Omit an empty options object so the call shape stays the plain
+      // two-argument form Foundry documents.
+      if (Object.keys(options).length === 0) {
+        await actor.createEmbeddedDocuments('ActiveEffect', effects);
+      } else {
+        await actor.createEmbeddedDocuments('ActiveEffect', effects, options);
+      }
+      return;
+    }
+
+    const socket = (globalThis as any).MidiQOL?.socket?.();
+    if (!socket?.executeAsGM) {
+      console.warn(
+        `${LOG_PREFIX} Cannot apply effects to ${actor.name} — not owned and no GM socket available.`
+      );
+      return;
+    }
+
+    await socket.executeAsGM('createEffects', {
+      actorUuid: actor.uuid,
+      effects,
+      options
+    });
+  }
+
+  /**
+   * Toggle a status effect, routing through a GM when the actor is not owned.
+   * See {@link createEffectsOn} for why.
+   */
+  private static async toggleStatusEffectOn(
+    actor: any,
+    statusId: string,
+    options: Record<string, any> = { active: true }
+  ): Promise<void> {
+    if (!actor) {
+      return;
+    }
+
+    if (actor.isOwner) {
+      await actor.toggleStatusEffect(statusId, options);
+      return;
+    }
+
+    const socket = (globalThis as any).MidiQOL?.socket?.();
+    if (!socket?.executeAsGM) {
+      console.warn(
+        `${LOG_PREFIX} Cannot toggle "${statusId}" on ${actor.name} — not owned and no GM socket available.`
+      );
+      return;
+    }
+
+    await socket.executeAsGM('toggleStatusEffect', {
+      actorUuid: actor.uuid,
+      statusId,
+      options
+    });
+  }
+
+  /**
    * Build Active Effect `duration` data that behaves correctly in combat with
    * DAE 14 + Times-Up 13 on Foundry v14 / dnd5e 5.3.
    *
@@ -224,7 +308,7 @@ export class EffectsManager {
     };
 
     try {
-      await token.actor.createEmbeddedDocuments('ActiveEffect', [effectData]);
+      await this.createEffectsOn(token.actor, [effectData]);
       const durationText =
         duration === -1 ? 'permanent' : duration === 0 ? 'until end of turn' : `${duration} rounds`;
       console.log(`${LOG_PREFIX} Applied "${conditionName}" to ${token.name} (${durationText})`);
@@ -256,7 +340,7 @@ export class EffectsManager {
 
       if (!hasCondition) {
         // Toggle the status effect on (this uses Foundry's built-in system)
-        await token.actor.toggleStatusEffect(statusId, { active: true });
+        await this.toggleStatusEffectOn(token.actor, statusId, { active: true });
       }
 
       const durationText =
@@ -1254,7 +1338,7 @@ export class EffectsManager {
     };
 
     try {
-      await token.actor.createEmbeddedDocuments('ActiveEffect', [effectData]);
+      await this.createEffectsOn(token.actor, [effectData]);
       console.log(`${LOG_PREFIX} Applied ${effectName} (${config.penaltyValue}) to ${token.name}`);
     } catch (error) {
       console.error(`${LOG_PREFIX} Failed to apply penalty:`, error);
@@ -1311,7 +1395,7 @@ export class EffectsManager {
     };
 
     try {
-      await token.actor.createEmbeddedDocuments('ActiveEffect', [effectData]);
+      await this.createEffectsOn(token.actor, [effectData]);
       const durationText =
         duration === -1 ? 'permanent' : duration === 0 ? 'until end of turn' : `${duration} rounds`;
       console.log(`${LOG_PREFIX} Applied "${effectName}" to ${token.name} (${durationText})`);
@@ -1515,6 +1599,19 @@ export class EffectsManager {
       effectDetails = this.formatEffectDetails(effectConfig);
     }
 
+    // Roll the surge BEFORE the card is built so its outcome appears on the
+    // card itself. The player never rolls, and the table posts nothing of its
+    // own — see WildMagicRoller.
+    let surgeDetails = '';
+    let surgeFlags: Record<string, unknown> | undefined;
+    if (effectConfig?.wildMagic) {
+      const surge = await WildMagicRoller.roll();
+      if (surge) {
+        surgeDetails = this.formatWildMagicSurge(surge);
+        surgeFlags = { table: surge.tableName, roll: surge.roll };
+      }
+    }
+
     const content = `
       <div class="crit-fumble-result ${typeClass}">
         <div class="result-header">
@@ -1527,6 +1624,7 @@ export class EffectsManager {
         <div class="result-name">${result.result.name}</div>
         <div class="result-description">${result.result.description}</div>
         ${effectDetails}
+        ${surgeDetails}
       </div>
     `;
 
@@ -1538,10 +1636,28 @@ export class EffectsManager {
         [MODULE_ID]: {
           resultType: result.type,
           attackType: result.attackType,
-          tier: result.tier
+          tier: result.tier,
+          ...(surgeFlags ? { wildMagic: surgeFlags } : {})
         }
       }
     });
+  }
+
+  /**
+   * Render the surge block appended to a fumble card.
+   */
+  private static formatWildMagicSurge(surge: WildMagicSurge): string {
+    const rollLabel = surge.roll === null ? '' : ` (${surge.roll})`;
+    return `
+      <div class="wild-magic-surge">
+        <div class="surge-header">
+          <i class="fa-solid fa-wand-sparkles"></i>
+          <strong>${game.i18n.localize('DLCRITFUMBLE.WildMagic.Header')}</strong>
+          <span class="surge-source">${surge.tableName}${rollLabel}</span>
+        </div>
+        <div class="surge-text">${surge.text}</div>
+      </div>
+    `;
   }
 
   /**

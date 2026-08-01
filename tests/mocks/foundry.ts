@@ -210,9 +210,14 @@ export function createMockFoundry(): typeof foundry {
 /**
  * Mock MidiQOL global object
  */
+export const midiExecuteAsGM = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
+
 export function createMockMidiQOL(): typeof MidiQOL {
   return {
-    applyTokenDamage: jest.fn<() => Promise<any>>().mockResolvedValue({})
+    applyTokenDamage: jest.fn<() => Promise<any>>().mockResolvedValue({}),
+    // Midi's socketlib socket, reused to apply effects to actors the current
+    // user does not own.
+    socket: () => ({ executeAsGM: midiExecuteAsGM })
   } as any;
 }
 
@@ -369,6 +374,9 @@ export function createMockActor(overrides?: Partial<Actor>): Actor {
     id: 'test-actor-id',
     name: 'Test Actor',
     uuid: 'Actor.test-actor-id',
+    // Owned by default: the common case is a player acting on their own actor.
+    // Tests that need the GM-routing path set this to false.
+    isOwner: true,
     system: {
       details: {
         level: 5
@@ -645,5 +653,7 @@ export function resetMocks(): void {
   itemPilesRemoveItems.mockResolvedValue({});
   testCollision.mockReset();
   testCollision.mockReturnValue(null);
+  midiExecuteAsGM.mockReset();
+  midiExecuteAsGM.mockResolvedValue({});
   setupMocks();
 }

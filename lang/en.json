@@ -38,6 +38,10 @@
         "Activity": "Damage Activity (players can apply)",
         "Roll": "Plain Roll Card (GM applies)"
       },
+      "WildMagicTable": {
+        "Name": "Wild Magic Table",
+        "Hint": "Table rolled when a spell fumble triggers a wild magic surge. Accepts a table UUID or a plain table name, so you can point at the PHB 2024 table (default), Tasha’s, or your own homebrew table. Leave blank to disable surges."
+      },
       "CritSound": {
         "Name": "Critical Hit Sound",
         "Hint": "Sound effect to play when a critical hit occurs. Leave empty for no sound."
@@ -136,6 +140,9 @@
       "ConfirmTitle": "Weapon Knocked Loose",
       "Drop": "Drop it",
       "Keep": "Keep it"
+    },
+    "WildMagic": {
+      "Header": "Wild Magic Surge"
     }
   }
 }

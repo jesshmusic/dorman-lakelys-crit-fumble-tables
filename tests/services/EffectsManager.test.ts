@@ -14,7 +14,8 @@ import {
   enableItemPiles,
   itemPilesCreatePile,
   itemPilesRemoveItems,
-  testCollision
+  testCollision,
+  midiExecuteAsGM
 } from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
@@ -1395,6 +1396,198 @@ describe('EffectsManager', () => {
       // actor is null, so no status effect should have been applied
       // (the function should bail out early without throwing)
       expect(token.actor).toBeNull();
+    });
+  });
+
+  describe('applying effects to actors the user does not own', () => {
+    /** A token whose actor the current user does NOT own — e.g. an NPC a player crit. */
+    const unownedToken = (): any => {
+      const token = createMockToken();
+      (token.actor as any).isOwner = false;
+      return token;
+    };
+
+    it('should route custom conditions through the GM when the actor is not owned', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyCondition(token, {
+        effectType: 'condition',
+        effectCondition: 'spell_locked',
+        duration: 1
+      });
+
+      // Foundry rejects a direct write, so it must go through Midi's GM socket.
+      expect(token.actor.createEmbeddedDocuments).not.toHaveBeenCalled();
+      expect(midiExecuteAsGM).toHaveBeenCalledWith(
+        'createEffects',
+        expect.objectContaining({
+          actorUuid: token.actor.uuid,
+          effects: expect.arrayContaining([expect.objectContaining({ name: 'Spell_locked' })])
+        })
+      );
+    });
+
+    it('should route standard conditions through the GM when the actor is not owned', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyCondition(token, {
+        effectType: 'condition',
+        effectCondition: 'prone',
+        duration: 0
+      });
+
+      expect(token.actor.toggleStatusEffect).not.toHaveBeenCalled();
+      expect(midiExecuteAsGM).toHaveBeenCalledWith(
+        'toggleStatusEffect',
+        expect.objectContaining({ actorUuid: token.actor.uuid, statusId: 'prone' })
+      );
+    });
+
+    it('should route penalties through the GM when the actor is not owned', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyPenalty(token, {
+        effectType: 'penalty',
+        penaltyType: 'ac',
+        penaltyValue: -2,
+        duration: -1
+      });
+
+      expect(midiExecuteAsGM).toHaveBeenCalledWith('createEffects', expect.anything());
+    });
+
+    it('should route advantage/disadvantage through the GM when the actor is not owned', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyAdvantageDisadvantage(
+        token,
+        { effectType: 'disadvantage', advantageScope: 'attack.all', duration: 1 },
+        'disadvantage'
+      );
+
+      expect(midiExecuteAsGM).toHaveBeenCalledWith('createEffects', expect.anything());
+    });
+
+    it('should write directly when the user DOES own the actor', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = createMockToken();
+
+      await EffectsManager.applyCondition(token, {
+        effectType: 'condition',
+        effectCondition: 'spell_locked',
+        duration: 1
+      });
+
+      expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalled();
+      expect(midiExecuteAsGM).not.toHaveBeenCalled();
+    });
+
+    it('should warn rather than throw when unowned and no GM socket exists', async () => {
+      (globalThis as any).MidiQOL = { applyTokenDamage: jest.fn() };
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      await EffectsManager.applyCondition(token, {
+        effectType: 'condition',
+        effectCondition: 'spell_locked',
+        duration: 1
+      });
+
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no GM socket'));
+      warn.mockRestore();
+    });
+  });
+
+  describe('wild magic surge on the fumble card', () => {
+    const surgeResult = (): any => ({
+      table: {
+        name: 'tier1-spell-fumbles',
+        tier: 1,
+        attackType: 'spell',
+        resultType: 'fumble',
+        results: []
+      },
+      result: {
+        name: 'Wild Magic Surge',
+        description: 'Your miscast tears a hole in the weave.',
+        img: 'icons/test.svg',
+        range: [99, 100],
+        flags: {
+          'dorman-lakelys-crit-fumble-tables': {
+            effectType: 'damage',
+            damageFormula: '1d6',
+            damageType: 'force',
+            wildMagic: true
+          }
+        }
+      },
+      type: 'fumble',
+      attackType: 'spell',
+      tier: 1,
+      roll: 99
+    });
+
+    it('should roll the surge and embed it in the fumble card', async () => {
+      const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+      jest.spyOn(WildMagicRoller, 'roll').mockResolvedValue({
+        text: 'You turn into a potted plant.',
+        tableName: 'Wild Magic Surge',
+        roll: 66
+      });
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+
+      const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
+      // Surge text is part of the fumble card itself, not a second message.
+      expect(ChatMessage.create).toHaveBeenCalledTimes(1);
+      expect(call.content).toContain('You turn into a potted plant.');
+      expect(call.content).toContain('wild-magic-surge');
+      expect(call.content).toContain('Wild Magic Surge');
+      expect(call.flags['dorman-lakelys-crit-fumble-tables'].wildMagic).toEqual({
+        table: 'Wild Magic Surge',
+        roll: 66
+      });
+    });
+
+    it('should still show the card when no surge could be rolled', async () => {
+      const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+      jest.spyOn(WildMagicRoller, 'roll').mockResolvedValue(null);
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+
+      const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
+      expect(call.content).toContain('Your miscast tears a hole in the weave.');
+      expect(call.content).not.toContain('wild-magic-surge');
+      expect(call.flags['dorman-lakelys-crit-fumble-tables'].wildMagic).toBeUndefined();
+    });
+
+    it('should not roll a surge for results that are not flagged', async () => {
+      const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+      const spy = jest.spyOn(WildMagicRoller, 'roll');
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const plain = surgeResult();
+      delete plain.result.flags['dorman-lakelys-crit-fumble-tables'].wildMagic;
+
+      await EffectsManager.displayResult(plain, 'Caster', 'Caster');
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('should still apply the result own effects alongside the surge', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // wildMagic is a flag, not an effectType, so the jolt damage still lands.
+      await EffectsManager.applyResult(surgeResult(), createMockToken());
+
+      expect(activityUse).toHaveBeenCalled();
     });
   });
 
