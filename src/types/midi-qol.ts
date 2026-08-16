@@ -13,6 +13,13 @@ export interface MidiQolWorkflow {
   /** The item being used (weapon, spell, etc.) */
   item: MidiQolItem;
 
+  /**
+   * The activity driving the workflow (D&D5e 4.0+). Midi-QOL keys its
+   * per-attack-type flags off `activity.actionType`, so it is the most reliable
+   * source of mwak/rwak/msak/rsak when present.
+   */
+  activity?: DnD5eActivity;
+
   /** Set of targeted tokens */
   targets: Set<Token>;
 

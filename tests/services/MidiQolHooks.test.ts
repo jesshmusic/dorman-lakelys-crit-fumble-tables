@@ -3,7 +3,7 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { resetMocks, createMockActor } from '../mocks/foundry';
+import { resetMocks, createMockActor, createMockToken, createMockWorkflow } from '../mocks/foundry';
 
 describe('MidiQolHooks', () => {
   beforeEach(() => {
@@ -296,6 +296,154 @@ describe('MidiQolHooks', () => {
 
       const result = (MidiQolHooks as any).findWeaponForAttackType(actor, 'melee');
       expect(result).toBe(sword);
+    });
+  });
+
+  describe('grants.noCritical handling', () => {
+    /** Build a token whose actor carries the given `grants.noCritical` flags. */
+    function createTargetWithNoCrit(name: string, noCritical?: Record<string, unknown>): any {
+      const actor = createMockActor();
+      (actor as any).flags = noCritical ? { 'midi-qol': { grants: { noCritical } } } : {};
+      return createMockToken({ name, actor } as any);
+    }
+
+    /**
+     * Import the hook service with its collaborators stubbed, so the assertions
+     * are about the crit DECISION rather than table lookups or effect writes.
+     */
+    async function loadHooks() {
+      const { MidiQolHooks } = await import('../../src/services/MidiQolHooks');
+      const { TableSelector } = await import('../../src/services/TableSelector');
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const rollCriticalHit = jest.fn<any>().mockResolvedValue({
+        table: { name: 'tier1-melee-crits' },
+        result: { name: 'Test Crit', effectType: 'none' },
+        roll: 50,
+        type: 'crit',
+        attackType: 'melee',
+        tier: 1
+      });
+      const displayResult = jest.fn<any>().mockResolvedValue(undefined);
+      const applyResult = jest.fn<any>().mockResolvedValue(undefined);
+
+      (TableSelector as any).rollCriticalHit = rollCriticalHit;
+      (EffectsManager as any).displayResult = displayResult;
+      (EffectsManager as any).applyResult = applyResult;
+
+      return { MidiQolHooks, rollCriticalHit, displayResult, applyResult };
+    }
+
+    /** The crit sound is the earliest observable sign that a crit fired at all. */
+    function critSoundPlays(): boolean {
+      return (foundry.audio.AudioHelper.play as jest.Mock).mock.calls.length > 0;
+    }
+
+    it('should skip the whole crit when every hit target grants no-critical', async () => {
+      const { MidiQolHooks, rollCriticalHit, displayResult, applyResult } = await loadHooks();
+
+      const paladin = createTargetWithNoCrit('Paladin', { all: '1' });
+      const workflow = createMockWorkflow({
+        targets: new Set([paladin]),
+        hitTargets: new Set([paladin])
+      });
+
+      await (MidiQolHooks as any).handleCriticalHit(workflow);
+
+      expect(critSoundPlays()).toBe(false);
+      expect(rollCriticalHit).not.toHaveBeenCalled();
+      expect(displayResult).not.toHaveBeenCalled();
+      expect(applyResult).not.toHaveBeenCalled();
+    });
+
+    it('should apply the crit only to unprotected targets in a mixed group', async () => {
+      const { MidiQolHooks, applyResult } = await loadHooks();
+
+      // Midi-QOL's own suppression is all-or-nothing, so it leaves isCritical
+      // true here — this module has to spare the paladin itself.
+      const paladin = createTargetWithNoCrit('Paladin', { all: '1' });
+      const goblin = createTargetWithNoCrit('Goblin');
+      const workflow = createMockWorkflow({
+        targets: new Set([paladin, goblin]),
+        hitTargets: new Set([paladin, goblin])
+      });
+
+      await (MidiQolHooks as any).handleCriticalHit(workflow);
+
+      expect(critSoundPlays()).toBe(true);
+      expect(applyResult).toHaveBeenCalledTimes(1);
+      expect(applyResult).toHaveBeenCalledWith(
+        expect.anything(),
+        goblin,
+        workflow.actor,
+        workflow.item
+      );
+    });
+
+    it('should behave exactly as before when no target grants no-critical', async () => {
+      const { MidiQolHooks, rollCriticalHit, displayResult, applyResult } = await loadHooks();
+
+      const goblin = createTargetWithNoCrit('Goblin');
+      const workflow = createMockWorkflow({
+        targets: new Set([goblin]),
+        hitTargets: new Set([goblin])
+      });
+
+      await (MidiQolHooks as any).handleCriticalHit(workflow);
+
+      expect(critSoundPlays()).toBe(true);
+      expect(rollCriticalHit).toHaveBeenCalled();
+      expect(displayResult).toHaveBeenCalled();
+      expect(applyResult).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still announce a targetless crit', async () => {
+      const { MidiQolHooks, displayResult, applyResult } = await loadHooks();
+
+      const workflow = createMockWorkflow({ targets: new Set(), hitTargets: new Set() });
+
+      await (MidiQolHooks as any).handleCriticalHit(workflow);
+
+      expect(critSoundPlays()).toBe(true);
+      expect(displayResult).toHaveBeenCalled();
+      expect(applyResult).not.toHaveBeenCalled();
+    });
+
+    it('should suppress even when auto hit checking is off and Midi-QOL never ran', async () => {
+      const { MidiQolHooks, rollCriticalHit } = await loadHooks();
+
+      // With autoCheckHit "none", Midi-QOL never calls processCriticalFlags, so
+      // isCritical is simply the natural crit and carries no suppression.
+      (globalThis as any).MidiQOL.configSettings = () => ({ autoCheckHit: 'none' });
+      const paladin = createTargetWithNoCrit('Paladin', { all: '1' });
+      const workflow = createMockWorkflow({
+        isCritical: true,
+        targets: new Set([paladin]),
+        hitTargets: new Set([paladin])
+      });
+
+      await (MidiQolHooks as any).onAttackRollComplete(workflow);
+
+      expect(critSoundPlays()).toBe(false);
+      expect(rollCriticalHit).not.toHaveBeenCalled();
+    });
+
+    it('should not let the natural-20 fallback resurrect a suppressed crit', async () => {
+      const { MidiQolHooks, rollCriticalHit } = await loadHooks();
+
+      // No isCritical at all, so the module falls back to the raw d20 - which
+      // knows nothing about grants.noCritical on its own.
+      const paladin = createTargetWithNoCrit('Paladin', { all: '1' });
+      const workflow = createMockWorkflow({
+        isCritical: undefined,
+        targets: new Set([paladin]),
+        hitTargets: new Set([paladin])
+      });
+
+      await (MidiQolHooks as any).onAttackRollComplete(workflow);
+
+      expect(critSoundPlays()).toBe(false);
+      expect(rollCriticalHit).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,6 +8,7 @@ import { MidiQolWorkflow, MIDI_QOL_HOOKS, getActionType } from '../types';
 import { areCritsEnabled, areFumblesEnabled, getCritSound, getFumbleSound } from '../settings';
 import { TableSelector } from './TableSelector';
 import { EffectsManager } from './EffectsManager';
+import { CritSuppression } from './CritSuppression';
 
 /**
  * Service for managing Midi-QOL hook integration
@@ -66,6 +67,11 @@ export class MidiQolHooks {
       }
 
       const d20Result = this.getD20Result(workflow);
+      // Midi-QOL always sets `isCritical`, so the natural 20 is only a fallback
+      // for workflows that carry none. It must never resurrect a crit Midi-QOL
+      // explicitly suppressed — `??` keeps an explicit `false`, and
+      // `handleCriticalHit` re-checks `grants.noCritical` per target either way,
+      // so a protected target is spared even when this fallback fired.
       const isCrit = workflow.isCritical ?? d20Result === 20;
       const isFumble = workflow.isFumble ?? d20Result === 1;
       const attackType = getActionType(workflow.item) || 'unknown';
@@ -118,6 +124,20 @@ export class MidiQolHooks {
    * Handle a critical hit
    */
   private static async handleCriticalHit(workflow: MidiQolWorkflow): Promise<void> {
+    const hitTargets = workflow.hitTargets || workflow.targets || new Set<Token>();
+
+    // Midi-QOL only clears the workflow's critical when EVERY hit target grants
+    // no-critical, and only when its auto hit checking is enabled. Re-check each
+    // target so one adamantine-armored creature is spared even when the rest of
+    // the group is not. Done before the sound so a fully suppressed crit is
+    // silent: no roll, no sound, no card.
+    const targets = CritSuppression.filterCritTargets(hitTargets, workflow);
+
+    if (hitTargets.size > 0 && targets.length === 0) {
+      console.log(`${LOG_PREFIX} Crit cancelled — every hit target grants no critical`);
+      return;
+    }
+
     const critSound = getCritSound();
     if (critSound) {
       foundry.audio.AudioHelper.play({ src: critSound, volume: 0.8 }, true);
@@ -133,12 +153,11 @@ export class MidiQolHooks {
       return;
     }
 
-    const targets = workflow.hitTargets || workflow.targets || new Set();
-    const targetNames = targets.size > 0 ? [...targets].map(t => t.name).join(', ') : 'no target';
+    const targetNames = targets.length > 0 ? targets.map(t => t.name).join(', ') : 'no target';
 
     console.log(`${LOG_PREFIX} Crit result: "${result.result.name}" → ${targetNames}`);
 
-    if (targets.size === 0) {
+    if (targets.length === 0) {
       await EffectsManager.displayResult(result, workflow.actor?.name || 'Unknown', 'their target');
       return;
     }

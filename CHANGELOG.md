@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-08-16
+
+### Fixed
+
+- **Crits no longer land on creatures that turn criticals into normal hits.** Midi-QOL's `flags.midi-qol.grants.noCritical` flag — the one behind Adamantine Armor ("any critical hit against you becomes a normal hit") — is now honoured per target. Midi-QOL's own suppression is all-or-nothing: it only cancels the critical when **every** creature hit by the attack grants no-critical, so an adamantine-armored PC caught in the same swing as an unarmored NPC still took the full crit table result. The module now checks each hit target on its own, applies the crit only to the ones that can be crit, and cancels the crit entirely — no table roll, no sound, no chat card — when every hit target is protected. Suppressed targets are named in the console so a GM can see why nothing fired.
+- The same check now runs even when Midi-QOL's **Auto check hit** setting is `None`. In that configuration Midi-QOL never evaluates the flag at all, so previously an adamantine-armored target ate every crit. It also covers the module's natural-20 fallback, which used to ignore suppression outright.
+- Fumbles are unchanged — `grants.noCritical` governs incoming criticals only.
+
 ## [1.5.0] - 2026-08-01
 
 ### Fixed
