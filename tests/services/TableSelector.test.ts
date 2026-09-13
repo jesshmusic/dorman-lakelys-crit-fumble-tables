@@ -3,7 +3,7 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { resetMocks, createMockWorkflow, createMockTable } from '../mocks/foundry';
+import { resetMocks, createMockAttackContext, createMockTable } from '../mocks/foundry';
 
 describe('TableSelector', () => {
   beforeEach(() => {
@@ -29,7 +29,7 @@ describe('TableSelector', () => {
     it('should return melee for melee weapon attack', async () => {
       const { TableSelector } = await import('../../src/services/TableSelector');
 
-      const workflow = createMockWorkflow({
+      const ctx = createMockAttackContext({
         item: {
           type: 'weapon',
           name: 'Longsword',
@@ -47,14 +47,14 @@ describe('TableSelector', () => {
         }
       });
 
-      const result = TableSelector.getAttackType(workflow.item);
+      const result = TableSelector.getAttackType(ctx.item);
       expect(result).toBe('melee');
     });
 
     it('should return ranged for ranged weapon attack', async () => {
       const { TableSelector } = await import('../../src/services/TableSelector');
 
-      const workflow = createMockWorkflow({
+      const ctx = createMockAttackContext({
         item: {
           type: 'weapon',
           name: 'Longbow',
@@ -72,14 +72,14 @@ describe('TableSelector', () => {
         }
       });
 
-      const result = TableSelector.getAttackType(workflow.item);
+      const result = TableSelector.getAttackType(ctx.item);
       expect(result).toBe('ranged');
     });
 
     it('should return spell for melee spell attack', async () => {
       const { TableSelector } = await import('../../src/services/TableSelector');
 
-      const workflow = createMockWorkflow({
+      const ctx = createMockAttackContext({
         item: {
           type: 'spell',
           name: 'Shocking Grasp',
@@ -97,14 +97,14 @@ describe('TableSelector', () => {
         }
       });
 
-      const result = TableSelector.getAttackType(workflow.item);
+      const result = TableSelector.getAttackType(ctx.item);
       expect(result).toBe('spell');
     });
 
     it('should return spell for ranged spell attack', async () => {
       const { TableSelector } = await import('../../src/services/TableSelector');
 
-      const workflow = createMockWorkflow({
+      const ctx = createMockAttackContext({
         item: {
           type: 'spell',
           name: 'Fire Bolt',
@@ -122,14 +122,14 @@ describe('TableSelector', () => {
         }
       });
 
-      const result = TableSelector.getAttackType(workflow.item);
+      const result = TableSelector.getAttackType(ctx.item);
       expect(result).toBe('spell');
     });
 
     it('should fall back to melee for weapon without activities', async () => {
       const { TableSelector } = await import('../../src/services/TableSelector');
 
-      const workflow = createMockWorkflow({
+      const ctx = createMockAttackContext({
         item: {
           type: 'weapon',
           name: 'Sword',
@@ -137,14 +137,14 @@ describe('TableSelector', () => {
         }
       });
 
-      const result = TableSelector.getAttackType(workflow.item);
+      const result = TableSelector.getAttackType(ctx.item);
       expect(result).toBe('melee');
     });
 
     it('should fall back to spell for spell without activities', async () => {
       const { TableSelector } = await import('../../src/services/TableSelector');
 
-      const workflow = createMockWorkflow({
+      const ctx = createMockAttackContext({
         item: {
           type: 'spell',
           name: 'Magic Missile',
@@ -152,7 +152,7 @@ describe('TableSelector', () => {
         }
       });
 
-      const result = TableSelector.getAttackType(workflow.item);
+      const result = TableSelector.getAttackType(ctx.item);
       expect(result).toBe('spell');
     });
   });

@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-13
+
+This is a **major** release because the Active Effect flag paths changed. Advantage/disadvantage effects created by a 1.x crit or fumble carry Midi-only keys (`flags.midi-qol.advantage.*` and friends) that dnd5e does not read, so any such effects still sitting on actors will do nothing once Midi-QOL is removed. They are all short-lived ("until end of next turn"), so in practice they will have expired long before you upgrade — but if you see a lingering one, delete it and let the next crit re-create it with the new keys.
+
+### Changed
+
+- **Midi-QOL is no longer required, and is no longer used.** Crit and fumble detection now hooks dnd5e's own `dnd5e.rollAttackV2`, which fires on the rolling client as soon as the attack card is posted. The module works out of the box with plain dnd5e; no automation module of any kind is needed.
+- **Hit detection is computed the same way dnd5e's attack card does it.** Since dnd5e provides no "hit targets" list, the module compares the attack total against each targeted creature's AC exactly as the system's attack card does: a critical hits everything it can, a fumble misses everything, and a target with **total cover** is always a miss. Crit effects therefore land on the same creatures the attack card would mark as hit.
+- **Advantage and disadvantage effects now use dnd5e 6.0's native advantage rules** instead of `flags.midi-qol.*`. Broad scopes write rule-type Active Effect changes (`type: 'dnd5e.advantage'` keyed `d20`, `attack`, `check` or `save`), while single-ability checks, single-ability saves and concentration write the per-ability roll-mode fields (`system.abilities.<abl>.check.roll.mode`, `system.abilities.<abl>.save.roll.mode`, `system.attributes.concentration.roll.mode`). dnd5e counts every source, so advantage and disadvantage still stack and cancel as in 5e, and the roller sees the advantage pre-selected with no Midi in the loop.
+- **Per-action-type attack scopes use dnd5e rule conditions.** Melee-weapon, ranged-weapon, melee-spell and ranged-spell advantage write an `attack` advantage rule with a per-change `conditions` filter on `roll.attack.type` and `roll.attack.classification`, evaluated by dnd5e at roll time, instead of the shared `system.rolls.attack.<type>` fields (which dnd5e 6.0.1 accepts but never applies to the roll).
+- **"Attacks against this creature" effects are now enforced by the module itself.** dnd5e has no native equivalent of Midi's target-side grants, so a crit that gives *attackers* advantage or disadvantage against the victim now writes the module's own flag on the effect, and the module hooks `dnd5e.preRollAttackV2` on every client to apply it whenever one of the roller's current targets carries that flag. "The target has advantage on its next save against you" results are applied as ordinary save advantage on the affected creature.
+- **Effects on tokens the roller does not own are relayed through the module's own GM socket.** A player who crits an NPC still gets the conditions and penalties applied; the module now carries its own request/response channel to a connected GM instead of borrowing Midi-QOL's socket. If no GM is connected the module warns and skips the effect, as before.
+- **Bonus-damage cards now default to the dnd5e Activity card.** The `Automatic` setting for **Bonus Damage Card Style** no longer checks for Midi-QOL; it always posts the transient damage Activity card, which in dnd5e 6 lets players apply damage to targets they own. `Plain Roll Card` remains available as an escape hatch.
+
+### Removed
+
+- The Midi-QOL hard requirement, the "Midi-QOL must be active" error gate on ready, and the Midi-QOL `requires` entry in `module.json`.
+- All `flags.midi-qol.*` writes. Nothing the module creates depends on Midi-QOL or DAE reading it.
+- Midi-QOL's `evalAllConditions` for crit suppression. Adamantine-style "criticals against you become normal hits" is still honoured per target, but the flag is now read directly from either `flags.midi-qol.grants.noCritical.*` (so items authored for Midi/DAE keep working) or the module's own `flags.dorman-lakelys-crit-fumble-tables.noCritical.*`.
+
+### Compatibility
+
+- **dnd5e 6.0 or later** (verified against 6.0.1) on FoundryVTT v14. dnd5e 5.x is no longer supported: the advantage rules above do not exist before dnd5e 6.0.
+- Midi-QOL may still be installed alongside this module; dnd5e's hooks fire either way, and the module simply ignores it.
+
 ## [1.5.1] - 2026-08-16
 
 ### Fixed

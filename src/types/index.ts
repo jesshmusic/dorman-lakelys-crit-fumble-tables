@@ -3,15 +3,9 @@
  */
 
 export * from './tables';
-export type {
-  MidiQolWorkflow,
-  MidiQolItem,
-  MidiQolRoll,
-  MidiQolDiceTerm,
-  DnD5eActivity
-} from './midi-qol';
+export type { AttackContext, AttackItem, RollLike, DiceTermLike, DnD5eActivity } from './attack';
 export {
-  MIDI_QOL_HOOKS,
+  DND5E_HOOKS,
   getActionType,
   isMeleeWeaponAttack,
   isRangedWeaponAttack,
@@ -20,4 +14,4 @@ export {
   isSpellAttack,
   isRangedAttack,
   isMeleeAttack
-} from './midi-qol';
+} from './attack';

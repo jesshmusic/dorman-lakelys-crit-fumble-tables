@@ -127,7 +127,7 @@ describe('TableImporter', () => {
       (game.tables as any).clear();
 
       // Mock fetch to return an error response
-      (global as any).fetch = jest.fn<any>().mockResolvedValue({
+      (global as any).fetch = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({
         ok: false,
         status: 404
       });
@@ -421,7 +421,7 @@ describe('TableImporter', () => {
       };
       (game.folders as Map<string, any>).set('existing-folder-id', existingFolder);
 
-      const mockDelete = jest.fn<any>().mockResolvedValue({});
+      const mockDelete = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
       const existingTable = {
         id: 'existing-table-id',
         name: 'tier1-melee-crits',

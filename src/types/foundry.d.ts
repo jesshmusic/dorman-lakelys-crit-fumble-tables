@@ -9,7 +9,7 @@ declare global {
   // The bare `AudioHelper` global is a v12 fallback that the runtime code
   // checks for via globalThis — no ambient declaration is needed.
   const game: {
-    modules: Map<string, { active: boolean }>;
+    modules: Map<string, { active: boolean; version?: string }>;
     settings: {
       register(module: string, key: string, options: any): void;
       registerMenu(
@@ -31,7 +31,21 @@ declare global {
     user: {
       id: string;
       isGM: boolean;
+      /** Tokens the user currently has targeted (may be absent in tests) */
+      targets?: Set<Token>;
     } | null;
+    users: {
+      /** The GM the module relays privileged work to; null when no GM is connected */
+      activeGM: { id: string; name?: string } | null;
+      get(id: string): any;
+      [key: string]: any;
+    };
+    /** Foundry's socket.io channel; the module listens on `module.<MODULE_ID>` */
+    socket: {
+      on(event: string, handler: (...args: any[]) => void): void;
+      emit(event: string, ...args: any[]): void;
+      [key: string]: any;
+    };
     tables: Collection<RollTable> | null;
     folders: Collection<Folder> | null;
     i18n: {
@@ -81,20 +95,6 @@ declare global {
         ): Promise<any>;
       };
     };
-  };
-
-  /**
-   * MidiQOL global object for damage application
-   */
-  const MidiQOL: {
-    applyTokenDamage(
-      damageDetail: Array<{ damage: number; type: string }>,
-      totalDamage: number,
-      targets: Set<Token> | Token[],
-      item?: Item | null,
-      saves?: Set<Token> | null,
-      options?: Record<string, any>
-    ): Promise<any>;
   };
 
   const canvas: {
@@ -222,6 +222,8 @@ declare global {
     id: string;
     name: string;
     uuid: string;
+    /** Raw actor flags, including keys written by active effects (`flags.<scope>.*`) */
+    flags?: Record<string, any>;
     system: {
       details?: {
         level?: number;
@@ -231,6 +233,9 @@ declare global {
         hp?: {
           value: number;
           max: number;
+        };
+        ac?: {
+          value?: number;
         };
       };
     };

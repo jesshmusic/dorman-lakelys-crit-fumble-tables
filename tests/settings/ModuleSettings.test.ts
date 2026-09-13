@@ -124,7 +124,7 @@ describe('ModuleSettings', () => {
 
   describe('setSetting', () => {
     it('should set setting value', async () => {
-      (game.settings.set as jest.Mock<any>).mockResolvedValue(false);
+      (game.settings.set as jest.Mock<(...args: any[]) => Promise<any>>).mockResolvedValue(false);
 
       const { setSetting } = await import('../../src/settings/ModuleSettings');
 
