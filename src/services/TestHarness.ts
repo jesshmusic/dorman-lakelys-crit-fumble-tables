@@ -21,7 +21,7 @@ import { MODULE_ID, LOG_PREFIX, STANDARD_CONDITIONS } from '../constants';
 import { AttackType, ResultType, RolledResult, TierNumber } from '../types';
 import { EffectsManager } from './EffectsManager';
 import { TableSelector } from './TableSelector';
-import { MidiQolHooks } from './MidiQolHooks';
+import { AttackHooks } from './AttackHooks';
 
 type TestType = 'crit' | 'fumble';
 
@@ -218,9 +218,9 @@ export class TestHarness {
 
     const sourceToken = this.getTokenForActor(sourceName);
     const targetToken = this.getToken(targetName, sourceName);
-    const item = MidiQolHooks.findWeaponForAttackType(source, attackType);
+    const item = AttackHooks.findWeaponForAttackType(source, attackType);
     const rr = this.buildRolledResult(doc, table.name, type, attackType, tier);
-    const cfg = rr.result.flags?.[MODULE_ID] ?? {};
+    const cfg: Record<string, any> = rr.result.flags?.[MODULE_ID] ?? {};
 
     console.log(
       `${LOG_PREFIX} [TEST] ${type.toUpperCase()} "${rr.result.name}" (${cfg.effectType}) ` +

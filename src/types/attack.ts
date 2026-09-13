@@ -1,30 +1,37 @@
 /**
- * Midi-QOL Type Declarations
- * Types for the Midi-QOL module's workflow and hooks
+ * Attack Type Declarations
+ * Types for the dnd5e attack roll hook and the context the module builds from it
  */
 
 /**
- * Midi-QOL Workflow object passed to hooks
+ * Everything the crit/fumble pipeline needs to know about one attack roll.
+ *
+ * Built by `AttackHooks` from dnd5e's `dnd5e.rollAttackV2` hook payload, and by
+ * the test harness by hand. It deliberately carries only what the handlers
+ * read, so a fixture is a handful of fields rather than a whole workflow.
  */
-export interface MidiQolWorkflow {
+export interface AttackContext {
   /** The actor performing the action */
   actor: Actor;
 
   /** The item being used (weapon, spell, etc.) */
-  item: MidiQolItem;
+  item: AttackItem;
 
   /**
-   * The activity driving the workflow (D&D5e 4.0+). Midi-QOL keys its
-   * per-attack-type flags off `activity.actionType`, so it is the most reliable
+   * The activity driving the attack (D&D5e 4.0+). dnd5e keys its per-attack-type
+   * roll modes off the activity's action type, so it is the most reliable
    * source of mwak/rwak/msak/rsak when present.
    */
   activity?: DnD5eActivity;
 
-  /** Set of targeted tokens */
+  /** Every token the rolling user had targeted when the attack was rolled */
   targets: Set<Token>;
 
+  /** The subset of `targets` the roll actually hit (see AttackHooks.computeHitTargets) */
+  hitTargets: Set<Token>;
+
   /** The attack roll result */
-  attackRoll?: MidiQolRoll;
+  attackRoll?: RollLike;
 
   /** Whether the attack was a critical hit */
   isCritical?: boolean;
@@ -32,24 +39,8 @@ export interface MidiQolWorkflow {
   /** Whether the attack was a fumble */
   isFumble?: boolean;
 
-  /** The damage rolls */
-  damageRolls?: MidiQolRoll[];
-
-  /** Total damage dealt */
-  damageTotal?: number;
-
-  /** Tokens that were hit */
-  hitTargets?: Set<Token>;
-
-  /** Tokens that failed saves */
-  failedSaves?: Set<Token>;
-
-  /** Advantage/disadvantage state */
-  advantage?: boolean;
-  disadvantage?: boolean;
-
-  /** The speaker data for chat messages */
-  speaker?: any;
+  /** Resolved action type (mwak/rwak/msak/rsak) when the hook could determine one */
+  actionType?: string;
 }
 
 /**
@@ -59,8 +50,11 @@ export interface DnD5eActivity {
   /** Activity type (e.g., 'attack') */
   type?: string;
 
-  /** Action type (mwak, rwak, msak, rsak, save, etc.) */
+  /** Action type (mwak, rwak, msak, rsak, save, etc.) — a getter on dnd5e 5.x */
   actionType?: string;
+
+  /** dnd5e 6.0: action type resolved for a specific attack mode */
+  getActionType?(attackMode?: string): string | undefined;
 
   /** Attack information */
   attack?: {
@@ -72,9 +66,9 @@ export interface DnD5eActivity {
 }
 
 /**
- * Item data in Midi-QOL context (D&D5e 3.0+)
+ * Item data as seen from the attack context (D&D5e 3.0+)
  */
-export interface MidiQolItem {
+export interface AttackItem {
   /** Item ID */
   id: string;
 
@@ -115,23 +109,38 @@ export interface MidiQolItem {
 }
 
 /**
- * Roll result in Midi-QOL context
+ * The slice of a Foundry Roll (dnd5e D20Roll in practice) the module reads.
+ * `isCritical`/`isFumble` are D20Roll getters that honour the crit threshold;
+ * `terms` is the raw fallback for extracting the natural d20.
  */
-export interface MidiQolRoll {
+export interface RollLike {
   /** Total result of the roll */
   total: number;
 
   /** Individual dice terms */
-  terms: MidiQolDiceTerm[];
+  terms: DiceTermLike[];
 
   /** The original formula */
   formula: string;
+
+  /** D20Roll: natural crit, threshold-aware */
+  isCritical?: boolean;
+
+  /** D20Roll: natural fumble, threshold-aware */
+  isFumble?: boolean;
+
+  /** Roll options (dnd5e stores attackMode/advantageMode here) */
+  options?: {
+    attackMode?: string;
+    advantageMode?: number;
+    [key: string]: unknown;
+  };
 }
 
 /**
  * A dice term within a roll
  */
-export interface MidiQolDiceTerm {
+export interface DiceTermLike {
   /** Number of dice */
   number?: number;
 
@@ -146,30 +155,21 @@ export interface MidiQolDiceTerm {
 }
 
 /**
- * Midi-QOL hook names
+ * dnd5e hook names the module listens to
  */
-export const MIDI_QOL_HOOKS = {
-  /** Fired when an attack roll is complete */
-  ATTACK_ROLL_COMPLETE: 'midi-qol.AttackRollComplete',
+export const DND5E_HOOKS = {
+  /** Fired on the rolling client after an attack roll's chat message is created */
+  ROLL_ATTACK: 'dnd5e.rollAttackV2',
 
-  /** Fired when damage is rolled */
-  DAMAGE_ROLL_COMPLETE: 'midi-qol.DamageRollComplete',
-
-  /** Fired when the entire roll workflow completes */
-  ROLL_COMPLETE: 'midi-qol.RollComplete',
-
-  /** Fired before damage is applied */
-  PRE_DAMAGE_ROLL: 'midi-qol.preDamageRoll',
-
-  /** Fired after damage is applied */
-  POST_DAMAGE_ROLL: 'midi-qol.postDamageRoll'
+  /** Fired on the rolling client before the attack roll dialog */
+  PRE_ROLL_ATTACK: 'dnd5e.preRollAttackV2'
 } as const;
 
 /**
  * Get the action type from an item (D&D5e 4.0+/5.x with activities system)
  * Returns: 'mwak' | 'rwak' | 'msak' | 'rsak' | undefined
  */
-export function getActionType(item: MidiQolItem): string | undefined {
+export function getActionType(item: AttackItem): string | undefined {
   if (item.system.activities) {
     const activities = item.system.activities;
     let activityList: DnD5eActivity[] = [];
@@ -211,35 +211,35 @@ export function getActionType(item: MidiQolItem): string | undefined {
 /**
  * Check if an item is a melee weapon attack
  */
-export function isMeleeWeaponAttack(item: MidiQolItem): boolean {
+export function isMeleeWeaponAttack(item: AttackItem): boolean {
   return getActionType(item) === 'mwak';
 }
 
 /**
  * Check if an item is a ranged weapon attack
  */
-export function isRangedWeaponAttack(item: MidiQolItem): boolean {
+export function isRangedWeaponAttack(item: AttackItem): boolean {
   return getActionType(item) === 'rwak';
 }
 
 /**
  * Check if an item is a melee spell attack
  */
-export function isMeleeSpellAttack(item: MidiQolItem): boolean {
+export function isMeleeSpellAttack(item: AttackItem): boolean {
   return getActionType(item) === 'msak';
 }
 
 /**
  * Check if an item is a ranged spell attack
  */
-export function isRangedSpellAttack(item: MidiQolItem): boolean {
+export function isRangedSpellAttack(item: AttackItem): boolean {
   return getActionType(item) === 'rsak';
 }
 
 /**
  * Check if an item is any kind of spell attack
  */
-export function isSpellAttack(item: MidiQolItem): boolean {
+export function isSpellAttack(item: AttackItem): boolean {
   const actionType = getActionType(item);
   return actionType === 'msak' || actionType === 'rsak';
 }
@@ -247,7 +247,7 @@ export function isSpellAttack(item: MidiQolItem): boolean {
 /**
  * Check if an item is any kind of ranged attack (weapon or spell)
  */
-export function isRangedAttack(item: MidiQolItem): boolean {
+export function isRangedAttack(item: AttackItem): boolean {
   const actionType = getActionType(item);
   return actionType === 'rwak' || actionType === 'rsak';
 }
@@ -255,7 +255,7 @@ export function isRangedAttack(item: MidiQolItem): boolean {
 /**
  * Check if an item is any kind of melee attack (weapon or spell)
  */
-export function isMeleeAttack(item: MidiQolItem): boolean {
+export function isMeleeAttack(item: AttackItem): boolean {
   const actionType = getActionType(item);
   return actionType === 'mwak' || actionType === 'msak';
 }

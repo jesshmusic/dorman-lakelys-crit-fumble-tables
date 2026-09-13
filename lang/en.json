@@ -33,7 +33,7 @@
       },
       "DamageCardMode": {
         "Name": "Bonus Damage Card Style",
-        "Hint": "How crit/fumble bonus damage is posted. \"Automatic\" uses a damage Activity when Midi-QOL is active so PLAYERS get an Apply button, and the plain roll card otherwise. \"Damage Activity\" always uses the Activity. \"Plain Roll Card\" uses the legacy card, which only the GM can apply.",
+        "Hint": "How crit/fumble bonus damage is posted. \"Automatic\" (recommended) posts a dnd5e damage Activity card, which lets PLAYERS apply damage to targets they own. \"Damage Activity\" is the same card, explicitly. \"Plain Roll Card\" uses the legacy roll card, which only the GM can apply.",
         "Auto": "Automatic (recommended)",
         "Activity": "Damage Activity (players can apply)",
         "Roll": "Plain Roll Card (GM applies)"
@@ -122,7 +122,6 @@
       }
     },
     "Errors": {
-      "MidiQolRequired": "Dorman Lakely's Critical Hit & Fumble Tables requires Midi-QOL to be enabled.",
       "TableNotFound": "Table '{tableName}' not found. Please import the compendium tables.",
       "NoActiveScene": "No active scene found.",
       "NoTargetToken": "No target token found for effect application.",
@@ -130,7 +129,7 @@
     },
     "Notifications": {
       "ModuleReady": "Dorman Lakely's Critical Hit & Fumble Tables is ready!",
-      "HooksRegistered": "Midi-QOL hooks registered successfully.",
+      "HooksRegistered": "dnd5e attack hooks registered successfully.",
       "ImportingTables": "Importing crit/fumble tables...",
       "TablesImported": "Imported {count} crit/fumble tables!",
       "ReimportingTables": "Re-importing crit/fumble tables...",

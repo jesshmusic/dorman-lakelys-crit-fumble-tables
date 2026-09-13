@@ -136,13 +136,15 @@ export const SETTINGS = {
  * How bonus crit/fumble damage is delivered to chat.
  *
  * ACTIVITY posts the damage through a transient dnd5e damage Activity, which
- * produces a `type: "usage"` message. Midi-QOL only attaches its player-usable
- * `<midi-damage-application>` tray to those, so PLAYERS get an Apply button.
+ * produces a `type: "usage"` message. dnd5e's own damage tray on those lets the
+ * message author apply the damage to targets they own (dnd5e ≥5), so PLAYERS
+ * get a working Apply button.
  *
- * ROLL is the legacy path: a bare `Roll#toMessage` card. dnd5e attaches its own
+ * ROLL is the legacy path: a bare `Roll#toMessage` card. dnd5e attaches its
  * `<damage-application>` tray to that, but GM-ONLY — players see a dead card.
  *
- * AUTO picks ACTIVITY when Midi-QOL is active and ROLL otherwise.
+ * AUTO is ACTIVITY (falling back to ROLL only when the Activity route is
+ * unavailable, e.g. no Item document class).
  */
 export const DAMAGE_CARD_MODES = {
   AUTO: 'auto',

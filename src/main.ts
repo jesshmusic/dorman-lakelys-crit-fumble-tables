@@ -5,7 +5,7 @@
 
 import { MODULE_ID, LOG_PREFIX } from './constants';
 import { registerSettings, injectSoundPreviewButtons, getFumbleSound } from './settings';
-import { MidiQolHooks, TableImporter, TestHarness } from './services';
+import { AttackHooks, GmSocket, GrantsEnforcer, TableImporter, TestHarness } from './services';
 import buildInfo from '../build-info.json';
 
 const buildNumber = buildInfo.buildNumber;
@@ -43,59 +43,6 @@ function logModuleReady(): void {
 }
 
 /**
- * Compare an installed dependency's declared Foundry compatibility against
- * the running Foundry core version and surface a user-visible notification
- * if the dep declares itself incompatible. Only fires for deps that ARE
- * installed and active — the existing "midi-qol not active" error path
- * above handles the not-installed case.
- *
- * This exists because upstream modules can lag behind Foundry major
- * releases (declaring themselves v13-only in their manifest) but still be
- * installed and active on a v14 world. The warning tells the user which
- * specific dep is stale, not just "something is broken."
- */
-function warnIfDepOutdated(depId: string, displayName: string): void {
-  const mod = (game as any).modules?.get(depId);
-  if (!mod || !mod.active) {
-    // Existing "not installed" / "not active" paths already handle these.
-    return;
-  }
-
-  const coreMajor =
-    (game as any).release?.generation ?? parseInt(String((game as any).version ?? '0'), 10);
-  if (!coreMajor || Number.isNaN(coreMajor)) return;
-
-  const parseMajor = (v: unknown): number | null => {
-    if (v == null) return null;
-    const m = String(v).match(/^(\d+)/);
-    return m ? parseInt(m[1], 10) : null;
-  };
-
-  const compat = mod.compatibility ?? {};
-  const depMax = parseMajor(compat.maximum);
-  const depVerified = parseMajor(compat.verified);
-
-  // Hard cap below current Foundry major → permanent warning
-  if (depMax != null && depMax < coreMajor) {
-    ui.notifications?.warn(
-      `${MODULE_TITLE}: ${displayName} v${mod.version} declares Foundry v${compat.maximum} as its maximum, ` +
-        `but you are running Foundry v${(game as any).version}. Expect bugs until ${displayName} ships an update.`,
-      { permanent: true }
-    );
-    return;
-  }
-
-  // No hard cap but verified is behind → transient warning
-  if (depVerified != null && depVerified < coreMajor) {
-    ui.notifications?.warn(
-      `${MODULE_TITLE}: ${displayName} v${mod.version} is only verified for Foundry v${compat.verified}. ` +
-        `You're running v${(game as any).version} — some features may not work until ${displayName} ships a v${coreMajor}-verified release.`,
-      { permanent: false }
-    );
-  }
-}
-
-/**
  * Initialize the module
  */
 Hooks.once('init', function () {
@@ -104,22 +51,16 @@ Hooks.once('init', function () {
 });
 
 /**
- * Module ready - set up hooks and verify dependencies
+ * Module ready - import tables and register the dnd5e hooks + GM socket
  */
 Hooks.once('ready', async function () {
-  if (!game.modules.get('midi-qol')?.active) {
-    console.error(`${LOG_PREFIX} ERROR: Midi-QOL is required but not active`);
-    ui.notifications.error(game.i18n.localize('DLCRITFUMBLE.Errors.MidiQolRequired'));
-    return;
-  }
-
-  // Midi-QOL is installed and active — warn loudly if its manifest
-  // declares itself incompatible with the running Foundry version.
-  warnIfDepOutdated('midi-qol', 'Midi QoL');
-
   await TableImporter.importTables();
   await TableImporter.checkForUpdates();
-  MidiQolHooks.register();
+  // Socket first: AttackHooks/GrantsEnforcer may relay to the GM as soon as
+  // the first attack lands, and dnd5e's hooks fire on the rolling client only.
+  GmSocket.register();
+  GrantsEnforcer.register();
+  AttackHooks.register();
   logModuleReady();
 });
 
@@ -141,12 +82,19 @@ Hooks.on('renderSettingsConfig', (_app: unknown, html: HTMLElement) => {
   injectSoundPreviewButtons(html);
 });
 
-export { TableSelector, EffectsManager, MidiQolHooks, TableImporter } from './services';
+export {
+  TableSelector,
+  EffectsManager,
+  AttackHooks,
+  GmSocket,
+  GrantsEnforcer,
+  TableImporter
+} from './services';
 
 if (typeof globalThis !== 'undefined') {
   (globalThis as any).DormanLakely = {
     /**
-     * Simulate a critical hit using the ACTUAL MidiQolHooks code path
+     * Simulate a critical hit using the ACTUAL AttackHooks code path
      * @param attackerName - Name of actor making the attack (e.g., "Daevon")
      * @param targetName - Name of token to target (optional, uses first on canvas)
      * @param attackType - Type of attack: 'melee', 'ranged', or 'spell'
@@ -156,7 +104,7 @@ if (typeof globalThis !== 'undefined') {
       targetName?: string,
       attackType: 'melee' | 'ranged' | 'spell' = 'melee'
     ) {
-      const { MidiQolHooks } = await import('./services/MidiQolHooks');
+      const { AttackHooks } = await import('./services/AttackHooks');
 
       const attacker = (game as any).actors?.getName(attackerName);
       if (!attacker) {
@@ -181,11 +129,11 @@ if (typeof globalThis !== 'undefined') {
         return null;
       }
 
-      await MidiQolHooks.testCriticalHit(attacker, targetToken, attackType);
+      await AttackHooks.testCriticalHit(attacker, targetToken, attackType);
     },
 
     /**
-     * Simulate a fumble using the ACTUAL MidiQolHooks code path
+     * Simulate a fumble using the ACTUAL AttackHooks code path
      * @param actorName - Name of actor fumbling (e.g., "Nimrod")
      * @param targetName - Name of target token (optional, needed for "grants" effects)
      * @param attackType - Type of attack: 'melee', 'ranged', or 'spell'
@@ -195,7 +143,7 @@ if (typeof globalThis !== 'undefined') {
       targetName?: string,
       attackType: 'melee' | 'ranged' | 'spell' = 'melee'
     ) {
-      const { MidiQolHooks } = await import('./services/MidiQolHooks');
+      const { AttackHooks } = await import('./services/AttackHooks');
 
       const actor = (game as any).actors?.getName(actorName);
       if (!actor) {
@@ -213,7 +161,7 @@ if (typeof globalThis !== 'undefined') {
         }
       }
 
-      await MidiQolHooks.testFumble(actor, targetToken, attackType);
+      await AttackHooks.testFumble(actor, targetToken, attackType);
     },
 
     /**
@@ -307,7 +255,7 @@ if (typeof globalThis !== 'undefined') {
         return null;
       }
 
-      const rolledResult = {
+      const rolledResult: any = {
         result: result,
         table: table
       };

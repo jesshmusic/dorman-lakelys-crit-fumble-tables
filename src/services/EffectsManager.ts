@@ -22,6 +22,7 @@ import { RolledResult, TableEffectConfig, AdvantageScope, AdvantageTarget } from
 import { shouldApplyEffects, shouldShowChatMessages, getDamageCardMode } from '../settings';
 import { SaveManager } from './SaveManager';
 import { WildMagicRoller, WildMagicSurge } from './WildMagicRoller';
+import { GmSocket } from './GmSocket';
 
 /**
  * Service for managing and applying crit/fumble effects
@@ -171,10 +172,10 @@ export class EffectsManager {
    * parent ActorDelta"). The failure was only logged, so the chat card still
    * announced an effect that never applied.
    *
-   * Midi-QOL is a hard dependency and already exposes a GM-side `createEffects`
-   * handler over socketlib, so we reuse it rather than registering our own
-   * socket. Applying silently (rather than prompting the GM) keeps a crit
-   * behaving the same way regardless of who rolled it.
+   * The write is relayed over the module's own socket ({@link GmSocket}) to
+   * the active GM, who has permission for every actor. Applying silently
+   * (rather than prompting the GM) keeps a crit behaving the same way
+   * regardless of who rolled it.
    */
   private static async createEffectsOn(
     actor: any,
@@ -196,15 +197,14 @@ export class EffectsManager {
       return;
     }
 
-    const socket = (globalThis as any).MidiQOL?.socket?.();
-    if (!socket?.executeAsGM) {
+    if (!actor.uuid) {
       console.warn(
-        `${LOG_PREFIX} Cannot apply effects to ${actor.name} — not owned and no GM socket available.`
+        `${LOG_PREFIX} Cannot apply effects to ${actor.name} — not owned and no GM socket route (no uuid).`
       );
       return;
     }
 
-    await socket.executeAsGM('createEffects', {
+    await GmSocket.executeAsGM('createEffects', {
       actorUuid: actor.uuid,
       effects,
       options
@@ -229,15 +229,14 @@ export class EffectsManager {
       return;
     }
 
-    const socket = (globalThis as any).MidiQOL?.socket?.();
-    if (!socket?.executeAsGM) {
+    if (!actor.uuid) {
       console.warn(
-        `${LOG_PREFIX} Cannot toggle "${statusId}" on ${actor.name} — not owned and no GM socket available.`
+        `${LOG_PREFIX} Cannot toggle "${statusId}" on ${actor.name} — not owned and no GM socket route (no uuid).`
       );
       return;
     }
 
-    await socket.executeAsGM('toggleStatusEffect', {
+    await GmSocket.executeAsGM('toggleStatusEffect', {
       actorUuid: actor.uuid,
       statusId,
       options
@@ -417,38 +416,37 @@ export class EffectsManager {
   /**
    * Decide how the bonus damage card should be posted.
    *
-   * The Activity route only pays off when Midi-QOL is present, because Midi is
-   * what attaches the player-usable tray. Without Midi, dnd5e's own tray is
-   * GM-only either way, so the cheaper legacy roll card is equivalent.
+   * AUTO resolves to the Activity route: dnd5e (5+) attaches its damage tray
+   * to `type: "usage"` messages and lets a player apply the damage to targets
+   * they own, so it is the better default. ROLL remains as an escape hatch
+   * for tables that prefer the plain roll card.
    */
   private static shouldUseDamageActivity(): boolean {
     const mode = getDamageCardMode();
     if (mode === DAMAGE_CARD_MODES.ROLL) {
       return false;
     }
-    if (mode === DAMAGE_CARD_MODES.ACTIVITY) {
-      return true;
-    }
-    return (game as any).modules?.get('midi-qol')?.active === true;
+    return true;
   }
 
   /**
    * Post the bonus damage through a transient dnd5e damage Activity.
    *
-   * WHY: a bare `Roll#toMessage` produces a `type: "base"` message. dnd5e
-   * attaches its `<damage-application>` tray to those for GMs ONLY, so players
-   * get a damage card with no buttons at all. Midi-QOL's own tray
-   * (`<midi-damage-application>`) has no GM check — it only checks `isOwner` —
-   * but Midi attaches it exclusively to `type: "usage"` messages carrying
-   * `flags.dnd5e.activity`. Using an Activity is what produces such a message,
-   * which is why this path exists.
+   * WHY: a bare `Roll#toMessage` produces a `type: "base"` message, and the
+   * `<damage-application>` tray dnd5e attaches to those is GM-only, so players
+   * get a damage card with no buttons at all. A damage Activity produces a
+   * `type: "usage"` message carrying `flags.dnd5e.activity`, whose tray lets
+   * the message author apply damage to targets they own (dnd5e ≥5), which is
+   * why this path exists.
    *
    * The item is constructed in memory and never saved to the actor.
    *
-   * Targeting is passed EXPLICITLY via `flags.dnd5e.targets` rather than by
-   * changing the user's targets. That keeps the tray pointed at the correct
-   * token (the fumbler for fumbles, the victim for crits) without disturbing
-   * whatever the player currently has targeted mid-combat.
+   * Targeting is passed EXPLICITLY rather than by changing the user's targets.
+   * That keeps the tray pointed at the correct token (the fumbler for fumbles,
+   * the victim for crits) without disturbing whatever the player currently has
+   * targeted mid-combat. The descriptors go in BOTH `system.targets` (dnd5e ≥5
+   * TargetsField, what the tray reads) and the legacy `flags.dnd5e.targets`,
+   * so older readers keep working.
    *
    * @returns true when the card was posted, false when this route is unusable.
    */
@@ -507,16 +505,17 @@ export class EffectsManager {
       return false;
     }
 
-    // Midi-QOL wraps `use` with its own workflow (flanking cleanup, Convenient
-    // Effects sockets, …), any part of which can throw for reasons unrelated to
-    // our damage — e.g. no GM connected. Handle that here so the caller can
-    // fall back instead of dropping the damage entirely.
+    // Other modules wrap `Activity#use` (automation, effect libraries, …), any
+    // part of which can throw for reasons unrelated to our damage — e.g. no GM
+    // connected. Handle that here so the caller can fall back instead of
+    // dropping the damage entirely.
     const messagesBefore = (game as any).messages?.size ?? 0;
     try {
+      const targets = [this.buildTargetDescriptor(token)];
       await activity.use(
         {},
         { configure: false },
-        { data: { flags: { dnd5e: { targets: [this.buildTargetDescriptor(token)] } } } }
+        { data: { system: { targets }, flags: { dnd5e: { targets } } } }
       );
     } catch (error) {
       console.error(`${LOG_PREFIX} Damage activity failed:`, error);
@@ -535,8 +534,8 @@ export class EffectsManager {
   /**
    * Legacy delivery: a bare dnd5e DamageRoll chat card.
    *
-   * Used when Midi-QOL is absent or the GM has forced "roll" mode. The
-   * Apply/½/2× tray on this card is GM-only in dnd5e 5.x.
+   * Used when the GM has forced "roll" mode, or as the fallback when the
+   * Activity route is unusable. The Apply/½/2× tray on this card is GM-only.
    */
   private static async postDamageRollCard(
     token: Token,
@@ -572,16 +571,25 @@ export class EffectsManager {
   }
 
   /**
-   * Build the `flags.dnd5e.targets` entry that points a damage tray at a token.
+   * Build the target descriptor that points a damage tray at a token.
+   *
+   * Carries both the dnd5e ≥5 `TargetsField` shape (`actor`/`token` uuids,
+   * read from `system.targets`) and the legacy `uuid` key that
+   * `flags.dnd5e.targets` readers expect, so one array serves both homes.
    */
   private static buildTargetDescriptor(token: Token): {
+    actor: string;
+    token: string | null;
     uuid: string;
     name: string;
     img: string;
     ac: number | null;
   } {
     const actor = (token as any).actor;
+    const tokenDoc = (token as any).document ?? token;
     return {
+      actor: actor.uuid,
+      token: tokenDoc?.uuid ?? null,
       uuid: actor.uuid,
       name: token.name,
       img: actor.img,
@@ -1171,23 +1179,22 @@ export class EffectsManager {
     console.log(`${LOG_PREFIX} attackAlly: ${actor.name} → ${ally.name} with ${weapon.name}`);
 
     // Guard so this solicited attack does not re-trigger crit/fumble handling.
-    // The next AttackRollComplete consumes the flag. A timeout auto-clears it so
-    // it can never leak into an unrelated later attack if this solicited attack
-    // produces no workflow (e.g. the player cancels the use dialog, or the
+    // The next dnd5e.rollAttackV2 consumes the flag. A timeout auto-clears it
+    // so it can never leak into an unrelated later attack if this solicited
+    // attack produces no roll (e.g. the player cancels the use dialog, or the
     // weapon has no attack roll).
-    const { MidiQolHooks } = await import('./MidiQolHooks');
-    MidiQolHooks.suppressNextWorkflow = true;
+    const { AttackHooks } = await import('./AttackHooks');
+    AttackHooks.suppressNextWorkflow = true;
     const guardTimer = setTimeout(() => {
-      MidiQolHooks.suppressNextWorkflow = false;
+      AttackHooks.suppressNextWorkflow = false;
     }, 8000);
     try {
-      // The module is COMPELLING this swing as a fumble consequence, so it must
-      // not be gated by — or consume — the player's reaction economy. Without
-      // this, a fumble on someone else's turn (e.g. an opportunity attack)
-      // prompts "You have used your reaction this round" and can be blocked.
-      await weapon.use({ midiOptions: { workflowOptions: { notReaction: true } } });
+      // The module is COMPELLING this swing as a fumble consequence. dnd5e
+      // itself does not gate item use on the reaction economy, so a plain
+      // `use()` is enough — nothing here consumes the player's reaction.
+      await weapon.use();
     } catch (error) {
-      MidiQolHooks.suppressNextWorkflow = false;
+      AttackHooks.suppressNextWorkflow = false;
       clearTimeout(guardTimer);
       console.error(`${LOG_PREFIX} attackAlly: failed to use weapon:`, error);
     }
@@ -1346,7 +1353,9 @@ export class EffectsManager {
   }
 
   /**
-   * Apply an advantage or disadvantage effect using Midi-QOL flags
+   * Apply an advantage or disadvantage effect as an Active Effect on dnd5e's
+   * native roll-mode fields (or, for target-side attack grants, the module's
+   * own flag read by GrantsEnforcer)
    */
   static async applyAdvantageDisadvantage(
     token: Token,
@@ -1405,7 +1414,18 @@ export class EffectsManager {
   }
 
   /**
-   * Build Midi-QOL flag changes for advantage/disadvantage effects
+   * Build Active Effect changes for advantage/disadvantage effects.
+   *
+   * Self-side scopes write dnd5e's NATIVE advantage-mode fields
+   * (`AdvantageModeField`, values -1/0/1) with mode ADD, which is how dnd5e
+   * counts advantage sources: `'1'` for advantage, `'-1'` for disadvantage.
+   * ADD rather than OVERRIDE so a table result stacks with (and cancels
+   * against) whatever else is already influencing the roll, exactly as the
+   * system does for its own sources.
+   *
+   * Target-side ("grants") attack scopes have no native dnd5e field, so they
+   * write the module's own flag with OVERRIDE `'1'`; {@link GrantsEnforcer}
+   * reads it back on `dnd5e.preRollAttackV2`.
    */
   private static buildAdvantageChanges(
     scopes: AdvantageScope[],
@@ -1413,17 +1433,15 @@ export class EffectsManager {
     target: AdvantageTarget
   ): Array<{ key: string; mode: number; value: string; priority: number }> {
     const changes: Array<{ key: string; mode: number; value: string; priority: number }> = [];
+    const nativeValue = type === 'advantage' ? '1' : '-1';
 
     for (const scope of scopes) {
-      const flagKeys = this.scopeToMidiFlags(scope, type, target);
-      for (const key of flagKeys) {
-        // Midi-QOL reads the raw change value as a truthy condition and ignores
-        // the mode; OVERRIDE also writes the flag into actor data, so midi's
-        // getProperty fallback works too. value '1' evaluates truthy.
+      for (const key of this.scopeToNativeChanges(scope, type, target)) {
+        const isGrantsFlag = key.startsWith('flags.');
         changes.push({
           key,
-          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
-          value: '1',
+          mode: isGrantsFlag ? CONST.ACTIVE_EFFECT_MODES.OVERRIDE : CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: isGrantsFlag ? '1' : nativeValue,
           priority: 20
         });
       }
@@ -1433,84 +1451,89 @@ export class EffectsManager {
   }
 
   /**
-   * Convert a scope to Midi-QOL flag keys
+   * Convert a scope to Active Effect change keys.
+   *
+   * Self-side keys are dnd5e's roll-mode fields on the actor:
+   * - `attack.all`     → `system.rolls.attack.mode` (combined into every attack)
+   * - `attack.<type>`  → `system.rolls.attack.<type>.mode`
+   * - `ability.all`    → `system.rolls.ability.check.mode`
+   * - `ability.<abl>`  → `system.abilities.<abl>.check.roll.mode`
+   * - `save.all`       → `system.rolls.ability.save.mode`
+   * - `save.<abl>`     → `system.abilities.<abl>.save.roll.mode`
+   * - `concentration`  → `system.attributes.concentration.roll.mode`
+   * - `all`            → attack + ability check + save + skill + concentration
+   *
+   * `grants` + `attack.*` → `flags.<MODULE_ID>.grants.<type>.attack.<scope>`,
+   * the module's own target-side flag (see {@link GrantsEnforcer}).
+   *
+   * `grants` + `save.*`: the tables mean "the target has advantage on its next
+   * save against you". dnd5e has no target-side save flag, and the bearer IS
+   * the one rolling the save, so this is simply self-side save advantage on
+   * the bearer — the same native key as `self` + `save.*`. The remaining
+   * grants scopes (`all`, `ability.*`, `concentration`) likewise have no
+   * target-side meaning and fall back to the self-side key, except that `all`
+   * also writes the attack grants flag so attacks against the bearer are
+   * covered.
    */
-  private static scopeToMidiFlags(
+  private static scopeToNativeChanges(
     scope: AdvantageScope,
     type: 'advantage' | 'disadvantage',
     target: AdvantageTarget
   ): string[] {
-    const prefix = target === 'grants' ? `flags.midi-qol.grants.${type}` : `flags.midi-qol.${type}`;
+    const grantsPrefix = `flags.${MODULE_ID}.grants.${type}`;
+
+    if (target === 'grants' && scope.startsWith('attack.')) {
+      return [`${grantsPrefix}.${scope}`];
+    }
+
     const keys: string[] = [];
 
     switch (scope) {
       case 'all':
-        keys.push(`${prefix}.all`);
+        keys.push(
+          'system.rolls.attack.mode',
+          'system.rolls.ability.check.mode',
+          'system.rolls.ability.save.mode',
+          'system.rolls.ability.skill.mode',
+          'system.attributes.concentration.roll.mode'
+        );
+        if (target === 'grants') {
+          keys.push(`${grantsPrefix}.attack.all`);
+        }
         break;
       case 'attack.all':
-        keys.push(`${prefix}.attack.all`);
+        keys.push('system.rolls.attack.mode');
         break;
       case 'attack.mwak':
-        keys.push(`${prefix}.attack.mwak`);
-        break;
       case 'attack.rwak':
-        keys.push(`${prefix}.attack.rwak`);
-        break;
       case 'attack.msak':
-        keys.push(`${prefix}.attack.msak`);
-        break;
       case 'attack.rsak':
-        keys.push(`${prefix}.attack.rsak`);
+        keys.push(`system.rolls.attack.${scope.slice('attack.'.length)}.mode`);
         break;
-      // Ability CHECK flags. Midi-QOL 14 path is `<type>.check.<abl>` — there is
-      // NO `.ability.` segment (that was the bug: the effect wrote a key midi
-      // never reads). `ability.all` maps to all ability checks.
       case 'ability.all':
-        keys.push(`${prefix}.check.all`);
+        keys.push('system.rolls.ability.check.mode');
         break;
       case 'ability.str':
-        keys.push(`${prefix}.check.str`);
-        break;
       case 'ability.dex':
-        keys.push(`${prefix}.check.dex`);
-        break;
       case 'ability.con':
-        keys.push(`${prefix}.check.con`);
-        break;
       case 'ability.int':
-        keys.push(`${prefix}.check.int`);
-        break;
       case 'ability.wis':
-        keys.push(`${prefix}.check.wis`);
-        break;
       case 'ability.cha':
-        keys.push(`${prefix}.check.cha`);
+        keys.push(`system.abilities.${scope.slice('ability.'.length)}.check.roll.mode`);
         break;
-      // Saving THROW flags. Midi-QOL 14 path is `<type>.save.<abl>` (again, no
-      // `.ability.` segment).
       case 'save.all':
-        keys.push(`${prefix}.save.all`);
+        keys.push('system.rolls.ability.save.mode');
         break;
       case 'save.str':
-        keys.push(`${prefix}.save.str`);
-        break;
       case 'save.dex':
-        keys.push(`${prefix}.save.dex`);
-        break;
       case 'save.con':
-        keys.push(`${prefix}.save.con`);
-        break;
       case 'save.int':
-        keys.push(`${prefix}.save.int`);
-        break;
       case 'save.wis':
-        keys.push(`${prefix}.save.wis`);
-        break;
       case 'save.cha':
-        keys.push(`${prefix}.save.cha`);
+        keys.push(`system.abilities.${scope.slice('save.'.length)}.save.roll.mode`);
         break;
       case 'concentration':
-        keys.push(`${prefix}.concentration`);
+        keys.push('system.attributes.concentration.roll.mode');
         break;
     }
 

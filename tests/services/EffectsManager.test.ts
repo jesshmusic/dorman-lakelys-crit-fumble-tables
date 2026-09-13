@@ -14,8 +14,7 @@ import {
   enableItemPiles,
   itemPilesCreatePile,
   itemPilesRemoveItems,
-  testCollision,
-  midiExecuteAsGM
+  testCollision
 } from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
@@ -132,9 +131,8 @@ describe('EffectsManager', () => {
 
       await EffectsManager.applyResult(result, token);
 
-      // Damage now posts a dnd5e damage Activity card, not MidiQOL.applyTokenDamage
+      // Damage posts a dnd5e damage Activity card
       expect(activityUse).toHaveBeenCalled();
-      expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
     });
   });
 
@@ -207,7 +205,7 @@ describe('EffectsManager', () => {
       });
     };
 
-    it('should post damage through a dnd5e damage Activity when Midi-QOL is active', async () => {
+    it('should post damage through a dnd5e damage Activity by default', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
       const token = createMockToken();
@@ -217,8 +215,8 @@ describe('EffectsManager', () => {
         damageType: 'piercing'
       });
 
-      // The Activity route is what produces a `type: "usage"` message, the only
-      // kind Midi-QOL attaches its player-usable Apply tray to.
+      // The Activity route is what produces a `type: "usage"` message, whose
+      // dnd5e tray lets players apply damage to targets they own.
       expect(activityUse).toHaveBeenCalledTimes(1);
       expect(rollToMessage).not.toHaveBeenCalled();
 
@@ -241,12 +239,18 @@ describe('EffectsManager', () => {
         damageType: 'slashing'
       });
 
-      // Explicit flags keep the tray pointed at the right actor without
-      // hijacking whatever the player currently has targeted.
+      // Explicit descriptors keep the tray pointed at the right actor without
+      // hijacking whatever the player currently has targeted. They go in both
+      // the dnd5e ≥5 `system.targets` home and the legacy flags home.
       const [, , message] = activityUse.mock.calls[0] as any[];
-      expect(message.data.flags.dnd5e.targets).toEqual([
-        expect.objectContaining({ uuid: token.actor.uuid, name: token.name })
-      ]);
+      const descriptor = expect.objectContaining({
+        actor: token.actor.uuid,
+        uuid: token.actor.uuid,
+        name: token.name
+      });
+      expect(message.data.system.targets).toEqual([descriptor]);
+      expect(message.data.flags.dnd5e.targets).toEqual([descriptor]);
+      expect(message.data.system.targets).toBe(message.data.flags.dnd5e.targets);
     });
 
     it('should never save the transient damage item to the actor', async () => {
@@ -318,13 +322,12 @@ describe('EffectsManager', () => {
           })
         })
       );
-      expect(MidiQOL.applyTokenDamage).not.toHaveBeenCalled();
     });
 
-    it('should use the legacy roll card when Midi-QOL is inactive', async () => {
-      (game.modules.get as jest.Mock).mockImplementation((id: string) =>
-        id === 'midi-qol' ? { active: false } : undefined
-      );
+    it('should use the Activity in AUTO mode without any automation module', async () => {
+      setDamageCardMode('auto');
+      // No Midi-QOL (or anything else) is installed in the mock world.
+      expect(game.modules.get('midi-qol')).toBeUndefined();
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
       await (EffectsManager as any).applyDamage(createMockToken(), {
@@ -332,15 +335,12 @@ describe('EffectsManager', () => {
         damageType: 'piercing'
       });
 
-      expect(activityUse).not.toHaveBeenCalled();
-      expect(rollToMessage).toHaveBeenCalled();
+      expect(activityUse).toHaveBeenCalledTimes(1);
+      expect(rollToMessage).not.toHaveBeenCalled();
     });
 
-    it('should still use the Activity when forced, even without Midi-QOL', async () => {
+    it('should use the Activity when forced', async () => {
       setDamageCardMode('activity');
-      (game.modules.get as jest.Mock).mockImplementation((id: string) =>
-        id === 'midi-qol' ? { active: false } : undefined
-      );
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
       await (EffectsManager as any).applyDamage(createMockToken(), {
@@ -366,8 +366,8 @@ describe('EffectsManager', () => {
     });
 
     it('should fall back to the roll card when the damage activity throws', async () => {
-      // Midi wraps `use` with flanking/Convenient-Effects work that can throw
-      // for unrelated reasons (e.g. no GM connected). Damage must still land.
+      // Other modules wrap `use` with work that can throw for unrelated reasons
+      // (e.g. no GM connected). Damage must still land.
       activityUse.mockRejectedValueOnce(new Error('no GM connected'));
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
@@ -481,8 +481,9 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.attack.all',
-                value: '1'
+                key: 'system.rolls.attack.mode',
+                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                value: '-1'
               })
             ]),
             duration: { value: 1, units: 'rounds', expiry: 'targetEnd' }
@@ -509,7 +510,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.advantage.attack.all',
+                key: 'system.rolls.attack.mode',
+                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 value: '1'
               })
             ])
@@ -537,12 +539,96 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.grants.advantage.attack.all',
+                key: 'flags.dorman-lakelys-crit-fumble-tables.grants.advantage.attack.all',
+                mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
                 value: '1'
               })
-            ])
+            ]),
+            name: 'Grants Advantage (All Attacks)'
           })
         ])
+      );
+    });
+
+    it('should write a per-action-type grants flag for grants disadvantage', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'disadvantage',
+        advantageScope: 'attack.mwak',
+        advantageTarget: 'grants',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      const [, effects] = (token.actor?.createEmbeddedDocuments as jest.Mock).mock
+        .calls[0] as any[];
+      expect(effects[0].changes).toEqual([
+        {
+          key: 'flags.dorman-lakelys-crit-fumble-tables.grants.disadvantage.attack.mwak',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+          value: '1',
+          priority: 20
+        }
+      ]);
+    });
+
+    it('should map grants save scopes to self-side native save advantage on the bearer', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: ['save.all', 'save.wis'],
+        advantageTarget: 'grants',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      // "The target has advantage on its next save" is rolled BY the bearer, so
+      // there is nothing target-side about it: dnd5e's own save mode field applies.
+      const [, effects] = (token.actor?.createEmbeddedDocuments as jest.Mock).mock
+        .calls[0] as any[];
+      expect(effects[0].changes).toEqual([
+        {
+          key: 'system.rolls.ability.save.mode',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '1',
+          priority: 20
+        },
+        {
+          key: 'system.abilities.wis.save.roll.mode',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '1',
+          priority: 20
+        }
+      ]);
+      expect(effects[0].changes.some((c: any) => c.key.startsWith('flags.'))).toBe(false);
+    });
+
+    it('should never write a midi-qol flag key', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      const result = createMockRolledResult({
+        effectType: 'advantage',
+        advantageScope: 'all',
+        advantageTarget: 'grants',
+        duration: 1
+      });
+
+      await EffectsManager.applyResult(result, token);
+
+      const [, effects] = (token.actor?.createEmbeddedDocuments as jest.Mock).mock
+        .calls[0] as any[];
+      const keys = effects[0].changes.map((c: any) => c.key);
+      expect(keys.some((k: string) => k.includes('midi'))).toBe(false);
+      expect(keys).toContain('flags.dorman-lakelys-crit-fumble-tables.grants.advantage.attack.all');
+      expect(effects[0].flags['dorman-lakelys-crit-fumble-tables']).toEqual(
+        expect.objectContaining({ effectType: 'advantage', advantageTarget: 'grants' })
       );
     });
 
@@ -564,12 +650,12 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.attack.rwak',
-                value: '1'
+                key: 'system.rolls.attack.rwak.mode',
+                value: '-1'
               }),
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.save.dex',
-                value: '1'
+                key: 'system.abilities.dex.save.roll.mode',
+                value: '-1'
               })
             ])
           })
@@ -695,8 +781,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.check.str',
-                value: '1'
+                key: 'system.abilities.str.check.roll.mode',
+                value: '-1'
               })
             ])
           })
@@ -722,8 +808,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.concentration',
-                value: '1'
+                key: 'system.attributes.concentration.roll.mode',
+                value: '-1'
               })
             ])
           })
@@ -1407,7 +1493,17 @@ describe('EffectsManager', () => {
       return token;
     };
 
+    /**
+     * Spy on the module's own GM relay. Imported AFTER resetModules so it is
+     * the same module instance EffectsManager binds to.
+     */
+    const spyExecuteAsGM = async () => {
+      const { GmSocket } = await import('../../src/services/GmSocket');
+      return jest.spyOn(GmSocket, 'executeAsGM').mockResolvedValue(undefined);
+    };
+
     it('should route custom conditions through the GM when the actor is not owned', async () => {
+      const executeAsGM = await spyExecuteAsGM();
       const { EffectsManager } = await import('../../src/services/EffectsManager');
       const token = unownedToken();
 
@@ -1417,9 +1513,9 @@ describe('EffectsManager', () => {
         duration: 1
       });
 
-      // Foundry rejects a direct write, so it must go through Midi's GM socket.
+      // Foundry rejects a direct write, so it must go through the module's GM socket.
       expect(token.actor.createEmbeddedDocuments).not.toHaveBeenCalled();
-      expect(midiExecuteAsGM).toHaveBeenCalledWith(
+      expect(executeAsGM).toHaveBeenCalledWith(
         'createEffects',
         expect.objectContaining({
           actorUuid: token.actor.uuid,
@@ -1429,6 +1525,7 @@ describe('EffectsManager', () => {
     });
 
     it('should route standard conditions through the GM when the actor is not owned', async () => {
+      const executeAsGM = await spyExecuteAsGM();
       const { EffectsManager } = await import('../../src/services/EffectsManager');
       const token = unownedToken();
 
@@ -1439,13 +1536,14 @@ describe('EffectsManager', () => {
       });
 
       expect(token.actor.toggleStatusEffect).not.toHaveBeenCalled();
-      expect(midiExecuteAsGM).toHaveBeenCalledWith(
+      expect(executeAsGM).toHaveBeenCalledWith(
         'toggleStatusEffect',
         expect.objectContaining({ actorUuid: token.actor.uuid, statusId: 'prone' })
       );
     });
 
     it('should route penalties through the GM when the actor is not owned', async () => {
+      const executeAsGM = await spyExecuteAsGM();
       const { EffectsManager } = await import('../../src/services/EffectsManager');
       const token = unownedToken();
 
@@ -1456,10 +1554,11 @@ describe('EffectsManager', () => {
         duration: -1
       });
 
-      expect(midiExecuteAsGM).toHaveBeenCalledWith('createEffects', expect.anything());
+      expect(executeAsGM).toHaveBeenCalledWith('createEffects', expect.anything());
     });
 
     it('should route advantage/disadvantage through the GM when the actor is not owned', async () => {
+      const executeAsGM = await spyExecuteAsGM();
       const { EffectsManager } = await import('../../src/services/EffectsManager');
       const token = unownedToken();
 
@@ -1469,10 +1568,37 @@ describe('EffectsManager', () => {
         'disadvantage'
       );
 
-      expect(midiExecuteAsGM).toHaveBeenCalledWith('createEffects', expect.anything());
+      expect(executeAsGM).toHaveBeenCalledWith('createEffects', expect.anything());
+    });
+
+    it('should emit a socket request when a non-GM applies to an unowned actor', async () => {
+      (game.user as any).isGM = false;
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const token = unownedToken();
+
+      // Do not await: the relay waits for the GM's response. Assert the emit.
+      void EffectsManager.applyPenalty(token, {
+        effectType: 'penalty',
+        penaltyType: 'ac',
+        penaltyValue: -2,
+        duration: -1
+      });
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect((game as any).socket.emit).toHaveBeenCalledWith(
+        'module.dorman-lakelys-crit-fumble-tables',
+        expect.objectContaining({
+          type: 'request',
+          action: 'createEffects',
+          payload: expect.objectContaining({ actorUuid: token.actor.uuid })
+        })
+      );
+      const { GmSocket } = await import('../../src/services/GmSocket');
+      GmSocket.unregister();
     });
 
     it('should write directly when the user DOES own the actor', async () => {
+      const executeAsGM = await spyExecuteAsGM();
       const { EffectsManager } = await import('../../src/services/EffectsManager');
       const token = createMockToken();
 
@@ -1483,11 +1609,12 @@ describe('EffectsManager', () => {
       });
 
       expect(token.actor?.createEmbeddedDocuments).toHaveBeenCalled();
-      expect(midiExecuteAsGM).not.toHaveBeenCalled();
+      expect(executeAsGM).not.toHaveBeenCalled();
     });
 
-    it('should warn rather than throw when unowned and no GM socket exists', async () => {
-      (globalThis as any).MidiQOL = { applyTokenDamage: jest.fn() };
+    it('should warn rather than throw when unowned and no GM is connected', async () => {
+      (game.user as any).isGM = false;
+      (game as any).users.activeGM = null;
       const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
       const { EffectsManager } = await import('../../src/services/EffectsManager');
       const token = unownedToken();
@@ -1498,7 +1625,8 @@ describe('EffectsManager', () => {
         duration: 1
       });
 
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no GM socket'));
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no GM is connected'));
+      expect((game as any).socket.emit).not.toHaveBeenCalled();
       warn.mockRestore();
     });
   });
@@ -2145,7 +2273,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.attack.mwak'
+                key: 'system.rolls.attack.mwak.mode',
+                value: '-1'
               })
             ])
           })
@@ -2171,7 +2300,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.advantage.attack.rsak'
+                key: 'system.rolls.attack.rsak.mode',
+                value: '1'
               })
             ])
           })
@@ -2197,7 +2327,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.disadvantage.attack.msak'
+                key: 'system.rolls.attack.msak.mode',
+                value: '-1'
               })
             ])
           })
@@ -2223,7 +2354,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.advantage.check.all'
+                key: 'system.rolls.ability.check.mode',
+                value: '1'
               })
             ])
           })
@@ -2264,7 +2396,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.advantage.save.all'
+                key: 'system.rolls.ability.save.mode',
+                value: '1'
               })
             ])
           })
@@ -2290,7 +2423,20 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'flags.midi-qol.advantage.all'
+                key: 'system.rolls.attack.mode',
+                value: '1'
+              }),
+              expect.objectContaining({
+                key: 'system.rolls.ability.check.mode',
+                value: '1'
+              }),
+              expect.objectContaining({
+                key: 'system.rolls.ability.save.mode',
+                value: '1'
+              }),
+              expect.objectContaining({
+                key: 'system.attributes.concentration.roll.mode',
+                value: '1'
               })
             ])
           })
@@ -2494,7 +2640,7 @@ describe('EffectsManager', () => {
       expect((game.user as any).updateTokenTargets).toHaveBeenCalledWith(['ally-far']);
     });
 
-    it('should not let a forced swing be blocked by the reaction economy', async () => {
+    it('should use the weapon plainly with no automation-specific options', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
       const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
@@ -2505,13 +2651,10 @@ describe('EffectsManager', () => {
 
       await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem, 'melee');
 
-      // The module compels this attack, so it must not consume or be gated by
-      // the player's reaction.
-      expect(weapon.use).toHaveBeenCalledWith(
-        expect.objectContaining({
-          midiOptions: { workflowOptions: { notReaction: true } }
-        })
-      );
+      // dnd5e itself does not gate item use on the reaction economy, so the
+      // compelled swing needs no special options.
+      expect(weapon.use).toHaveBeenCalledTimes(1);
+      expect(weapon.use).toHaveBeenCalledWith();
     });
 
     it('should not treat an item pile as an ally to attack', async () => {
@@ -2548,7 +2691,7 @@ describe('EffectsManager', () => {
 
     it('should use the weapon and set the re-entrancy guard', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
-      const { MidiQolHooks } = await import('../../src/services/MidiQolHooks');
+      const { AttackHooks } = await import('../../src/services/AttackHooks');
 
       const fumbler = makeToken('fumbler', { disposition: 1, x: 0, y: 0, hp: 20 });
       const ally = makeToken('ally', { disposition: 1, x: 100, y: 0, hp: 10 });
@@ -2556,11 +2699,11 @@ describe('EffectsManager', () => {
 
       const { actor, weapon, sourceItem } = makeSourceActor();
 
-      MidiQolHooks.suppressNextWorkflow = false;
+      AttackHooks.suppressNextWorkflow = false;
       await EffectsManager.applyAttackAlly(fumbler, actor, sourceItem);
 
       expect(weapon.use).toHaveBeenCalled();
-      expect(MidiQolHooks.suppressNextWorkflow).toBe(true);
+      expect(AttackHooks.suppressNextWorkflow).toBe(true);
     });
 
     it('should no-op gracefully when no ally exists', async () => {

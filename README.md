@@ -29,9 +29,10 @@ Different tables for different attacks:
 
 ## Requirements
 
-- FoundryVTT v13 or higher
-- D&D 5e game system
-- **Midi-QOL module** (required for automatic detection)
+- FoundryVTT v14 or higher
+- D&D 5e game system, version 5.0 or later (works with dnd5e 6 too)
+
+That's it. The module hooks straight into the D&D 5e system's own attack rolls, so it works with plain dnd5e and needs no automation module. If you already use Midi-QOL or similar, it can stay installed; this module works the same either way.
 
 ## Installation
 

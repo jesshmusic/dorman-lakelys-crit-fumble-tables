@@ -9,13 +9,14 @@ import { jest } from '@jest/globals';
  * Mock game object
  */
 export function createMockGame(overrides?: Partial<typeof game>): typeof game {
-  // Create a mock modules Map with a mocked get function
-  const modulesMap = new Map([['midi-qol', { active: true, version: '1.0.0' }]]);
+  // Create a mock modules Map with a mocked get function. Midi-QOL is
+  // deliberately absent: the module must work without it.
+  const modulesMap = new Map();
   (modulesMap as any).get = jest.fn((id: string) => {
-    if (id === 'midi-qol') return { active: true, version: '1.0.0' };
-    if (id === 'dorman-lakelys-crit-fumble-tables') return { active: true, version: '1.0.1' };
+    if (id === 'dorman-lakelys-crit-fumble-tables') return { active: true, version: '2.0.0' };
     return undefined;
   });
+  const gmUser = { id: 'gm1', name: 'GM', isGM: true, active: true };
 
   return {
     modules: modulesMap,
@@ -42,8 +43,14 @@ export function createMockGame(overrides?: Partial<typeof game>): typeof game {
     user: {
       id: 'test-user-id',
       isGM: true,
+      targets: new Set(),
       updateTokenTargets: jest.fn()
     },
+    // `activeGM` is what GmSocket uses to decide who executes relayed requests.
+    users: { activeGM: gmUser, get: jest.fn((id: string) => (id === 'gm1' ? gmUser : undefined)) },
+    // Module socket used by GmSocket. Both directions are inert mocks; tests
+    // drive GmSocket.handleMessage directly to simulate the other side.
+    socket: { on: jest.fn(), emit: jest.fn() },
     tables: createMockTables(),
     // Only `size` is used, to detect whether a card reached chat.
     messages: { size: 0 },
@@ -208,20 +215,6 @@ export function createMockFoundry(): typeof foundry {
 }
 
 /**
- * Mock MidiQOL global object
- */
-export const midiExecuteAsGM = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
-
-export function createMockMidiQOL(): typeof MidiQOL {
-  return {
-    applyTokenDamage: jest.fn<() => Promise<any>>().mockResolvedValue({}),
-    // Midi's socketlib socket, reused to apply effects to actors the current
-    // user does not own.
-    socket: () => ({ executeAsGM: midiExecuteAsGM })
-  } as any;
-}
-
-/**
  * Mock ChatMessage class
  */
 export function createMockChatMessage(): typeof ChatMessage {
@@ -233,9 +226,8 @@ export function createMockChatMessage(): typeof ChatMessage {
 
 /**
  * Shared, assertable mock for `Roll#toMessage`. Exported so tests can assert
- * that the dnd5e damage card was posted (the new applyDamage behavior posts a
- * DamageRoll chat card instead of calling MidiQOL.applyTokenDamage). Reset in
- * `resetMocks`.
+ * that the dnd5e damage card was posted (the legacy applyDamage route posts a
+ * DamageRoll chat card). Reset in `resetMocks`.
  */
 export const rollToMessage = jest.fn<(options?: any) => Promise<any>>().mockResolvedValue({});
 
@@ -273,7 +265,7 @@ export function createMockRoll(): typeof Roll {
 /**
  * Shared, assertable mock for `Activity#use`. Exported so tests can assert that
  * bonus damage was posted through a dnd5e damage Activity (the route that makes
- * the card applicable by PLAYERS via Midi-QOL's tray). Reset in `resetMocks`.
+ * the card applicable by PLAYERS via dnd5e's own tray). Reset in `resetMocks`.
  */
 export const activityUse = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
 
@@ -434,9 +426,11 @@ export function createMockItem(overrides?: any): any {
 }
 
 /**
- * Mock Midi-QOL Workflow
+ * Mock AttackContext — what AttackHooks builds from `dnd5e.rollAttackV2`.
+ * `hitTargets` defaults to the same set as `targets` (a crit hits everyone).
  */
-export function createMockWorkflow(overrides?: any): any {
+export function createMockAttackContext(overrides?: any): any {
+  const targets = overrides?.targets ?? new Set([createMockToken()]);
   return {
     actor: createMockActor(),
     item: {
@@ -450,8 +444,7 @@ export function createMockWorkflow(overrides?: any): any {
         }
       }
     },
-    targets: new Set([createMockToken()]),
-    hitTargets: new Set([createMockToken()]),
+    activity: undefined,
     attackRoll: {
       total: 25,
       formula: '1d20+5',
@@ -464,7 +457,10 @@ export function createMockWorkflow(overrides?: any): any {
     },
     isCritical: true,
     isFumble: false,
-    ...overrides
+    actionType: 'mwak',
+    ...overrides,
+    targets,
+    hitTargets: overrides?.hitTargets ?? targets
   };
 }
 
@@ -580,10 +576,12 @@ export function setupMocks(): void {
   (global as any).RollTable = createMockRollTableClass();
   (global as any).FormApplication = createMockFormApplication();
   (global as any).Dialog = createMockDialog();
-  (global as any).MidiQOL = createMockMidiQOL();
   (global as any).$ = createMockJQuery();
   (global as any).AudioHelper = createMockAudioHelper();
   (global as any).HTMLElement = class MockHTMLElement {};
+  // GmSocket resolves relayed actor uuids through fromUuid; tests install
+  // their own implementation per case.
+  (global as any).fromUuid = jest.fn<(uuid: string) => Promise<any>>().mockResolvedValue(null);
   // `Dice` is intentionally empty so `CONFIG.Dice.DamageRoll` falls back to Roll.
   (global as any).CONFIG = {
     Item: { documentClass: createMockItemDocumentClass() },
@@ -653,7 +651,6 @@ export function resetMocks(): void {
   itemPilesRemoveItems.mockResolvedValue({});
   testCollision.mockReset();
   testCollision.mockReturnValue(null);
-  midiExecuteAsGM.mockReset();
-  midiExecuteAsGM.mockResolvedValue({});
+  delete (global as any).MidiQOL;
   setupMocks();
 }

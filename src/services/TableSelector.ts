@@ -12,7 +12,7 @@ import {
   getTierFromCR
 } from '../constants';
 import { AttackType, ResultType, TierNumber, RolledResult } from '../types';
-import { MidiQolItem, isSpellAttack, isRangedAttack } from '../types/midi-qol';
+import { AttackItem, isSpellAttack, isRangedAttack } from '../types/attack';
 import { useActorLevel, getConfiguredTier } from '../settings';
 
 /**
@@ -20,9 +20,9 @@ import { useActorLevel, getConfiguredTier } from '../settings';
  */
 export class TableSelector {
   /**
-   * Determine the attack type from a Midi-QOL item
+   * Determine the attack type from an item
    */
-  static getAttackType(item: MidiQolItem): AttackType {
+  static getAttackType(item: AttackItem): AttackType {
     if (isSpellAttack(item)) {
       return ATTACK_TYPES.SPELL;
     }
