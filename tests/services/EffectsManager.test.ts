@@ -481,8 +481,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'system.rolls.attack.mode',
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                key: 'attack',
+                type: 'dnd5e.advantage',
                 value: '-1'
               })
             ]),
@@ -510,8 +510,8 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'system.rolls.attack.mode',
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                key: 'attack',
+                type: 'dnd5e.advantage',
                 value: '1'
               })
             ])
@@ -540,7 +540,7 @@ describe('EffectsManager', () => {
             changes: expect.arrayContaining([
               expect.objectContaining({
                 key: 'flags.dorman-lakelys-crit-fumble-tables.grants.advantage.attack.all',
-                mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                type: 'override',
                 value: '1'
               })
             ]),
@@ -568,7 +568,7 @@ describe('EffectsManager', () => {
       expect(effects[0].changes).toEqual([
         {
           key: 'flags.dorman-lakelys-crit-fumble-tables.grants.disadvantage.attack.mwak',
-          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+          type: 'override',
           value: '1',
           priority: 20
         }
@@ -589,19 +589,19 @@ describe('EffectsManager', () => {
       await EffectsManager.applyResult(result, token);
 
       // "The target has advantage on its next save" is rolled BY the bearer, so
-      // there is nothing target-side about it: dnd5e's own save mode field applies.
+      // there is nothing target-side about it: dnd5e's own save rules apply.
       const [, effects] = (token.actor?.createEmbeddedDocuments as jest.Mock).mock
         .calls[0] as any[];
       expect(effects[0].changes).toEqual([
         {
-          key: 'system.rolls.ability.save.mode',
-          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          key: 'save',
+          type: 'dnd5e.advantage',
           value: '1',
           priority: 20
         },
         {
           key: 'system.abilities.wis.save.roll.mode',
-          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          type: 'add',
           value: '1',
           priority: 20
         }
@@ -650,7 +650,7 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'system.rolls.attack.rwak.mode',
+                key: 'attack',
                 value: '-1'
               }),
               expect.objectContaining({
@@ -815,6 +815,108 @@ describe('EffectsManager', () => {
           })
         ])
       );
+    });
+
+    it('should express per-action-type attack scopes as filtered attack rules', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const expected: Record<string, [string, string]> = {
+        'attack.mwak': ['melee', 'weapon'],
+        'attack.rwak': ['ranged', 'weapon'],
+        'attack.msak': ['melee', 'spell'],
+        'attack.rsak': ['ranged', 'spell']
+      };
+
+      for (const [scope, [attackType, classification]] of Object.entries(expected)) {
+        const token = createMockToken();
+        await EffectsManager.applyResult(
+          createMockRolledResult({ effectType: 'advantage', advantageScope: scope, duration: 1 }),
+          token
+        );
+
+        const [, effects] = (token.actor?.createEmbeddedDocuments as jest.Mock).mock
+          .calls[0] as any[];
+        expect(effects[0].changes).toEqual([
+          {
+            key: 'attack',
+            type: 'dnd5e.advantage',
+            value: '1',
+            priority: 20,
+            conditions: JSON.stringify([
+              { k: 'roll.attack.type', v: attackType },
+              { k: 'roll.attack.classification', v: classification }
+            ])
+          }
+        ]);
+      }
+    });
+
+    it('should never write the shared rolls.*.mode fields dnd5e 6 does not count', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      // Regression: these fields accept an add change but dnd5e 6.0.1 ignores
+      // them when combining a roll, so every table effect on them was inert.
+      const scopes = [
+        'all',
+        'attack.all',
+        'attack.mwak',
+        'attack.rwak',
+        'attack.msak',
+        'attack.rsak',
+        'ability.all',
+        'ability.str',
+        'save.all',
+        'save.dex',
+        'concentration'
+      ];
+
+      for (const scope of scopes) {
+        const token = createMockToken();
+        await EffectsManager.applyResult(
+          createMockRolledResult({
+            effectType: 'disadvantage',
+            advantageScope: scope,
+            duration: 1
+          }),
+          token
+        );
+
+        const [, effects] = (token.actor?.createEmbeddedDocuments as jest.Mock).mock
+          .calls[0] as any[];
+        expect(effects[0].changes.length).toBeGreaterThan(0);
+        for (const change of effects[0].changes) {
+          expect(change.key.startsWith('system.rolls.')).toBe(false);
+          expect(change).not.toHaveProperty('mode');
+          expect(change.value).toBe('-1');
+        }
+      }
+    });
+
+    it('should use the d20 rule plus the attack grants flag for grants on all rolls', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      const token = createMockToken();
+      await EffectsManager.applyResult(
+        createMockRolledResult({
+          effectType: 'disadvantage',
+          advantageScope: 'all',
+          advantageTarget: 'grants',
+          duration: 1
+        }),
+        token
+      );
+
+      const [, effects] = (token.actor?.createEmbeddedDocuments as jest.Mock).mock
+        .calls[0] as any[];
+      expect(effects[0].changes).toEqual([
+        { key: 'd20', type: 'dnd5e.advantage', value: '-1', priority: 20 },
+        {
+          key: 'flags.dorman-lakelys-crit-fumble-tables.grants.disadvantage.attack.all',
+          type: 'override',
+          value: '1',
+          priority: 20
+        }
+      ]);
     });
   });
 
@@ -2273,7 +2375,11 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'system.rolls.attack.mwak.mode',
+                key: 'attack',
+                conditions: JSON.stringify([
+                  { k: 'roll.attack.type', v: 'melee' },
+                  { k: 'roll.attack.classification', v: 'weapon' }
+                ]),
                 value: '-1'
               })
             ])
@@ -2300,7 +2406,11 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'system.rolls.attack.rsak.mode',
+                key: 'attack',
+                conditions: JSON.stringify([
+                  { k: 'roll.attack.type', v: 'ranged' },
+                  { k: 'roll.attack.classification', v: 'spell' }
+                ]),
                 value: '1'
               })
             ])
@@ -2327,7 +2437,11 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'system.rolls.attack.msak.mode',
+                key: 'attack',
+                conditions: JSON.stringify([
+                  { k: 'roll.attack.type', v: 'melee' },
+                  { k: 'roll.attack.classification', v: 'spell' }
+                ]),
                 value: '-1'
               })
             ])
@@ -2354,7 +2468,7 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'system.rolls.ability.check.mode',
+                key: 'check',
                 value: '1'
               })
             ])
@@ -2396,7 +2510,7 @@ describe('EffectsManager', () => {
           expect.objectContaining({
             changes: expect.arrayContaining([
               expect.objectContaining({
-                key: 'system.rolls.ability.save.mode',
+                key: 'save',
                 value: '1'
               })
             ])
@@ -2421,24 +2535,7 @@ describe('EffectsManager', () => {
         'ActiveEffect',
         expect.arrayContaining([
           expect.objectContaining({
-            changes: expect.arrayContaining([
-              expect.objectContaining({
-                key: 'system.rolls.attack.mode',
-                value: '1'
-              }),
-              expect.objectContaining({
-                key: 'system.rolls.ability.check.mode',
-                value: '1'
-              }),
-              expect.objectContaining({
-                key: 'system.rolls.ability.save.mode',
-                value: '1'
-              }),
-              expect.objectContaining({
-                key: 'system.attributes.concentration.roll.mode',
-                value: '1'
-              })
-            ])
+            changes: [{ key: 'd20', type: 'dnd5e.advantage', value: '1', priority: 20 }]
           })
         ])
       );

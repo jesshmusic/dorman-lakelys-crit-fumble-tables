@@ -24,6 +24,50 @@ import { SaveManager } from './SaveManager';
 import { WildMagicRoller, WildMagicSurge } from './WildMagicRoller';
 import { GmSocket } from './GmSocket';
 
+/** One Active Effect change produced for an advantage/disadvantage result. */
+interface AdvantageChange {
+  key: string;
+  type: 'add' | 'override' | 'dnd5e.advantage';
+  value: string;
+  priority: number;
+  /** dnd5e `Filter` JSON, evaluated against the roll data at roll time. */
+  conditions?: string;
+}
+
+/** A single dnd5e filter clause (`exact` comparison when `o` is omitted). */
+interface RollFilter {
+  k: string;
+  v: string;
+}
+
+type AttackActionType = 'mwak' | 'rwak' | 'msak' | 'rsak';
+
+/**
+ * dnd5e 6.0 has no working per-action-type advantage field, so per-type scopes
+ * become an `attack` rule filtered on the roll data dnd5e builds for the
+ * attack: `roll.attack.type` is melee/ranged and `roll.attack.classification`
+ * is weapon/spell. Verified live against dnd5e 6.0.1 with a melee weapon, a
+ * ranged weapon and a ranged spell attack.
+ */
+const ATTACK_TYPE_FILTERS: Record<AttackActionType, RollFilter[]> = {
+  mwak: [
+    { k: 'roll.attack.type', v: 'melee' },
+    { k: 'roll.attack.classification', v: 'weapon' }
+  ],
+  rwak: [
+    { k: 'roll.attack.type', v: 'ranged' },
+    { k: 'roll.attack.classification', v: 'weapon' }
+  ],
+  msak: [
+    { k: 'roll.attack.type', v: 'melee' },
+    { k: 'roll.attack.classification', v: 'spell' }
+  ],
+  rsak: [
+    { k: 'roll.attack.type', v: 'ranged' },
+    { k: 'roll.attack.classification', v: 'spell' }
+  ]
+};
+
 /**
  * Service for managing and applying crit/fumble effects
  */
@@ -1416,128 +1460,117 @@ export class EffectsManager {
   /**
    * Build Active Effect changes for advantage/disadvantage effects.
    *
-   * Self-side scopes write dnd5e's NATIVE advantage-mode fields
-   * (`AdvantageModeField`, values -1/0/1) with mode ADD, which is how dnd5e
-   * counts advantage sources: `'1'` for advantage, `'-1'` for disadvantage.
-   * ADD rather than OVERRIDE so a table result stacks with (and cancels
-   * against) whatever else is already influencing the roll, exactly as the
-   * system does for its own sources.
+   * dnd5e 6.0 resolves a roll's advantage from two places, and only some field
+   * paths actually reach the roll (verified live against dnd5e 6.0.1):
+   * - Rule changes (`type: 'dnd5e.advantage'`) keyed by roll category:
+   *   `attack`, `check`, `save`, or `d20` for all of them. dnd5e collects these
+   *   at roll time, so a change can carry a `conditions` filter evaluated
+   *   against the roll data. That is how per-action-type attack scopes work.
+   * - Per-ability and concentration `AdvantageModeField`s, via an `add` change.
    *
-   * Target-side ("grants") attack scopes have no native dnd5e field, so they
-   * write the module's own flag with OVERRIDE `'1'`; {@link GrantsEnforcer}
-   * reads it back on `dnd5e.preRollAttackV2`.
+   * The shared `system.rolls.attack.mode` and `system.rolls.ability.*.mode`
+   * fields look like the obvious target but do NOT work: an `add` change shows
+   * up on the prepared actor, yet dnd5e never counts it when it combines a
+   * roll's modifiers, so the roll stays normal.
+   *
+   * `'1'` adds a source of advantage and `'-1'` a source of disadvantage.
+   * dnd5e counts sources, so table results stack and cancel like any other.
+   *
+   * Target-side ("grants") attack scopes have no dnd5e equivalent, so they
+   * write the module's own flag, which {@link GrantsEnforcer} reads back on
+   * `dnd5e.preRollAttackV2`.
    */
   private static buildAdvantageChanges(
     scopes: AdvantageScope[],
     type: 'advantage' | 'disadvantage',
     target: AdvantageTarget
-  ): Array<{ key: string; mode: number; value: string; priority: number }> {
-    const changes: Array<{ key: string; mode: number; value: string; priority: number }> = [];
-    const nativeValue = type === 'advantage' ? '1' : '-1';
-
-    for (const scope of scopes) {
-      for (const key of this.scopeToNativeChanges(scope, type, target)) {
-        const isGrantsFlag = key.startsWith('flags.');
-        changes.push({
-          key,
-          mode: isGrantsFlag ? CONST.ACTIVE_EFFECT_MODES.OVERRIDE : CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: isGrantsFlag ? '1' : nativeValue,
-          priority: 20
-        });
-      }
-    }
-
-    return changes;
+  ): AdvantageChange[] {
+    const value = type === 'advantage' ? '1' : '-1';
+    return scopes.flatMap(scope => this.scopeToChanges(scope, type, target, value));
   }
 
   /**
-   * Convert a scope to Active Effect change keys.
+   * Convert one scope to Active Effect changes.
    *
-   * Self-side keys are dnd5e's roll-mode fields on the actor:
-   * - `attack.all`     → `system.rolls.attack.mode` (combined into every attack)
-   * - `attack.<type>`  → `system.rolls.attack.<type>.mode`
-   * - `ability.all`    → `system.rolls.ability.check.mode`
+   * - `all`            → rule `d20` (attacks, checks, saves, concentration)
+   * - `attack.all`     → rule `attack`
+   * - `attack.<type>`  → rule `attack` filtered on the roll's attack type and
+   *                      classification (see {@link ATTACK_TYPE_FILTERS})
+   * - `ability.all`    → rule `check`
    * - `ability.<abl>`  → `system.abilities.<abl>.check.roll.mode`
-   * - `save.all`       → `system.rolls.ability.save.mode`
+   * - `save.all`       → rule `save`
    * - `save.<abl>`     → `system.abilities.<abl>.save.roll.mode`
-   * - `concentration`  → `system.attributes.concentration.roll.mode`
-   * - `all`            → attack + ability check + save + skill + concentration
+   * - `concentration`  → `system.attributes.concentration.roll.mode` (a rule
+   *                      keyed `concentration` has no effect in dnd5e 6.0.1)
    *
-   * `grants` + `attack.*` → `flags.<MODULE_ID>.grants.<type>.attack.<scope>`,
-   * the module's own target-side flag (see {@link GrantsEnforcer}).
+   * `grants` + `attack.*` → `flags.<MODULE_ID>.grants.<type>.attack.<scope>`.
    *
    * `grants` + `save.*`: the tables mean "the target has advantage on its next
-   * save against you". dnd5e has no target-side save flag, and the bearer IS
-   * the one rolling the save, so this is simply self-side save advantage on
-   * the bearer — the same native key as `self` + `save.*`. The remaining
-   * grants scopes (`all`, `ability.*`, `concentration`) likewise have no
-   * target-side meaning and fall back to the self-side key, except that `all`
-   * also writes the attack grants flag so attacks against the bearer are
-   * covered.
+   * save against you". The bearer is the one rolling that save, so this is
+   * plain self-side save advantage on the bearer. `grants` + `all` writes the
+   * `d20` rule and also the attack grants flag, so attacks against the bearer
+   * are covered too. The other grants scopes fall back to the self-side change.
    */
-  private static scopeToNativeChanges(
+  private static scopeToChanges(
     scope: AdvantageScope,
     type: 'advantage' | 'disadvantage',
-    target: AdvantageTarget
-  ): string[] {
-    const grantsPrefix = `flags.${MODULE_ID}.grants.${type}`;
+    target: AdvantageTarget,
+    value: string
+  ): AdvantageChange[] {
+    const rule = (key: string, conditions?: RollFilter[]): AdvantageChange => ({
+      key,
+      type: 'dnd5e.advantage',
+      value,
+      priority: 20,
+      ...(conditions ? { conditions: JSON.stringify(conditions) } : {})
+    });
+    const field = (key: string): AdvantageChange => ({ key, type: 'add', value, priority: 20 });
+    const grantsFlag = (attackScope: string): AdvantageChange => ({
+      key: `flags.${MODULE_ID}.grants.${type}.${attackScope}`,
+      type: 'override',
+      value: '1',
+      priority: 20
+    });
 
     if (target === 'grants' && scope.startsWith('attack.')) {
-      return [`${grantsPrefix}.${scope}`];
+      return [grantsFlag(scope)];
     }
-
-    const keys: string[] = [];
 
     switch (scope) {
       case 'all':
-        keys.push(
-          'system.rolls.attack.mode',
-          'system.rolls.ability.check.mode',
-          'system.rolls.ability.save.mode',
-          'system.rolls.ability.skill.mode',
-          'system.attributes.concentration.roll.mode'
-        );
-        if (target === 'grants') {
-          keys.push(`${grantsPrefix}.attack.all`);
-        }
-        break;
+        return target === 'grants' ? [rule('d20'), grantsFlag('attack.all')] : [rule('d20')];
       case 'attack.all':
-        keys.push('system.rolls.attack.mode');
-        break;
+        return [rule('attack')];
       case 'attack.mwak':
       case 'attack.rwak':
       case 'attack.msak':
       case 'attack.rsak':
-        keys.push(`system.rolls.attack.${scope.slice('attack.'.length)}.mode`);
-        break;
+        return [
+          rule('attack', ATTACK_TYPE_FILTERS[scope.slice('attack.'.length) as AttackActionType])
+        ];
       case 'ability.all':
-        keys.push('system.rolls.ability.check.mode');
-        break;
+        return [rule('check')];
       case 'ability.str':
       case 'ability.dex':
       case 'ability.con':
       case 'ability.int':
       case 'ability.wis':
       case 'ability.cha':
-        keys.push(`system.abilities.${scope.slice('ability.'.length)}.check.roll.mode`);
-        break;
+        return [field(`system.abilities.${scope.slice('ability.'.length)}.check.roll.mode`)];
       case 'save.all':
-        keys.push('system.rolls.ability.save.mode');
-        break;
+        return [rule('save')];
       case 'save.str':
       case 'save.dex':
       case 'save.con':
       case 'save.int':
       case 'save.wis':
       case 'save.cha':
-        keys.push(`system.abilities.${scope.slice('save.'.length)}.save.roll.mode`);
-        break;
+        return [field(`system.abilities.${scope.slice('save.'.length)}.save.roll.mode`)];
       case 'concentration':
-        keys.push('system.attributes.concentration.roll.mode');
-        break;
+        return [field('system.attributes.concentration.roll.mode')];
     }
 
-    return keys;
+    return [];
   }
 
   /**

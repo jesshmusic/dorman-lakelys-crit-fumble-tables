@@ -14,7 +14,7 @@ This document contains technical notes, patterns, and conventions for working on
 **Key Dependencies:**
 
 - FoundryVTT v14+
-- dnd5e system 5.0+ (verified against 6.0.1). Midi-QOL may be installed but is ignored.
+- dnd5e system 6.0.0+ (verified against 6.0.1). Required for rule-type `dnd5e.advantage` Active Effect changes, which do not exist in dnd5e 5.x. Midi-QOL may be installed but is ignored.
 - DFreds Convenient Effects (optional, for enhanced conditions)
 
 ## Quick Start for AI Assistants
@@ -204,7 +204,7 @@ interface TableEffectConfig {
 
 ## dnd5e Integration
 
-The module has **zero runtime dependency on Midi-QOL**: no `MidiQOL` global, no `midi-qol.*` hooks, no `flags.midi-qol.*` writes, no `game.modules.get('midi-qol')` gating. Everything below is built on hooks and data paths that dnd5e 5.0+ provides natively (verified against 6.0.1). If Midi-QOL happens to be installed, dnd5e's hooks still fire and nothing special is needed.
+The module has **zero runtime dependency on Midi-QOL**: no `MidiQOL` global, no `midi-qol.*` hooks, no `flags.midi-qol.*` writes, no `game.modules.get('midi-qol')` gating. Everything below is built on hooks, data paths and Active Effect change types that dnd5e 6.0+ provides natively (verified against 6.0.1). If Midi-QOL happens to be installed, dnd5e's hooks still fire and nothing special is needed.
 
 Hook names live in `src/types/attack.ts`:
 
@@ -292,28 +292,32 @@ function getD20Result(ctx: AttackContext): number | null {
 
 ### Native Advantage / Disadvantage (self-side effects)
 
-dnd5e models advantage with `AdvantageModeField` (a NumberField, -1 / 0 / 1). Effects write it via an Active Effect change with mode `CONST.ACTIVE_EFFECT_MODES.ADD` (= 2) and value `'1'` (advantage) or `'-1'` (disadvantage). ADD counts sources, so stacking advantage and disadvantage cancels to normal, which is correct 5e; do **not** use OVERRIDE.
+dnd5e 6.0 resolves advantage by counting sources. `EffectsManager` writes value `'1'` (advantage) or `'-1'` (disadvantage); because sources are counted, stacking advantage and disadvantage cancels to normal, which is correct 5e. Two change shapes are used:
 
-Every key below is prefixed with `system.`:
+- **Rule-type changes**: `{ key, type: 'dnd5e.advantage', value }` where `key` is one of `d20`, `attack`, `check`, `save`. These do not exist before dnd5e 6.0 (hence the 6.0.0 minimum).
+- **Field changes**: `{ key: 'system....roll.mode', type: 'add', value }` on per-ability / concentration `AdvantageModeField`s.
 
-| Module scope      | dnd5e key(s)                                                                                                                     |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `attack.all`      | `rolls.attack.mode`                                                                                                              |
-| `attack.mwak` etc | `rolls.attack.mwak.mode` (`rwak` / `msak` / `rsak` likewise)                                                                     |
-| `ability.all`     | `rolls.ability.check.mode`                                                                                                       |
-| `ability.<abl>`   | `abilities.<abl>.check.roll.mode`                                                                                                |
-| `save.all`        | `rolls.ability.save.mode`                                                                                                        |
-| `save.<abl>`      | `abilities.<abl>.save.roll.mode`                                                                                                 |
-| `concentration`   | `attributes.concentration.roll.mode`                                                                                             |
-| `all`             | `rolls.attack.mode` + `rolls.ability.check.mode` + `rolls.ability.save.mode` + `rolls.ability.skill.mode` + `attributes.concentration.roll.mode` |
+| Table scope                          | Change written                                                                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `all`                                | rule `{ key: 'd20', type: 'dnd5e.advantage' }` (attacks, checks, saves, concentration)                                                                     |
+| `attack.all`                         | rule `{ key: 'attack', type: 'dnd5e.advantage' }`                                                                                                          |
+| `attack.mwak` / `rwak` / `msak` / `rsak` | rule `attack` plus a per-change `conditions` filter (JSON) on `roll.attack.type` (melee/ranged) and `roll.attack.classification` (weapon/spell)         |
+| `ability.all`                        | rule `{ key: 'check', type: 'dnd5e.advantage' }`                                                                                                           |
+| `ability.<abl>`                      | `{ key: 'system.abilities.<abl>.check.roll.mode', type: 'add' }`                                                                                           |
+| `save.all`                           | rule `{ key: 'save', type: 'dnd5e.advantage' }`                                                                                                            |
+| `save.<abl>`                         | `{ key: 'system.abilities.<abl>.save.roll.mode', type: 'add' }`                                                                                            |
+| `concentration`                      | `{ key: 'system.attributes.concentration.roll.mode', type: 'add' }`                                                                                        |
+| grants + `attack.*`                  | module flag `flags.dorman-lakelys-crit-fumble-tables.grants.<advantage\|disadvantage>.attack.<all\|type>`, `type: 'override'`, enforced by `GrantsEnforcer` on `dnd5e.preRollAttackV2` |
+| grants + `save.*`                    | same as the self-side save change, on the bearer                                                                                                           |
+| grants + `all`                       | `d20` rule plus the `grants.<type>.attack.all` flag                                                                                                        |
 
-dnd5e combines `abilities.<abl>.attack.roll`, `rolls.attack` and `rolls.attack.<actionType>` when rolling an attack, so `rolls.attack.mode` alone covers all attacks. `rolls.ability.skill.mode` exists in the 6.0.1 creature template; per-skill `skills.<id>.roll.mode` also exists.
+Rule-type changes carry `skipConditions: true`, so their per-change `conditions` are evaluated at roll time against the roll data, not during data prep. Do **not** use the shared `system.rolls.*` mode fields; see Common Gotchas.
 
 ### Target-Side "Grants" (`GrantsEnforcer`)
 
 Tables use `advantageTarget: 'grants'` with scopes `attack.all` ("attacks **against** the bearer get adv/dis") and `save.all`. dnd5e has **no native equivalent**, so the module enforces these itself:
 
-1. `EffectsManager` writes the module's own flag on the effect: change key `flags.dorman-lakelys-crit-fumble-tables.grants.<advantage|disadvantage>.<scope>`, value `'1'`, mode OVERRIDE. Foundry applies unknown flag keys straight onto `actor.flags`.
+1. `EffectsManager` writes the module's own flag on the effect: change key `flags.dorman-lakelys-crit-fumble-tables.grants.<advantage|disadvantage>.<scope>`, value `'1'`, `type: 'override'`. Foundry applies unknown flag keys straight onto `actor.flags`.
 2. `GrantsEnforcer.register()` subscribes to `dnd5e.preRollAttackV2`, which fires on the rolling client **before** the roll dialog. `onPreRollAttack(config)` inspects `game.user.targets`; if any target actor has `flags.<MODULE_ID>.grants.advantage.attack.all` (or `.attack.<actionType>`) it sets `config.rolls[0].options.advantage = true`; likewise for `disadvantage`. Both set means dnd5e resolves to a normal roll.
 
 ```typescript
@@ -329,7 +333,7 @@ Hooks.on('dnd5e.preRollAttackV2', (config, dialog, message) => {
 });
 ```
 
-`grants` + `save.<X>`: the table semantics are "the target has advantage on its next save against you", which is applied as an ordinary self-side save advantage on the bearer, i.e. it maps to the same native key as `self` + `save.<X>`. Fumble-side grants were already rewritten to plain self-side effects on the fumbler's targets in `applyFumbleResult`; only crit results write true grants flags onto the victim.
+`grants` + `save.<X>`: the table semantics are "the target has advantage on its next save against you", which is applied as an ordinary self-side save advantage on the bearer, i.e. it maps to the same native change as `self` + `save.<X>` (the `save` rule for `save.all`, the per-ability field for `save.<abl>`). `grants` + `all` writes the `d20` rule plus the `grants.<type>.attack.all` flag. Fumble-side grants were already rewritten to plain self-side effects on the fumbler's targets in `applyFumbleResult`; only crit results write true grants flags onto the victim.
 
 ### GM Socket (`GmSocket`)
 
@@ -423,6 +427,21 @@ it('should apply condition effect', async () => {
 });
 ```
 
+### Live Smoke Test (FoundryVTT 14 + dnd5e 6.0.1)
+
+Verified on the live server for 2.0.0:
+
+- Crit and fumble detection through `dnd5e.rollAttackV2` for melee weapon, ranged weapon and ranged spell attacks; hit vs AC.
+- Native advantage via the rule/field changes above; grants advantage injection and removal via `GrantsEnforcer`.
+- Bonus damage Activity card carrying `system.targets` and `flags.dnd5e.targets`.
+- Save-gated results posting a dnd5e save card; conditions.
+- Disarm dropping an Item Piles pile after the GM confirms.
+- Attack-ally retargeting to an ally in reach and opening dnd5e's attack dialog.
+- GM socket handler executing `createEffects` / `toggleStatusEffect` and rejecting unknown actions.
+- Crit suppression via the module `noCritical` flag.
+
+**Not verified live**: the GM relay from a non-GM player client.
+
 ## Adding New Tables
 
 ### Steps to Add a New Effect
@@ -495,6 +514,7 @@ npm run build:tables
    - `mwak` → melee
    - `rwak` → ranged
    - `msak`, `rsak` → spell
+8. **Shared `system.rolls.*` advantage fields are dead in dnd5e 6.0.1** - `system.rolls.attack.mode`, `system.rolls.attack.<type>.mode`, `system.rolls.ability.check.mode` and `system.rolls.ability.save.mode` accept an `add` change and show the new value on the prepared actor, but dnd5e never counts them when combining a roll, so the roll stays normal (verified live). Use the `dnd5e.advantage` rule types (`d20` / `attack` / `check` / `save`) instead. A `dnd5e.advantage` rule keyed `concentration` also does nothing; concentration must use `system.attributes.concentration.roll.mode`. Rule-type changes carry `skipConditions: true`, so per-change `conditions` are evaluated at roll time against the roll data rather than during data prep.
 
 ## Code References
 

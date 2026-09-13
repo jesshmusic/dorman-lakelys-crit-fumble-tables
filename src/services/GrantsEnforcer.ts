@@ -3,8 +3,8 @@
  *
  * Applies TARGET-side advantage/disadvantage on attack rolls.
  *
- * WHY: dnd5e's native advantage fields (`system.rolls.attack.mode` and
- * friends) only describe the ROLLER. A crit result such as "attacks against
+ * WHY: dnd5e's own advantage sources (the `dnd5e.advantage` rule changes and
+ * the per-ability roll-mode fields) only describe the ROLLER. A crit result such as "attacks against
  * this creature have advantage until end of its next turn" needs the flag to
  * live on the VICTIM and be consulted whenever anyone attacks it. Midi-QOL
  * had `flags.midi-qol.grants.*` for exactly this; dnd5e has no equivalent, so

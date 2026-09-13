@@ -211,8 +211,15 @@ export class TestHarness {
         return selector >= lo && selector <= hi;
       });
     } else {
+      // Match the result NAME (the text before " - ") first. A plain substring
+      // search over the whole text also hits descriptions: "Sprawled" mentions a
+      // wild swing, so "Wild Swing" used to select it.
       const needle = selector.toLowerCase();
-      doc = docs.find((d: any) => this.readDoc(d).text.toLowerCase().includes(needle));
+      const nameOf = (d: any) => this.readDoc(d).text.split(' - ')[0].toLowerCase();
+      doc =
+        docs.find((d: any) => nameOf(d) === needle) ??
+        docs.find((d: any) => nameOf(d).includes(needle)) ??
+        docs.find((d: any) => this.readDoc(d).text.toLowerCase().includes(needle));
     }
     if (!doc) return { ok: false, error: `No result matched "${selector}"` };
 
