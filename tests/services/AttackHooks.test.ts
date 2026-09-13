@@ -100,7 +100,7 @@ async function loadHooks() {
   const { TableSelector } = await import('../../src/services/TableSelector');
   const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-  const rollCriticalHit = jest.fn<any>().mockResolvedValue({
+  const rollCriticalHit = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({
     table: { name: 'tier1-melee-crits' },
     result: { name: 'Test Crit', effectType: 'none' },
     roll: 50,
@@ -108,7 +108,7 @@ async function loadHooks() {
     attackType: 'melee',
     tier: 1
   });
-  const rollFumble = jest.fn<any>().mockResolvedValue({
+  const rollFumble = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({
     table: { name: 'tier1-melee-fumbles' },
     result: { name: 'Test Fumble', effectType: 'none' },
     roll: 50,
@@ -116,9 +116,11 @@ async function loadHooks() {
     attackType: 'melee',
     tier: 1
   });
-  const displayResult = jest.fn<any>().mockResolvedValue(undefined);
-  const applyResult = jest.fn<any>().mockResolvedValue(undefined);
-  const applyFumbleResult = jest.fn<any>().mockResolvedValue(undefined);
+  const displayResult = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue(undefined);
+  const applyResult = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue(undefined);
+  const applyFumbleResult = jest
+    .fn<(...args: any[]) => Promise<any>>()
+    .mockResolvedValue(undefined);
 
   (TableSelector as any).rollCriticalHit = rollCriticalHit;
   (TableSelector as any).rollFumble = rollFumble;

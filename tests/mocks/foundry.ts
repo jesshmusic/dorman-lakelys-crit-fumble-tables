@@ -38,7 +38,7 @@ export function createMockGame(overrides?: Partial<typeof game>): typeof game {
         };
         return defaults[key];
       }),
-      set: jest.fn<any>().mockResolvedValue(undefined)
+      set: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue(undefined)
     },
     user: {
       id: 'test-user-id',
@@ -487,8 +487,8 @@ export function createMockRollTableClass(): typeof RollTable {
       id: 'mock-table-id',
       name: 'mock-table',
       folder: null,
-      draw: jest.fn<any>().mockResolvedValue({ results: [] }),
-      delete: jest.fn<any>().mockResolvedValue({})
+      draw: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({ results: [] }),
+      delete: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({})
     })
   } as any;
 }

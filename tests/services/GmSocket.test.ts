@@ -239,7 +239,9 @@ describe('GmSocket', () => {
 
     it('should answer with an error when execution fails', async () => {
       const actor = createMockActor({ uuid: 'Actor.npc' } as any);
-      (actor.createEmbeddedDocuments as jest.Mock<any>).mockRejectedValue(new Error('denied'));
+      (
+        actor.createEmbeddedDocuments as jest.Mock<(...args: any[]) => Promise<any>>
+      ).mockRejectedValue(new Error('denied'));
       installActor(actor);
       const error = jest.spyOn(console, 'error').mockImplementation(() => {});
 

@@ -1843,7 +1843,7 @@ describe('EffectsManager', () => {
     it('should unequip weapon on disarm', async () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-      const mockUpdate = jest.fn<any>().mockResolvedValue({});
+      const mockUpdate = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
       const weapon = {
         id: 'weapon-id',
         type: 'weapon',
@@ -1926,7 +1926,7 @@ describe('EffectsManager', () => {
         name: 'Longsword',
         parent: null,
         system: { quantity: 1, type: { value: weaponType ?? 'martialM' } },
-        update: jest.fn<any>().mockResolvedValue({}),
+        update: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({}),
         toObject: () => ({ name: 'Longsword', type: 'weapon', system: { quantity: 1 } })
       };
       const actor = createMockActor();
@@ -2232,7 +2232,7 @@ describe('EffectsManager', () => {
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
       const token = createMockToken();
-      const mockUpdate = jest.fn<any>().mockResolvedValue({});
+      const mockUpdate = jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({});
       const weapon = {
         id: 'weapon-id',
         type: 'weapon',
