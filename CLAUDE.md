@@ -65,6 +65,7 @@ src/
 │   ├── EffectsManager.ts      # Applies conditions, damage, adv/dis, disarm, attackAlly
 │   ├── SaveManager.ts         # Real saving throws for save-gated results
 │   ├── WildMagicRoller.ts     # Silent wild magic surge roll for spell fumbles
+│   ├── HtmlEnricher.ts        # TextEditor.enrichHTML wrapper for table text embedded in chat cards
 │   ├── TableImporter.ts       # Imports compendium tables into the world
 │   └── TestHarness.ts         # DormanLakely console API (listResults, test, sweep, clearEffects)
 └── settings/
@@ -102,6 +103,7 @@ tests/
 │   ├── TableSelector.test.ts
 │   ├── EffectsManager.test.ts
 │   ├── TableImporter.test.ts
+│   ├── HtmlEnricher.test.ts
 │   └── WildMagicRoller.test.ts
 ├── settings/
 │   └── ModuleSettings.test.ts

@@ -10,9 +10,10 @@
 
 import { LOG_PREFIX } from '../constants';
 import { getWildMagicTable } from '../settings';
+import { HtmlEnricher } from './HtmlEnricher';
 
 export interface WildMagicSurge {
-  /** The surge description, as HTML from the table result. */
+  /** The surge description: the table result's HTML, enriched for the chat card. */
   text: string;
   /** Name of the table drawn from, for attribution on the card. */
   tableName: string;
@@ -49,9 +50,13 @@ export class WildMagicRoller {
         return null;
       }
 
+      // Enrich relative to the result so its `&Reference[...]` and `@UUID` links
+      // render as links on the fumble card.
+      const enriched = await HtmlEnricher.enrich(text, { relativeTo: result });
+
       const total = Number(drawn?.roll?.total);
       return {
-        text,
+        text: enriched,
         tableName: (table as any).name ?? reference,
         roll: Number.isFinite(total) ? total : null
       };

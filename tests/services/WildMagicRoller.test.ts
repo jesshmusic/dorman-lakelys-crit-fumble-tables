@@ -3,7 +3,7 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { resetMocks } from '../mocks/foundry';
+import { resetMocks, mockEnrichHTML } from '../mocks/foundry';
 
 describe('WildMagicRoller', () => {
   /** Point the wildMagicTable setting somewhere. */
@@ -101,6 +101,31 @@ describe('WildMagicRoller', () => {
 
     expect(table.roll).toHaveBeenCalled();
     expect((table as any).draw).not.toHaveBeenCalled();
+  });
+
+  it('should enrich the surge text relative to its result, without escaping it', async () => {
+    // The PHB table stores the enricher entity-encoded once, as HTML should be.
+    const stored = 'You have the &amp;Reference[Incapacitated] condition.';
+    const result = { description: stored };
+    const table: any = {
+      name: 'Wild Magic Surge',
+      roll: jest
+        .fn<() => Promise<any>>()
+        .mockResolvedValue({ roll: { total: 66 }, results: [result] })
+    };
+    (game as any).tables = { getName: jest.fn().mockReturnValue(table) };
+    const enrichHTML = mockEnrichHTML();
+    const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
+
+    const surge = await WildMagicRoller.roll();
+
+    expect(enrichHTML).toHaveBeenCalledWith(
+      stored,
+      expect.objectContaining({ relativeTo: result })
+    );
+    expect(surge?.text).toBe(
+      'You have the <span class="reference-link"><a class="content-link">Incapacitated</a></span> condition.'
+    );
   });
 
   it('should read legacy TableResult#text when description is absent', async () => {

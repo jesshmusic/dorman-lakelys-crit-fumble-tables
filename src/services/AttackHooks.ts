@@ -248,16 +248,18 @@ export class AttackHooks {
 
     console.log(`${LOG_PREFIX} Crit result: "${result.result.name}" → ${targetNames}`);
 
+    const attackerName = ctx.actor?.name || 'Unknown';
+
     if (targets.length === 0) {
-      await EffectsManager.displayResult(result, ctx.actor?.name || 'Unknown', 'their target');
+      await EffectsManager.displayResult(result, attackerName);
       return;
     }
 
     for (const targetToken of targets) {
       await EffectsManager.displayResult(
         result,
-        ctx.actor?.name || 'Unknown',
-        targetToken.name || 'Unknown'
+        attackerName,
+        AttackHooks.cardTargetName(targetToken, ctx.actor)
       );
       await EffectsManager.applyResult(result, targetToken, ctx.actor, ctx.item);
     }
@@ -295,11 +297,8 @@ export class AttackHooks {
 
     console.log(`${LOG_PREFIX} Fumble result: "${result.result.name}" → ${ctx.actor?.name}`);
 
-    await EffectsManager.displayResult(
-      result,
-      ctx.actor?.name || 'Unknown',
-      ctx.actor?.name || 'themselves'
-    );
+    // A fumble lands on the fumbler, so the card names only them.
+    await EffectsManager.displayResult(result, ctx.actor?.name || 'Unknown');
 
     await EffectsManager.applyFumbleResult(result, actorToken, targetTokens, ctx.actor, ctx.item);
   }
@@ -370,6 +369,22 @@ export class AttackHooks {
       `${LOG_PREFIX} [TEST] Simulating fumble: ${actor.name} → ${targetName} [${attackType}]`
     );
     await this.handleFumble(mockContext);
+  }
+
+  /**
+   * Name to show as the crit card's target, or undefined when the token is the
+   * attacker's own, so the card reads "Barius" rather than "Barius vs Barius".
+   * Compared by actor (uuid for unlinked tokens) because a token's name need not
+   * match its actor's. Public so the test harness builds the same card.
+   */
+  static cardTargetName(targetToken: Token, attacker?: Actor | null): string | undefined {
+    const targetActor: any = (targetToken as any)?.actor;
+    const self: any = attacker;
+    const isSelf =
+      !!targetActor &&
+      !!self &&
+      (targetActor === self || (!!targetActor.uuid && targetActor.uuid === self.uuid));
+    return isSelf ? undefined : targetToken?.name || 'Unknown';
   }
 
   /**
