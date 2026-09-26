@@ -269,7 +269,7 @@ if (typeof globalThis !== 'undefined') {
         foundry.audio.AudioHelper.play({ src: fumbleSound, volume: 0.8 }, true);
       }
 
-      await EffectsManager.displayResult(rolledResult, fumblerName, fumblerName);
+      await EffectsManager.displayResult(rolledResult, fumblerName);
       await EffectsManager.applyFumbleResult(
         rolledResult,
         fumblerToken,

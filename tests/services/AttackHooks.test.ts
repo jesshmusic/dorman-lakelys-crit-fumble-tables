@@ -81,6 +81,8 @@ function createAttackActivity(overrides?: any): any {
 function createTargetWithAC(name: string, ac: number | undefined, statuses: string[] = []): any {
   const actor = createMockActor();
   (actor as any).flags = {};
+  // A distinct actor: every mock actor otherwise shares one uuid.
+  (actor as any).uuid = `Actor.${name}`;
   actor.system.attributes = { ...(actor.system.attributes ?? {}), ac: { value: ac } } as any;
   actor.statuses = new Set(statuses);
   return createMockToken({ name, actor } as any);
@@ -514,7 +516,7 @@ describe('AttackHooks', () => {
 
       // Targetless crit: rolled and announced, nothing to apply it to.
       expect(rollCriticalHit).toHaveBeenCalledTimes(1);
-      expect(displayResult).toHaveBeenCalledWith(expect.anything(), 'Test Actor', 'their target');
+      expect(displayResult).toHaveBeenCalledWith(expect.anything(), 'Test Actor');
       expect(applyResult).not.toHaveBeenCalled();
     });
 
@@ -868,6 +870,105 @@ describe('AttackHooks', () => {
         actor,
         bow
       );
+    });
+  });
+
+  describe('card combatants', () => {
+    it('should name only the fumbler on a fumble card', async () => {
+      const { AttackHooks, displayResult } = await loadHooks();
+
+      setUserTargets(createTargetWithAC('Goblin', 15));
+      const roll = createD20Roll({ total: 6, isFumble: true });
+
+      await (AttackHooks as any).onRollAttack([roll], { subject: createAttackActivity() });
+
+      // No target argument at all, so the card cannot read "X vs X".
+      expect(displayResult.mock.calls[0]).toStrictEqual([expect.anything(), 'Test Actor']);
+    });
+
+    it('should show the target on a crit against another creature', async () => {
+      const { AttackHooks, displayResult } = await loadHooks();
+
+      setUserTargets(createTargetWithAC('Goblin', 15));
+      const roll = createD20Roll({ total: 24, isCritical: true });
+
+      await (AttackHooks as any).onRollAttack([roll], { subject: createAttackActivity() });
+
+      expect(displayResult).toHaveBeenCalledWith(expect.anything(), 'Test Actor', 'Goblin');
+    });
+
+    it('should name only the attacker on a crit against their own token', async () => {
+      const { AttackHooks, displayResult, applyResult } = await loadHooks();
+
+      const subject = createAttackActivity();
+      subject.actor.system.attributes.ac = { value: 16 };
+      const ownToken = createMockToken({ name: 'Barius', actor: subject.actor } as any);
+      setUserTargets(ownToken);
+      const roll = createD20Roll({ total: 24, isCritical: true });
+
+      await (AttackHooks as any).onRollAttack([roll], { subject });
+
+      expect(displayResult.mock.calls[0]).toStrictEqual([
+        expect.anything(),
+        'Test Actor',
+        undefined
+      ]);
+      // The effect still lands on the token.
+      expect(applyResult).toHaveBeenCalledWith(
+        expect.anything(),
+        ownToken,
+        subject.actor,
+        subject.item
+      );
+    });
+  });
+
+  describe('cardTargetName', () => {
+    it('should return undefined when the token is the attacker', async () => {
+      const { AttackHooks } = await import('../../src/services/AttackHooks');
+      const attacker = createMockActor();
+
+      expect(AttackHooks.cardTargetName(createMockToken({ actor: attacker }), attacker)).toBe(
+        undefined
+      );
+    });
+
+    it('should match the attacker by uuid when the actor instance differs', async () => {
+      const { AttackHooks } = await import('../../src/services/AttackHooks');
+      const attacker = createMockActor({ uuid: 'Actor.barius' } as any);
+      const sameActor = createMockActor({ uuid: 'Actor.barius' } as any);
+
+      expect(
+        AttackHooks.cardTargetName(createMockToken({ actor: sameActor }), attacker)
+      ).toBeUndefined();
+    });
+
+    it('should compare actors, not names, so a same-named foe still shows', async () => {
+      const { AttackHooks } = await import('../../src/services/AttackHooks');
+      const goblin = createMockActor({ name: 'Goblin', uuid: 'Scene.s.Token.a.Actor.g' } as any);
+      const otherGoblin = createMockActor({
+        name: 'Goblin',
+        uuid: 'Scene.s.Token.b.Actor.g'
+      } as any);
+      const token = createMockToken({ name: 'Goblin', actor: otherGoblin } as any);
+
+      expect(AttackHooks.cardTargetName(token, goblin)).toBe('Goblin');
+    });
+
+    it('should fall back to "Unknown" for an unnamed target token', async () => {
+      const { AttackHooks } = await import('../../src/services/AttackHooks');
+      const token = createMockToken({
+        name: '',
+        actor: createMockActor({ uuid: 'Actor.x' } as any)
+      } as any);
+
+      expect(AttackHooks.cardTargetName(token, createMockActor())).toBe('Unknown');
+    });
+
+    it('should show the target when the attacker is unknown', async () => {
+      const { AttackHooks } = await import('../../src/services/AttackHooks');
+
+      expect(AttackHooks.cardTargetName(createMockToken({ name: 'Orc' }), undefined)).toBe('Orc');
     });
   });
 

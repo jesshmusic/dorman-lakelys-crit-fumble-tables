@@ -215,6 +215,24 @@ export function createMockFoundry(): typeof foundry {
 }
 
 /**
+ * Install `foundry.applications.ux.TextEditor.implementation.enrichHTML` (absent
+ * from the default mock, so code under test falls back to the raw HTML). The
+ * default implementation stands in for dnd5e's `&Reference[...]` enricher; the
+ * mock is dropped by the next `resetMocks()`.
+ */
+export function mockEnrichHTML(
+  impl: (html: string, options?: any) => Promise<string> = async html =>
+    html.replace(
+      /&amp;Reference\[([^\]]+)]/g,
+      (_m, name) => `<span class="reference-link"><a class="content-link">${name}</a></span>`
+    )
+): jest.Mock<(html: string, options?: any) => Promise<string>> {
+  const enrichHTML = jest.fn(impl);
+  (foundry as any).applications.ux = { TextEditor: { implementation: { enrichHTML } } };
+  return enrichHTML;
+}
+
+/**
  * Mock ChatMessage class
  */
 export function createMockChatMessage(): typeof ChatMessage {

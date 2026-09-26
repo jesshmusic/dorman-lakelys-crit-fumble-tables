@@ -14,7 +14,8 @@ import {
   enableItemPiles,
   itemPilesCreatePile,
   itemPilesRemoveItems,
-  testCollision
+  testCollision,
+  mockEnrichHTML
 } from '../mocks/foundry';
 import { RolledResult } from '../../src/types';
 
@@ -437,7 +438,7 @@ describe('EffectsManager', () => {
       const result = createMockRolledResult();
       result.type = 'fumble';
 
-      await EffectsManager.displayResult(result, 'Attacker', 'Attacker');
+      await EffectsManager.displayResult(result, 'Attacker');
 
       expect(ChatMessage.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -459,6 +460,59 @@ describe('EffectsManager', () => {
       await EffectsManager.displayResult(result, 'Attacker', 'Target');
 
       expect(ChatMessage.create).not.toHaveBeenCalled();
+    });
+
+    /** The `combatants` block of the single card posted. */
+    const postedCombatants = (): string => {
+      const content = ((ChatMessage.create as jest.Mock).mock.calls[0][0] as any).content;
+      return content.match(/<div class="combatants">([\s\S]*?)<\/div>/)[1].trim();
+    };
+
+    it('should show "attacker vs target" when a target is given', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(createMockRolledResult(), 'Barius', 'Goblin');
+
+      expect(postedCombatants()).toBe('<strong>Barius</strong> vs <strong>Goblin</strong>');
+    });
+
+    it('should name only the attacker when there is no target', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const result = createMockRolledResult();
+      result.type = 'fumble';
+
+      await EffectsManager.displayResult(result, 'Barius Stormborn');
+
+      // Self-affecting fumbles used to read "Barius Stormborn vs Barius Stormborn".
+      expect(postedCombatants()).toBe('<strong>Barius Stormborn</strong>');
+    });
+
+    it('should name only the attacker when the target name is empty', async () => {
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(createMockRolledResult(), 'Barius', '');
+
+      expect(postedCombatants()).toBe('<strong>Barius</strong>');
+    });
+
+    it('should enrich the result description instead of embedding raw enricher text', async () => {
+      const enrichHTML = mockEnrichHTML();
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+      const result = createMockRolledResult();
+      result.result.description = 'You fall &amp;Reference[Prone] in a heap.';
+
+      await EffectsManager.displayResult(result, 'Attacker', 'Target');
+
+      expect(enrichHTML).toHaveBeenCalledWith(
+        'You fall &amp;Reference[Prone] in a heap.',
+        expect.any(Object)
+      );
+      const content = ((ChatMessage.create as jest.Mock).mock.calls[0][0] as any).content;
+      expect(content).toContain(
+        '<div class="result-description">You fall <span class="reference-link">' +
+          '<a class="content-link">Prone</a></span> in a heap.</div>'
+      );
+      expect(content).not.toContain('&amp;Reference');
     });
   });
 
@@ -1771,7 +1825,7 @@ describe('EffectsManager', () => {
       });
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+      await EffectsManager.displayResult(surgeResult(), 'Caster');
 
       const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
       // Surge text is part of the fumble card itself, not a second message.
@@ -1785,12 +1839,40 @@ describe('EffectsManager', () => {
       });
     });
 
+    it('should embed the drawn surge as enriched HTML, not escaped enricher text', async () => {
+      // End to end through the real WildMagicRoller, with the PHB result text.
+      const plant = 'While you’re a plant, you have the &amp;Reference[Incapacitated] condition.';
+      (game.settings.get as jest.Mock).mockImplementation((_m: string, key: string) =>
+        key === 'wildMagicTable' ? 'Wild Magic Surge' : key === 'showChatMessages'
+      );
+      (game as any).tables = {
+        getName: jest.fn().mockReturnValue({
+          name: 'Wild Magic Surge',
+          roll: jest
+            .fn<() => Promise<any>>()
+            .mockResolvedValue({ roll: { total: 66 }, results: [{ description: plant }] })
+        })
+      };
+      mockEnrichHTML();
+      const { EffectsManager } = await import('../../src/services/EffectsManager');
+
+      await EffectsManager.displayResult(surgeResult(), 'Barius Stormborn');
+
+      const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
+      expect(call.content).toContain(
+        '<div class="surge-text">While you’re a plant, you have the <span class="reference-link">' +
+          '<a class="content-link">Incapacitated</a></span> condition.</div>'
+      );
+      expect(call.content).not.toContain('&amp;');
+      expect(call.content).not.toContain(' vs ');
+    });
+
     it('should still show the card when no surge could be rolled', async () => {
       const { WildMagicRoller } = await import('../../src/services/WildMagicRoller');
       jest.spyOn(WildMagicRoller, 'roll').mockResolvedValue(null);
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+      await EffectsManager.displayResult(surgeResult(), 'Caster');
 
       const call = (ChatMessage.create as jest.Mock).mock.calls[0][0] as any;
       expect(call.content).toContain('Your miscast tears a hole in the weave.');
@@ -1806,7 +1888,7 @@ describe('EffectsManager', () => {
       const plain = surgeResult();
       delete plain.result.flags['dorman-lakelys-crit-fumble-tables'].wildMagic;
 
-      await EffectsManager.displayResult(plain, 'Caster', 'Caster');
+      await EffectsManager.displayResult(plain, 'Caster');
 
       expect(spy).not.toHaveBeenCalled();
     });
@@ -1830,7 +1912,7 @@ describe('EffectsManager', () => {
       });
       const { EffectsManager } = await import('../../src/services/EffectsManager');
 
-      await EffectsManager.displayResult(surgeResult(), 'Caster', 'Caster');
+      await EffectsManager.displayResult(surgeResult(), 'Caster');
 
       // wildMagic is a flag, so an effectType of "none" must not skip the draw.
       expect(spy).toHaveBeenCalled();

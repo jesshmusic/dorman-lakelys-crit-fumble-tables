@@ -23,6 +23,7 @@ import { shouldApplyEffects, shouldShowChatMessages, getDamageCardMode } from '.
 import { SaveManager } from './SaveManager';
 import { WildMagicRoller, WildMagicSurge } from './WildMagicRoller';
 import { GmSocket } from './GmSocket';
+import { HtmlEnricher } from './HtmlEnricher';
 
 /** One Active Effect change produced for an advantage/disadvantage result. */
 interface AdvantageChange {
@@ -1630,12 +1631,15 @@ export class EffectsManager {
   }
 
   /**
-   * Display the result in chat
+   * Display the result in chat.
+   * @param targetName - The other combatant, shown as "attacker vs target". Omit
+   *   it when there is no target or the result lands on the attacker (every
+   *   fumble, or a crit on their own token); the card then names the attacker only.
    */
   static async displayResult(
     result: RolledResult,
     attackerName: string,
-    targetName: string
+    targetName?: string
   ): Promise<void> {
     if (!shouldShowChatMessages()) {
       return;
@@ -1668,6 +1672,14 @@ export class EffectsManager {
       }
     }
 
+    // Table text is HTML that may carry enrichers (`&Reference[...]`, `@UUID`),
+    // so enrich it rather than embedding the raw markup.
+    const description = await HtmlEnricher.enrich(result.result.description);
+
+    const combatants = targetName
+      ? `<strong>${attackerName}</strong> vs <strong>${targetName}</strong>`
+      : `<strong>${attackerName}</strong>`;
+
     const content = `
       <div class="crit-fumble-result ${typeClass}">
         <div class="result-header">
@@ -1675,10 +1687,10 @@ export class EffectsManager {
           <h3>${typeLabel}</h3>
         </div>
         <div class="combatants">
-          <strong>${attackerName}</strong> vs <strong>${targetName}</strong>
+          ${combatants}
         </div>
         <div class="result-name">${result.result.name}</div>
-        <div class="result-description">${result.result.description}</div>
+        <div class="result-description">${description}</div>
         ${effectDetails}
         ${surgeDetails}
       </div>

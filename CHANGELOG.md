@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-09-26
+
+### Fixed
+
+- **Links in table text now work on the chat card.** Crit/fumble result descriptions and the wild magic surge text are run through Foundry's text enrichment before they go on the card. A dnd5e reference such as `&Reference[Incapacitated]` in the PHB surge table now shows as a condition link with its apply-status button, instead of raw enricher markup. The same applies to `@UUID` links and inline rolls. Secret blocks are removed because the card is public.
+- **Fumble cards no longer read "Barius vs Barius".** A fumble lands on the fumbler, so the card header now shows only their name. The same goes for a crit with no target, which used to read "vs their target", and for a crit on the attacker's own token. Crits against another creature still show "attacker vs target".
+
 ## [2.0.0] - 2026-09-13
 
 This is a **major** release because the Active Effect flag paths changed. Advantage/disadvantage effects created by a 1.x crit or fumble carry Midi-only keys (`flags.midi-qol.advantage.*` and friends) that dnd5e does not read, so any such effects still sitting on actors will do nothing once Midi-QOL is removed. They are all short-lived ("until end of next turn"), so in practice they will have expired long before you upgrade — but if you see a lingering one, delete it and let the next crit re-create it with the new keys.

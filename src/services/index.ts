@@ -12,3 +12,4 @@ export { GrantsEnforcer } from './GrantsEnforcer';
 export { TableImporter } from './TableImporter';
 export { TestHarness } from './TestHarness';
 export { WildMagicRoller } from './WildMagicRoller';
+export { HtmlEnricher } from './HtmlEnricher';

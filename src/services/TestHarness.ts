@@ -236,11 +236,15 @@ export class TestHarness {
 
     if (type === 'crit') {
       if (!targetToken) return { ok: false, error: 'crit needs a target token on canvas' };
-      await EffectsManager.displayResult(rr, sourceName, targetToken.name);
+      await EffectsManager.displayResult(
+        rr,
+        sourceName,
+        AttackHooks.cardTargetName(targetToken, source)
+      );
       await EffectsManager.applyResult(rr, targetToken, source, item);
     } else {
       if (!sourceToken) return { ok: false, error: `no token for fumbler "${sourceName}"` };
-      await EffectsManager.displayResult(rr, sourceName, sourceName);
+      await EffectsManager.displayResult(rr, sourceName);
       await EffectsManager.applyFumbleResult(
         rr,
         sourceToken,
