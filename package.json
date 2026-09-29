@@ -1,6 +1,6 @@
 {
   "name": "dorman-lakelys-crit-fumble-tables",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Generic tier-based critical hit and fumble tables for D&D 5e. Works with plain dnd5e; no Midi-QOL required",
   "main": "dist/main.js",
   "type": "commonjs",
