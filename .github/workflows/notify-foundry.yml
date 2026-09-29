@@ -1,0 +1,79 @@
+name: Notify Foundry Package Listing
+
+# Manually (re)send an existing GitHub release to the Foundry package listing,
+# e.g. after the release API token was rotated or the auto-release notify step failed.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (must already have a GitHub release, e.g. 2.0.2). Defaults to module.json.'
+        required: false
+        default: ''
+      dry-run:
+        description: 'Validate the token and payload without publishing'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${INPUT_VERSION:-$(jq -r .version module.json)}"
+          if ! gh release view "v${VERSION}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "::error::No GitHub release v${VERSION}; create the release before notifying Foundry."
+            exit 1
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Notify FoundryVTT Package Release API
+        env:
+          FOUNDRY_TOKEN: ${{ secrets.FOUNDRY_PACKAGE_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DRY_RUN: ${{ inputs.dry-run }}
+          REPO: ${{ github.repository }}
+        run: |
+          PAYLOAD=$(jq -c \
+            --arg version "$VERSION" \
+            --arg manifest "https://github.com/${REPO}/releases/download/v${VERSION}/module.json" \
+            --arg notes "https://github.com/${REPO}/releases/tag/v${VERSION}" \
+            --argjson dryrun "${DRY_RUN:-false}" \
+            '{
+              id: .id,
+              "dry-run": $dryrun,
+              release: {
+                version: $version,
+                manifest: $manifest,
+                notes: $notes,
+                compatibility: (.compatibility | with_entries(select(.key | IN("minimum", "verified", "maximum")) | .value |= tostring))
+              }
+            }' module.json)
+          echo "Payload: $PAYLOAD"
+
+          RESPONSE=$(curl -sS -X POST https://foundryvtt.com/_api/packages/release_version/ \
+            -w "\n%{http_code}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${FOUNDRY_TOKEN}" \
+            -d "$PAYLOAD")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response: $BODY"
+          echo "HTTP Code: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Failed to notify Foundry API. HTTP $HTTP_CODE: $BODY"
+            exit 1
+          fi
+
+          echo "Successfully notified Foundry Package API"
